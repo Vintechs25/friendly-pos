@@ -111,7 +111,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     setNeedsLicense(false);
     const result = await validateLicense(license.license_key, PROJECT_ID);
     handleStateChange(result);
-  }, [profile?.business_id, handleStateChange, isSuperAdmin]);
+  }, [user, profile?.business_id, handleStateChange, isSuperAdmin, refreshProfile]);
 
   useEffect(() => {
     if (!user) {
