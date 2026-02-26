@@ -69,7 +69,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     const { data: business } = await supabase
       .from("businesses")
       .select("trial_ends_at, subscription_plan")
-      .eq("id", profile.business_id)
+      .eq("id", businessId)
       .single();
 
     const trialEnded = business?.trial_ends_at && new Date(business.trial_ends_at) <= new Date();
