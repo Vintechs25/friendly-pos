@@ -177,12 +177,12 @@ const ThermalReceipt = forwardRef<HTMLDivElement, ThermalReceiptProps>(
 
         {/* Totals */}
         <div style={{ marginBottom: "4px" }}>
-          <Row left="Subtotal" right={`$${fmt(data.subtotal)}`} />
+          <Row left="Subtotal" right={`KSh ${fmt(data.subtotal)}`} />
           {data.taxAmount > 0 && (
-            <Row left="Tax" right={`$${fmt(data.taxAmount)}`} />
+            <Row left="Tax" right={`KSh ${fmt(data.taxAmount)}`} />
           )}
           {data.discountAmount > 0 && (
-            <Row left="Discount" right={`-$${fmt(data.discountAmount)}`} />
+            <Row left="Discount" right={`-KSh ${fmt(data.discountAmount)}`} />
           )}
           <div
             style={{
