@@ -110,7 +110,7 @@ export default function AdminPlansPage() {
                 </div>
                 <h3 className="font-display text-lg font-bold mb-1">{plan.name}</h3>
                 <div className="mb-4">
-                  <span className="font-display text-3xl font-bold">${plan.price_monthly}</span>
+                  <span className="font-display text-3xl font-bold">KSh {plan.price_monthly}</span>
                   <span className="text-muted-foreground text-sm">/mo</span>
                 </div>
                 <div className="space-y-2 text-sm text-muted-foreground flex-1">
