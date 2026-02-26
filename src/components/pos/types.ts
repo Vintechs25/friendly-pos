@@ -12,11 +12,12 @@ export interface CartItem {
   overrideBy: string | null;
 }
 
-export type PaymentMethod = "cash" | "card" | "mobile_money";
+export type PaymentMethod = "cash" | "card" | "mobile_money" | "store_credit" | "gift_card";
 
 export interface PaymentEntry {
   method: PaymentMethod;
   amount: number;
+  reference?: string; // M-Pesa till number, gift card code, etc.
 }
 
 export interface HeldSale {
