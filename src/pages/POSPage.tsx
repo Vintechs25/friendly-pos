@@ -449,12 +449,24 @@ export default function POSPage() {
       }
 
       // Build receipt
+      const receiptPayments = splitMode
+        ? payments.filter((p) => p.amount > 0).map((p) => ({
+            method: p.method,
+            amount: p.amount,
+            reference: p.reference,
+          }))
+        : [{ method: payments[0]?.method ?? "cash", amount: total }];
+
+      const cashPayment = receiptPayments.find((p) => p.method === "cash");
+      const changeAmt = cashPayment ? Math.max(0, cashTendered - total) : 0;
+
       const receipt: ReceiptData = {
         receiptNumber,
         businessName: business?.name || "Business",
         branchName: branch.name,
         address: business?.address || undefined,
         phone: business?.phone || undefined,
+        email: business?.email || undefined,
         cashierName: profile.full_name || undefined,
         items: cart.map((item) => ({
           name: item.name,
@@ -462,13 +474,24 @@ export default function POSPage() {
           unitPrice: item.priceOverride ?? item.price,
           taxAmount: getItemTax(item),
           total: getItemTotal(item) + getItemTax(item),
+          discount: item.itemDiscount > 0 ? item.itemDiscount : undefined,
+          discountType: item.itemDiscount > 0 ? item.itemDiscountType : undefined,
+          taxIndicator: item.tax_rate > 0 ? "V" : undefined,
         })),
         subtotal: itemsSubtotal,
         taxAmount,
         discountAmount: cartDiscountAmount,
         total,
         paymentMethod: splitMode ? "split" : (payments[0]?.method ?? "cash"),
+        payments: receiptPayments,
+        cashTendered: cashPayment ? cashTendered : undefined,
+        changeAmount: changeAmt > 0 ? changeAmt : undefined,
         date: new Date(),
+        config: {
+          taxLabel: "VAT",
+          currency: "KSh",
+          showQR: true,
+        },
       };
       setReceiptData(receipt);
       setShowReceipt(true);
