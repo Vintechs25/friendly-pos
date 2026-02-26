@@ -17,6 +17,7 @@ import ReportsPage from "./pages/ReportsPage";
 import CustomersPage from "./pages/CustomersPage";
 import ShiftsPage from "./pages/ShiftsPage";
 import RefundsPage from "./pages/RefundsPage";
+import SettingsPage from "./pages/SettingsPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminBusinessesPage from "./pages/admin/AdminBusinessesPage";
 import AdminPlansPage from "./pages/admin/AdminPlansPage";
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/dashboard/customers" element={<ProtectedRoute><CustomersPage /></ProtectedRoute>} />
               <Route path="/dashboard/shifts" element={<ProtectedRoute><ShiftsPage /></ProtectedRoute>} />
               <Route path="/dashboard/refunds" element={<ProtectedRoute><RefundsPage /></ProtectedRoute>} />
+              <Route path="/dashboard/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute requiredRole="super_admin"><AdminDashboardPage /></ProtectedRoute>} />
               <Route path="/admin/businesses" element={<ProtectedRoute requiredRole="super_admin"><AdminBusinessesPage /></ProtectedRoute>} />
               <Route path="/admin/plans" element={<ProtectedRoute requiredRole="super_admin"><AdminPlansPage /></ProtectedRoute>} />
