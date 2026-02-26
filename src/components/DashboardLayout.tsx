@@ -20,6 +20,10 @@ import {
   Clock,
   RotateCcw,
   UserCheck,
+  Truck,
+  ClipboardList,
+  ClipboardMinus,
+  ArrowRightLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
