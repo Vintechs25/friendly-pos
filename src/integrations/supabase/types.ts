@@ -153,6 +153,75 @@ export type Database = {
         }
         Relationships: []
       }
+      cashier_shifts: {
+        Row: {
+          branch_id: string
+          business_id: string
+          cash_variance: number | null
+          cashier_id: string
+          closing_cash: number | null
+          created_at: string
+          ended_at: string | null
+          expected_cash: number | null
+          id: string
+          notes: string | null
+          opening_cash: number
+          started_at: string
+          status: string
+          total_sales: number
+          total_transactions: number
+        }
+        Insert: {
+          branch_id: string
+          business_id: string
+          cash_variance?: number | null
+          cashier_id: string
+          closing_cash?: number | null
+          created_at?: string
+          ended_at?: string | null
+          expected_cash?: number | null
+          id?: string
+          notes?: string | null
+          opening_cash?: number
+          started_at?: string
+          status?: string
+          total_sales?: number
+          total_transactions?: number
+        }
+        Update: {
+          branch_id?: string
+          business_id?: string
+          cash_variance?: number | null
+          cashier_id?: string
+          closing_cash?: number | null
+          created_at?: string
+          ended_at?: string | null
+          expected_cash?: number | null
+          id?: string
+          notes?: string | null
+          opening_cash?: number
+          started_at?: string
+          status?: string
+          total_sales?: number
+          total_transactions?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cashier_shifts_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cashier_shifts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           business_id: string
@@ -729,6 +798,111 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      refund_items: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          product_name: string
+          quantity: number
+          refund_id: string
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          product_name: string
+          quantity: number
+          refund_id: string
+          total: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          refund_id?: string
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refund_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refund_items_refund_id_fkey"
+            columns: ["refund_id"]
+            isOneToOne: false
+            referencedRelation: "refunds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      refunds: {
+        Row: {
+          amount: number
+          business_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          reason: string
+          refund_number: string
+          refunded_by: string
+          restock_items: boolean
+          sale_id: string
+          status: string
+        }
+        Insert: {
+          amount: number
+          business_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reason: string
+          refund_number: string
+          refunded_by: string
+          restock_items?: boolean
+          sale_id: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          business_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reason?: string
+          refund_number?: string
+          refunded_by?: string
+          restock_items?: boolean
+          sale_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refunds_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refunds_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
             referencedColumns: ["id"]
           },
         ]
