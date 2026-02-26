@@ -638,7 +638,7 @@ export default function POSPage() {
             {/* Cart discount */}
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">Subtotal</span>
-              <span className="text-sm">${itemsSubtotal.toFixed(2)}</span>
+              <span className="text-sm">KSh {itemsSubtotal.toFixed(2)}</span>
             </div>
 
             <div className="flex items-center gap-2">
