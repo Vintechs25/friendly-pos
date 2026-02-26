@@ -35,7 +35,7 @@ export default function CustomersPage() {
   const businessId = profile?.business_id;
 
   const loadCustomers = useCallback(async () => {
-    if (!businessId) return;
+    if (!businessId) { setLoading(false); return; }
     setLoading(true);
 
     const { data: custs } = await supabase

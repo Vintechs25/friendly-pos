@@ -32,7 +32,7 @@ export default function SalesPage() {
   const businessId = profile?.business_id;
 
   const loadSales = useCallback(async () => {
-    if (!businessId) return;
+    if (!businessId) { setLoading(false); return; }
     setLoading(true);
     const { data } = await supabase
       .from("sales")
@@ -43,8 +43,16 @@ export default function SalesPage() {
     setSales((data ?? []).map(s => ({ ...s, total: Number(s.total), subtotal: Number(s.subtotal), tax_amount: Number(s.tax_amount), discount_amount: Number(s.discount_amount) })));
     setLoading(false);
   }, [businessId]);
-
-  useEffect(() => { loadSales(); }, [loadSales]);
+  useEffect(() => {
+    loadSales();
+    if (businessId) {
+      const channel = supabase
+        .channel('sales-realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'sales' }, () => { loadSales(); })
+        .subscribe();
+      return () => { supabase.removeChannel(channel); };
+    }
+  }, [loadSales]);
 
   const handleReprint = async (sale: SaleRow) => {
     const [itemsRes, bizRes, branchRes] = await Promise.all([

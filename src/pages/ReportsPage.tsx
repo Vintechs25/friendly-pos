@@ -27,7 +27,7 @@ export default function ReportsPage() {
   const businessId = profile?.business_id;
 
   useEffect(() => {
-    if (!businessId) return;
+    if (!businessId) { setLoading(false); return; }
     loadReport(tab);
   }, [businessId, tab]);
 

@@ -42,7 +42,7 @@ export default function ShiftsPage() {
   const businessId = profile?.business_id;
 
   const loadShifts = useCallback(async () => {
-    if (!businessId) return;
+    if (!businessId) { setLoading(false); return; }
     setLoading(true);
     const { data } = await supabase
       .from("cashier_shifts")

@@ -61,7 +61,7 @@ export default function InventoryPage() {
   const businessId = profile?.business_id;
 
   const loadData = useCallback(async () => {
-    if (!businessId) return;
+    if (!businessId) { setLoading(false); return; }
     setLoading(true);
 
     // Load branch, products, inventory, categories in parallel
@@ -96,7 +96,17 @@ export default function InventoryPage() {
     setLoading(false);
   }, [businessId]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    loadData();
+    if (businessId) {
+      const channel = supabase
+        .channel('inventory-realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => { loadData(); })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => { loadData(); })
+        .subscribe();
+      return () => { supabase.removeChannel(channel); };
+    }
+  }, [loadData, businessId]);
 
   const lowStockCount = products.filter(p => getStatus(p.stock, p.reorder_level) !== "in-stock").length;
 

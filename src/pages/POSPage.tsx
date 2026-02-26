@@ -144,6 +144,17 @@ export default function POSPage() {
       setLoadingProducts(false);
     };
     loadProducts();
+
+    // Realtime: auto-refresh product list when inventory/products change
+    if (profile?.business_id) {
+      const channel = supabase
+        .channel('pos-products')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+          loadProducts();
+        })
+        .subscribe();
+      return () => { supabase.removeChannel(channel); };
+    }
   }, [profile?.business_id]);
 
   const addToCart = (product: Product) => {
