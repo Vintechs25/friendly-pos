@@ -27,7 +27,7 @@ const LicenseContext = createContext<LicenseContextType | undefined>(undefined);
 const PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || "vzerzgmywwhvcgkezkhh";
 
 export function LicenseProvider({ children }: { children: React.ReactNode }) {
-  const { user, profile, roles } = useAuth();
+  const { user, profile, roles, refreshProfile } = useAuth();
   const [licenseState, setLicenseState] = useState<LicenseState>("unregistered");
   const [validation, setValidation] = useState<LicenseValidation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +42,19 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const refreshLicense = useCallback(async () => {
-    if (!profile?.business_id) return;
+    // Re-fetch profile first (edge function may have linked business_id)
+    await refreshProfile();
+
+    // Re-read the latest profile from auth context after refresh
+    // We need to fetch it directly since state update is async
+    const { data: freshProfile } = await supabase
+      .from("profiles")
+      .select("business_id")
+      .eq("id", user!.id)
+      .single();
+
+    const businessId = freshProfile?.business_id;
+    if (!businessId) return;
 
     // Super admins bypass license checks
     if (isSuperAdmin) {
@@ -57,7 +69,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     const { data: business } = await supabase
       .from("businesses")
       .select("trial_ends_at, subscription_plan")
-      .eq("id", profile.business_id)
+      .eq("id", businessId)
       .single();
 
     const trialEnded = business?.trial_ends_at && new Date(business.trial_ends_at) <= new Date();
@@ -67,7 +79,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     const { data: license } = await supabase
       .from("licenses")
       .select("license_key, status")
-      .eq("business_id", profile.business_id)
+      .eq("business_id", businessId)
       .eq("status", "active")
       .order("created_at", { ascending: false })
       .limit(1)
@@ -99,7 +111,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     setNeedsLicense(false);
     const result = await validateLicense(license.license_key, PROJECT_ID);
     handleStateChange(result);
-  }, [profile?.business_id, handleStateChange, isSuperAdmin]);
+  }, [user, profile?.business_id, handleStateChange, isSuperAdmin, refreshProfile]);
 
   useEffect(() => {
     if (!user) {
