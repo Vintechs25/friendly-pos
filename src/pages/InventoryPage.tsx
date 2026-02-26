@@ -43,6 +43,7 @@ const emptyForm = {
   name: "", sku: "", barcode: "", price: "", cost: "", tax_rate: "0",
   category_id: "", description: "", unit: "piece", min_stock_level: "10",
   track_inventory: true, initial_stock: "0",
+  expiry_date: "", batch_number: "", serial_number: "", minimum_price: "0",
 };
 
 export default function InventoryPage() {
