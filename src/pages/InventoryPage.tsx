@@ -134,6 +134,8 @@ export default function InventoryPage() {
       category_id: p.category_id ?? "", description: p.description ?? "",
       unit: p.unit ?? "piece", min_stock_level: String(p.min_stock_level ?? 10),
       track_inventory: p.track_inventory, initial_stock: String(p.stock),
+      expiry_date: (p as any).expiry_date ?? "", batch_number: (p as any).batch_number ?? "",
+      serial_number: (p as any).serial_number ?? "", minimum_price: String((p as any).minimum_price ?? 0),
     });
     setDialogOpen(true);
   };
