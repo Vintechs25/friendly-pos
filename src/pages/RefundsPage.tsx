@@ -48,7 +48,7 @@ export default function RefundsPage() {
   const businessId = profile?.business_id;
 
   const loadRefunds = useCallback(async () => {
-    if (!businessId) return;
+    if (!businessId) { setLoading(false); return; }
     setLoading(true);
     const { data } = await supabase
       .from("refunds")

@@ -61,7 +61,7 @@ export default function InventoryPage() {
   const businessId = profile?.business_id;
 
   const loadData = useCallback(async () => {
-    if (!businessId) return;
+    if (!businessId) { setLoading(false); return; }
     setLoading(true);
 
     // Load branch, products, inventory, categories in parallel

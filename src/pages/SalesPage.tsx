@@ -32,7 +32,7 @@ export default function SalesPage() {
   const businessId = profile?.business_id;
 
   const loadSales = useCallback(async () => {
-    if (!businessId) return;
+    if (!businessId) { setLoading(false); return; }
     setLoading(true);
     const { data } = await supabase
       .from("sales")
