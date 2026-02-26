@@ -43,6 +43,7 @@ const emptyForm = {
   name: "", sku: "", barcode: "", price: "", cost: "", tax_rate: "0",
   category_id: "", description: "", unit: "piece", min_stock_level: "10",
   track_inventory: true, initial_stock: "0",
+  expiry_date: "", batch_number: "", serial_number: "", minimum_price: "0",
 };
 
 export default function InventoryPage() {
@@ -133,6 +134,8 @@ export default function InventoryPage() {
       category_id: p.category_id ?? "", description: p.description ?? "",
       unit: p.unit ?? "piece", min_stock_level: String(p.min_stock_level ?? 10),
       track_inventory: p.track_inventory, initial_stock: String(p.stock),
+      expiry_date: (p as any).expiry_date ?? "", batch_number: (p as any).batch_number ?? "",
+      serial_number: (p as any).serial_number ?? "", minimum_price: String((p as any).minimum_price ?? 0),
     });
     setDialogOpen(true);
   };
@@ -144,7 +147,7 @@ export default function InventoryPage() {
     }
     setSaving(true);
     try {
-      const productData = {
+      const productData: any = {
         business_id: businessId,
         name: form.name.trim(),
         sku: form.sku.trim() || null,
@@ -157,6 +160,10 @@ export default function InventoryPage() {
         unit: form.unit || "piece",
         min_stock_level: parseInt(form.min_stock_level) || 10,
         track_inventory: form.track_inventory,
+        expiry_date: form.expiry_date || null,
+        batch_number: form.batch_number.trim() || null,
+        serial_number: form.serial_number.trim() || null,
+        minimum_price: parseFloat(form.minimum_price) || 0,
       };
 
       if (editingProduct) {
@@ -395,6 +402,26 @@ export default function InventoryPage() {
             <div className="space-y-2">
               <Label>Description</Label>
               <Input value={form.description} onChange={e => updateField("description", e.target.value)} placeholder="Optional description" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Expiry Date</Label>
+                <Input type="date" value={form.expiry_date} onChange={e => updateField("expiry_date", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Batch Number</Label>
+                <Input value={form.batch_number} onChange={e => updateField("batch_number", e.target.value)} placeholder="e.g. BATCH-001" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Serial Number</Label>
+                <Input value={form.serial_number} onChange={e => updateField("serial_number", e.target.value)} placeholder="For electronics" />
+              </div>
+              <div className="space-y-2">
+                <Label>Minimum Price ($)</Label>
+                <Input type="number" step="0.01" min="0" value={form.minimum_price} onChange={e => updateField("minimum_price", e.target.value)} />
+              </div>
             </div>
           </div>
           <DialogFooter>
