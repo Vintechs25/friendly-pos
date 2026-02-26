@@ -377,7 +377,7 @@ export default function ShiftsPage() {
               Record cash removed from the register and placed in the safe during this shift.
             </p>
             <div className="space-y-2">
-              <Label>Amount ($)</Label>
+              <Label>Amount (KSh)</Label>
               <Input
                 type="number"
                 step="0.01"

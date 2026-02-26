@@ -105,7 +105,7 @@ export default function CartItemRow({
 
       {item.itemDiscount > 0 && (
         <p className="text-xs text-green-600">
-          Discount: {item.itemDiscountType === "percent" ? `${item.itemDiscount}%` : `$${item.itemDiscount.toFixed(2)}`}
+          Discount: {item.itemDiscountType === "percent" ? `${item.itemDiscount}%` : `KSh ${item.itemDiscount.toFixed(2)}`}
         </p>
       )}
     </div>

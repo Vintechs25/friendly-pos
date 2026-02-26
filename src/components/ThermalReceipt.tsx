@@ -200,7 +200,7 @@ const ThermalReceipt = forwardRef<HTMLDivElement, ThermalReceiptProps>(
             }}
           >
             <span>TOTAL</span>
-            <span>${fmt(data.total)}</span>
+            <span>KSh {fmt(data.total)}</span>
           </div>
         </div>
 

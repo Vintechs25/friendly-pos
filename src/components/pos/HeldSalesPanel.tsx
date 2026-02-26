@@ -25,7 +25,7 @@ export default function HeldSalesPanel({ heldSales, onResume, onDelete }: HeldSa
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium truncate">{hs.label || "Parked Sale"}</p>
             <p className="text-[10px] text-muted-foreground">
-              {hs.itemCount} items · ${hs.total.toFixed(2)}
+              {hs.itemCount} items · KSh {hs.total.toFixed(2)}
             </p>
           </div>
           <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => onResume(hs.id)}>

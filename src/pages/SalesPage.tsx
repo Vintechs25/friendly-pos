@@ -97,8 +97,8 @@ export default function SalesPage() {
     a.click();
   };
 
-  const fmt = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
-  const fmtDate = (iso: string) => new Date(iso).toLocaleString("en-US", {
+  const fmt = (n: number) => `KSh ${n.toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const fmtDate = (iso: string) => new Date(iso).toLocaleString("en-KE", {
     month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
   });
 

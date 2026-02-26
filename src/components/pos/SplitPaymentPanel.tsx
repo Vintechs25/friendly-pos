@@ -465,7 +465,7 @@ function GiftCardDialog({
           {balance !== null && (
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-3 text-center">
               <p className="text-xs text-muted-foreground">Available Balance</p>
-              <p className="text-2xl font-bold text-primary">${balance.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-primary">KSh {balance.toFixed(2)}</p>
             </div>
           )}
         </div>
