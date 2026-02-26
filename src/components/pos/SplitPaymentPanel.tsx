@@ -349,7 +349,7 @@ export default function SplitPaymentPanel({
           />
           {changeAmount > 0 && (
             <p className="text-xs font-semibold text-green-600">
-              Change: ${changeAmount.toFixed(2)}
+              Change: KSh {changeAmount.toFixed(2)}
             </p>
           )}
         </div>
