@@ -763,21 +763,75 @@ export type Database = {
           },
         ]
       }
+      product_variants: {
+        Row: {
+          barcode: string | null
+          cost_adjustment: number
+          created_at: string
+          id: string
+          is_active: boolean
+          price_adjustment: number
+          product_id: string
+          sku: string | null
+          updated_at: string
+          variant_name: string
+          variant_value: string
+        }
+        Insert: {
+          barcode?: string | null
+          cost_adjustment?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          price_adjustment?: number
+          product_id: string
+          sku?: string | null
+          updated_at?: string
+          variant_name: string
+          variant_value: string
+        }
+        Update: {
+          barcode?: string | null
+          cost_adjustment?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          price_adjustment?: number
+          product_id?: string
+          sku?: string | null
+          updated_at?: string
+          variant_name?: string
+          variant_value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           barcode: string | null
+          batch_number: string | null
           business_id: string
           category_id: string | null
           cost: number
           created_at: string
           description: string | null
+          expiry_date: string | null
           id: string
           image_url: string | null
           is_active: boolean
           min_stock_level: number | null
+          minimum_price: number | null
           name: string
           price: number
           product_type: Database["public"]["Enums"]["product_type"]
+          serial_number: string | null
           sku: string | null
           tax_rate: number
           track_inventory: boolean
@@ -786,18 +840,22 @@ export type Database = {
         }
         Insert: {
           barcode?: string | null
+          batch_number?: string | null
           business_id: string
           category_id?: string | null
           cost?: number
           created_at?: string
           description?: string | null
+          expiry_date?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           min_stock_level?: number | null
+          minimum_price?: number | null
           name: string
           price?: number
           product_type?: Database["public"]["Enums"]["product_type"]
+          serial_number?: string | null
           sku?: string | null
           tax_rate?: number
           track_inventory?: boolean
@@ -806,18 +864,22 @@ export type Database = {
         }
         Update: {
           barcode?: string | null
+          batch_number?: string | null
           business_id?: string
           category_id?: string | null
           cost?: number
           created_at?: string
           description?: string | null
+          expiry_date?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           min_stock_level?: number | null
+          minimum_price?: number | null
           name?: string
           price?: number
           product_type?: Database["public"]["Enums"]["product_type"]
+          serial_number?: string | null
           sku?: string | null
           tax_rate?: number
           track_inventory?: boolean
@@ -1282,6 +1344,64 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_adjustments: {
+        Row: {
+          adjusted_by: string
+          branch_id: string
+          business_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          product_id: string
+          quantity: number
+          reason: string
+        }
+        Insert: {
+          adjusted_by: string
+          branch_id: string
+          business_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id: string
+          quantity: number
+          reason: string
+        }
+        Update: {
+          adjusted_by?: string
+          branch_id?: string
+          business_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string
+          quantity?: number
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_adjustments_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_adjustments_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_adjustments_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
