@@ -34,9 +34,10 @@ const navItems = [
   { icon: ShoppingCart, label: "Point of Sale", path: "/dashboard/pos" },
   { icon: Package, label: "Inventory", path: "/dashboard/inventory" },
   { icon: Receipt, label: "Sales", path: "/dashboard/sales" },
+  { icon: RotateCcw, label: "Refunds", path: "/dashboard/refunds" },
+  { icon: UserCheck, label: "Customers", path: "/dashboard/customers" },
+  { icon: Clock, label: "Shifts", path: "/dashboard/shifts" },
   { icon: BarChart3, label: "Reports", path: "/dashboard/reports" },
-  { icon: Users, label: "Team", path: "/dashboard/team" },
-  { icon: Building2, label: "Branches", path: "/dashboard/branches" },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];
 
