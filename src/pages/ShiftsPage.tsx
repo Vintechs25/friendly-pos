@@ -346,7 +346,7 @@ export default function ShiftsPage() {
               </div>
             )}
             <div className="space-y-2">
-              <Label>Closing Cash Amount ($)</Label>
+              <Label>Closing Cash Amount (KSh)</Label>
               <Input type="number" step="0.01" min="0" value={closingCash} onChange={e => setClosingCash(e.target.value)} />
             </div>
             <div className="space-y-2">
