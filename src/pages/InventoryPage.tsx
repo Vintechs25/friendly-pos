@@ -302,8 +302,8 @@ export default function InventoryPage() {
                         <td className="p-4 text-muted-foreground hidden md:table-cell">{product.sku ?? "—"}</td>
                         <td className="p-4 hidden sm:table-cell">{cat?.name ?? "—"}</td>
                         <td className="p-4 text-right font-semibold">{product.stock}</td>
-                        <td className="p-4 text-right hidden md:table-cell">${product.price.toFixed(2)}</td>
-                        <td className="p-4 text-right hidden md:table-cell text-muted-foreground">${product.cost.toFixed(2)}</td>
+                        <td className="p-4 text-right hidden md:table-cell">KSh {product.price.toFixed(2)}</td>
+                        <td className="p-4 text-right hidden md:table-cell text-muted-foreground">KSh {product.cost.toFixed(2)}</td>
                         <td className="p-4 text-center">
                           <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${statusStyles[status]}`}>
                             {statusLabels[status]}
