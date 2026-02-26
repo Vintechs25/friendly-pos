@@ -330,7 +330,7 @@ export default function POSPage() {
     if (splitMode) {
       const allocated = payments.reduce((s, p) => s + p.amount, 0);
       if (allocated < total - 0.01) {
-        toast.error(`Payment short by $${(total - allocated).toFixed(2)}`);
+        toast.error(`Payment short by KSh ${(total - allocated).toFixed(2)}`);
         return;
       }
     }
@@ -566,7 +566,7 @@ export default function POSPage() {
                     </span>
                   </div>
                   <p className="text-sm font-medium leading-tight">{product.name}</p>
-                  <p className="text-primary font-display font-bold mt-1">${product.price.toFixed(2)}</p>
+                  <p className="text-primary font-display font-bold mt-1">KSh {product.price.toFixed(2)}</p>
                   {product.barcode && (
                     <div className="flex items-center gap-1 mt-1">
                       <Barcode className="h-3 w-3 text-muted-foreground" />
@@ -638,7 +638,7 @@ export default function POSPage() {
             {/* Cart discount */}
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">Subtotal</span>
-              <span className="text-sm">${itemsSubtotal.toFixed(2)}</span>
+              <span className="text-sm">KSh {itemsSubtotal.toFixed(2)}</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -669,17 +669,17 @@ export default function POSPage() {
                 </PopoverContent>
               </Popover>
               {cartDiscountAmount > 0 && (
-                <span className="text-xs text-green-600 ml-auto">-${cartDiscountAmount.toFixed(2)}</span>
+                <span className="text-xs text-green-600 ml-auto">-KSh {cartDiscountAmount.toFixed(2)}</span>
               )}
             </div>
 
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Tax</span>
-              <span>${taxAmount.toFixed(2)}</span>
+              <span>KSh {taxAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between font-display text-lg font-bold pt-2 border-t border-border">
               <span>Total</span>
-              <span>${total.toFixed(2)}</span>
+              <span>KSh {total.toFixed(2)}</span>
             </div>
 
             <SplitPaymentPanel

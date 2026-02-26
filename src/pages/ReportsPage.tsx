@@ -117,7 +117,7 @@ export default function ReportsPage() {
     setLoading(false);
   }
 
-  const fmt = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+  const fmt = (n: number) => `KSh ${n.toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const tabs: { key: Tab; label: string; icon: typeof Calendar }[] = [
     { key: "daily", label: "Daily Sales", icon: Calendar },

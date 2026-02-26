@@ -224,7 +224,7 @@ export default function PurchaseOrdersPage() {
                     <tr key={po.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                       <td className="p-4 font-medium">{po.order_number}</td>
                       <td className="p-4">{po.supplier_name}</td>
-                      <td className="p-4 text-right">${po.total.toFixed(2)}</td>
+                      <td className="p-4 text-right">KSh {po.total.toFixed(2)}</td>
                       <td className="p-4 text-center">
                         <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[po.status] ?? ""}`}>
                           {po.status.replace("_", " ")}
@@ -298,7 +298,7 @@ export default function PurchaseOrdersPage() {
             </div>
 
             <div className="text-right font-semibold">
-              Total: ${items.reduce((s, it) => s + it.quantity * it.unit_cost, 0).toFixed(2)}
+              Total: KSh {items.reduce((s, it) => s + it.quantity * it.unit_cost, 0).toFixed(2)}
             </div>
           </div>
           <DialogFooter>

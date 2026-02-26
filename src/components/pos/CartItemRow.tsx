@@ -44,7 +44,7 @@ export default function CartItemRow({
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate">{item.name}</p>
           <p className="text-xs text-muted-foreground">
-            ${effectivePrice.toFixed(2)} each
+            KSh {effectivePrice.toFixed(2)} each
             {item.priceOverride !== null && (
               <span className="text-yellow-600 ml-1">(overridden)</span>
             )}
@@ -84,8 +84,8 @@ export default function CartItemRow({
             <Plus className="h-3 w-3" />
           </button>
         </div>
-        <span className="text-sm font-semibold w-16 text-right">
-          ${lineTotal.toFixed(2)}
+        <span className="text-sm font-semibold w-20 text-right">
+          KSh {lineTotal.toFixed(2)}
         </span>
         <button
           onClick={() => onRemove(item.id)}
@@ -105,7 +105,7 @@ export default function CartItemRow({
 
       {item.itemDiscount > 0 && (
         <p className="text-xs text-green-600">
-          Discount: {item.itemDiscountType === "percent" ? `${item.itemDiscount}%` : `$${item.itemDiscount.toFixed(2)}`}
+          Discount: {item.itemDiscountType === "percent" ? `${item.itemDiscount}%` : `KSh ${item.itemDiscount.toFixed(2)}`}
         </p>
       )}
     </div>

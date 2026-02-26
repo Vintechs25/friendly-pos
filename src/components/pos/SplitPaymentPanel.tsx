@@ -149,7 +149,7 @@ export default function SplitPaymentPanel({
     setShowGiftCardDialog(false);
     setGiftCardCode("");
     setGiftCardBalance(null);
-    toast.success(`Gift card applied: $${useAmount.toFixed(2)}`);
+    toast.success(`Gift card applied: KSh ${useAmount.toFixed(2)}`);
   };
 
   const applyStoreCredit = () => {
@@ -163,7 +163,7 @@ export default function SplitPaymentPanel({
     } else {
       onPaymentsChange([{ method: "store_credit", amount: useAmount }]);
     }
-    toast.success(`Store credit applied: $${useAmount.toFixed(2)}`);
+    toast.success(`Store credit applied: KSh ${useAmount.toFixed(2)}`);
   };
 
   const selectMethod = (m: PaymentMethod) => {
@@ -218,7 +218,7 @@ export default function SplitPaymentPanel({
             />
             {cashTendered >= total && cashTendered > 0 && (
               <p className="text-sm font-semibold text-green-600">
-                Change: ${(cashTendered - total).toFixed(2)}
+                Change: KSh {(cashTendered - total).toFixed(2)}
               </p>
             )}
           </div>
@@ -319,7 +319,7 @@ export default function SplitPaymentPanel({
       ))}
 
       {remaining > 0 && (
-        <p className="text-xs text-destructive">Remaining: ${remaining.toFixed(2)}</p>
+        <p className="text-xs text-destructive">Remaining: KSh {remaining.toFixed(2)}</p>
       )}
       {remaining <= 0 && allocated >= total && (
         <p className="text-xs text-green-600">Fully allocated ✓</p>
@@ -349,7 +349,7 @@ export default function SplitPaymentPanel({
           />
           {changeAmount > 0 && (
             <p className="text-xs font-semibold text-green-600">
-              Change: ${changeAmount.toFixed(2)}
+              Change: KSh {changeAmount.toFixed(2)}
             </p>
           )}
         </div>
@@ -404,7 +404,7 @@ function MpesaDialog({
         <div className="space-y-3 py-2">
           <div className="rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 p-3 text-center">
             <p className="text-xs text-muted-foreground">Amount</p>
-            <p className="text-2xl font-bold text-green-700 dark:text-green-400">${amount.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-green-700 dark:text-green-400">KSh {amount.toFixed(2)}</p>
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs">Customer Phone Number</Label>
@@ -465,7 +465,7 @@ function GiftCardDialog({
           {balance !== null && (
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-3 text-center">
               <p className="text-xs text-muted-foreground">Available Balance</p>
-              <p className="text-2xl font-bold text-primary">${balance.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-primary">KSh {balance.toFixed(2)}</p>
             </div>
           )}
         </div>

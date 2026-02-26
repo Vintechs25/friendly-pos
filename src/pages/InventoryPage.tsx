@@ -302,8 +302,8 @@ export default function InventoryPage() {
                         <td className="p-4 text-muted-foreground hidden md:table-cell">{product.sku ?? "—"}</td>
                         <td className="p-4 hidden sm:table-cell">{cat?.name ?? "—"}</td>
                         <td className="p-4 text-right font-semibold">{product.stock}</td>
-                        <td className="p-4 text-right hidden md:table-cell">${product.price.toFixed(2)}</td>
-                        <td className="p-4 text-right hidden md:table-cell text-muted-foreground">${product.cost.toFixed(2)}</td>
+                        <td className="p-4 text-right hidden md:table-cell">KSh {product.price.toFixed(2)}</td>
+                        <td className="p-4 text-right hidden md:table-cell text-muted-foreground">KSh {product.cost.toFixed(2)}</td>
                         <td className="p-4 text-center">
                           <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${statusStyles[status]}`}>
                             {statusLabels[status]}
@@ -352,11 +352,11 @@ export default function InventoryPage() {
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-2">
-                <Label>Price ($)</Label>
+                <Label>Price (KSh)</Label>
                 <Input type="number" step="0.01" min="0" value={form.price} onChange={e => updateField("price", e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Cost ($)</Label>
+                <Label>Cost (KSh)</Label>
                 <Input type="number" step="0.01" min="0" value={form.cost} onChange={e => updateField("cost", e.target.value)} />
               </div>
               <div className="space-y-2">
@@ -419,7 +419,7 @@ export default function InventoryPage() {
                 <Input value={form.serial_number} onChange={e => updateField("serial_number", e.target.value)} placeholder="For electronics" />
               </div>
               <div className="space-y-2">
-                <Label>Minimum Price ($)</Label>
+                <Label>Minimum Price (KSh)</Label>
                 <Input type="number" step="0.01" min="0" value={form.minimum_price} onChange={e => updateField("minimum_price", e.target.value)} />
               </div>
             </div>

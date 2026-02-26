@@ -211,7 +211,7 @@ export default function DashboardPage() {
   }
 
   const fmt = (n: number) =>
-    n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+    `KSh ${n.toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const timeAgo = (iso: string) => {
     const diff = Date.now() - new Date(iso).getTime();

@@ -171,7 +171,7 @@ export default function ShiftsPage() {
         dropped_by: user.id,
       });
       if (error) { toast.error(error.message); return; }
-      toast.success(`Safe drop of $${amount.toFixed(2)} recorded`);
+      toast.success(`Safe drop of KSh ${amount.toFixed(2)} recorded`);
       setShowSafeDropDialog(false);
       setSafeDropAmount("");
       setSafeDropNotes("");
@@ -179,8 +179,8 @@ export default function ShiftsPage() {
     } finally { setSaving(false); }
   };
 
-  const fmt = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
-  const fmtTime = (iso: string) => new Date(iso).toLocaleString("en-US", {
+  const fmt = (n: number) => `KSh ${n.toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const fmtTime = (iso: string) => new Date(iso).toLocaleString("en-KE", {
     month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
   });
 
@@ -314,7 +314,7 @@ export default function ShiftsPage() {
           <DialogHeader><DialogTitle>Open New Shift</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label>Opening Cash Amount ($)</Label>
+              <Label>Opening Cash Amount (KSh)</Label>
               <Input type="number" step="0.01" min="0" value={openingCash} onChange={e => setOpeningCash(e.target.value)} />
               <p className="text-xs text-muted-foreground">Count the cash in your register drawer</p>
             </div>
@@ -346,7 +346,7 @@ export default function ShiftsPage() {
               </div>
             )}
             <div className="space-y-2">
-              <Label>Closing Cash Amount ($)</Label>
+              <Label>Closing Cash Amount (KSh)</Label>
               <Input type="number" step="0.01" min="0" value={closingCash} onChange={e => setClosingCash(e.target.value)} />
             </div>
             <div className="space-y-2">
@@ -377,7 +377,7 @@ export default function ShiftsPage() {
               Record cash removed from the register and placed in the safe during this shift.
             </p>
             <div className="space-y-2">
-              <Label>Amount ($)</Label>
+              <Label>Amount (KSh)</Label>
               <Input
                 type="number"
                 step="0.01"
