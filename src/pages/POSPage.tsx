@@ -566,7 +566,7 @@ export default function POSPage() {
                     </span>
                   </div>
                   <p className="text-sm font-medium leading-tight">{product.name}</p>
-                  <p className="text-primary font-display font-bold mt-1">${product.price.toFixed(2)}</p>
+                  <p className="text-primary font-display font-bold mt-1">KSh {product.price.toFixed(2)}</p>
                   {product.barcode && (
                     <div className="flex items-center gap-1 mt-1">
                       <Barcode className="h-3 w-3 text-muted-foreground" />
