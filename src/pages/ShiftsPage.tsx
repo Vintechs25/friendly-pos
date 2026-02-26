@@ -314,7 +314,7 @@ export default function ShiftsPage() {
           <DialogHeader><DialogTitle>Open New Shift</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label>Opening Cash Amount ($)</Label>
+              <Label>Opening Cash Amount (KSh)</Label>
               <Input type="number" step="0.01" min="0" value={openingCash} onChange={e => setOpeningCash(e.target.value)} />
               <p className="text-xs text-muted-foreground">Count the cash in your register drawer</p>
             </div>
