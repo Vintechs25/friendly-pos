@@ -84,8 +84,8 @@ export default function CartItemRow({
             <Plus className="h-3 w-3" />
           </button>
         </div>
-        <span className="text-sm font-semibold w-16 text-right">
-          ${lineTotal.toFixed(2)}
+        <span className="text-sm font-semibold w-20 text-right">
+          KSh {lineTotal.toFixed(2)}
         </span>
         <button
           onClick={() => onRemove(item.id)}
