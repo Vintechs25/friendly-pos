@@ -5,6 +5,7 @@ import { Search, Plus, Barcode, Minus, Trash2, CreditCard, Banknote, Smartphone,
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLicense, LicenseBanner } from "@/contexts/LicenseContext";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 
