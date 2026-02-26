@@ -152,20 +152,31 @@ Deno.serve(async (req) => {
       const { license_key } = await req.json();
       if (!license_key) return json({ error: "license_key required" }, 400);
 
-      // Get user's business
+      // Get user's profile
       const { data: prof } = await admin.from("profiles").select("business_id").eq("id", user.id).single();
-      if (!prof?.business_id) return json({ error: "No business linked to your account" }, 400);
+      let businessId = prof?.business_id;
 
-      // Find the license
+      // Find the license by key (without business_id filter first)
       const { data: license } = await admin
         .from("licenses")
         .select("*")
         .eq("license_key", license_key.trim())
-        .eq("business_id", prof.business_id)
+        .eq("status", "active")
         .single();
 
       if (!license) {
-        return json({ success: false, error: "Invalid license key for your business." }, 400);
+        return json({ success: false, error: "Invalid or inactive license key." }, 400);
+      }
+
+      // If user has no business linked, link them to the license's business
+      if (!businessId) {
+        businessId = license.business_id;
+        await admin.from("profiles").update({ business_id: businessId }).eq("id", user.id);
+      }
+
+      // Verify the license belongs to the user's business
+      if (license.business_id !== businessId) {
+        return json({ success: false, error: "This license key does not belong to your business." }, 400);
       }
 
       if (license.status === "suspended" || license.status === "terminated") {
@@ -177,17 +188,12 @@ Deno.serve(async (req) => {
         return json({ success: false, error: "This license has expired." }, 400);
       }
 
-      // Mark license as active if not already
-      if (license.status !== "active") {
-        await admin.from("licenses").update({ status: "active", updated_at: new Date().toISOString() }).eq("id", license.id);
-      }
-
       // Update the business to mark subscription as the license plan (end trial)
       await admin.from("businesses").update({
         subscription_plan: license.subscription_plan,
         trial_ends_at: null,
         updated_at: new Date().toISOString(),
-      }).eq("id", prof.business_id);
+      }).eq("id", businessId);
 
       return json({ success: true, message: "License activated successfully.", license_key: license.license_key });
     }
