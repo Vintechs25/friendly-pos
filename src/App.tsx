@@ -17,6 +17,7 @@ import ReportsPage from "./pages/ReportsPage";
 import CustomersPage from "./pages/CustomersPage";
 import ShiftsPage from "./pages/ShiftsPage";
 import RefundsPage from "./pages/RefundsPage";
+import SettingsPage from "./pages/SettingsPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminBusinessesPage from "./pages/admin/AdminBusinessesPage";
 import AdminPlansPage from "./pages/admin/AdminPlansPage";
