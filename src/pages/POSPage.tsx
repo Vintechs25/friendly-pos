@@ -36,6 +36,8 @@ export default function POSPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [scanMode, setScanMode] = useState<ScanMode>("checkout");
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
+  const [showReceipt, setShowReceipt] = useState(false);
   const { user, profile } = useAuth();
   const { canUsePOS } = useLicense();
 
