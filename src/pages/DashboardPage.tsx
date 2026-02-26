@@ -46,6 +46,16 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user) return;
     loadDashboard();
+
+    // Realtime: refresh dashboard on new sales
+    const channel = supabase
+      .channel('dashboard-sales')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sales' }, () => {
+        loadDashboard();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [user]);
 
   async function loadDashboard() {
