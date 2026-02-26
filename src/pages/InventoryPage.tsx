@@ -419,7 +419,7 @@ export default function InventoryPage() {
                 <Input value={form.serial_number} onChange={e => updateField("serial_number", e.target.value)} placeholder="For electronics" />
               </div>
               <div className="space-y-2">
-                <Label>Minimum Price ($)</Label>
+                <Label>Minimum Price (KSh)</Label>
                 <Input type="number" step="0.01" min="0" value={form.minimum_price} onChange={e => updateField("minimum_price", e.target.value)} />
               </div>
             </div>
