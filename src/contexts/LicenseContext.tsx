@@ -42,7 +42,19 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const refreshLicense = useCallback(async () => {
-    if (!profile?.business_id) return;
+    // Re-fetch profile first (edge function may have linked business_id)
+    await refreshProfile();
+
+    // Re-read the latest profile from auth context after refresh
+    // We need to fetch it directly since state update is async
+    const { data: freshProfile } = await supabase
+      .from("profiles")
+      .select("business_id")
+      .eq("id", user!.id)
+      .single();
+
+    const businessId = freshProfile?.business_id;
+    if (!businessId) return;
 
     // Super admins bypass license checks
     if (isSuperAdmin) {
