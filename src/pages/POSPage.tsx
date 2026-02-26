@@ -34,6 +34,7 @@ type Product = Tables<"products">;
 
 export default function POSPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [mobileView, setMobileView] = useState<"products" | "cart">("products");
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
@@ -513,9 +514,36 @@ export default function POSPage() {
     <DashboardLayout>
       <LicenseBanner />
       <ReceiptPreviewDialog open={showReceipt} onOpenChange={setShowReceipt} data={receiptData} />
-      <div className="flex flex-col lg:flex-row gap-4 h-[calc(100vh-8.5rem)]">
+
+      {/* Mobile tab toggle */}
+      <div className="flex lg:hidden mb-2 rounded-lg border border-border overflow-hidden">
+        <button
+          onClick={() => setMobileView("products")}
+          className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+            mobileView === "products" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"
+          }`}
+        >
+          Products
+        </button>
+        <button
+          onClick={() => setMobileView("cart")}
+          className={`flex-1 py-2.5 text-sm font-medium transition-colors relative ${
+            mobileView === "cart" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"
+          }`}
+        >
+          Cart {cart.length > 0 && (
+            <span className={`ml-1 inline-flex items-center justify-center h-5 w-5 rounded-full text-xs font-bold ${
+              mobileView === "cart" ? "bg-primary-foreground text-primary" : "bg-primary text-primary-foreground"
+            }`}>
+              {cart.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-4 h-[calc(100vh-11rem)] lg:h-[calc(100vh-8.5rem)]">
         {/* Products Panel */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className={`flex-1 flex flex-col min-h-0 overflow-hidden ${mobileView !== "products" ? "hidden lg:flex" : "flex"}`}>
           <div className="flex items-center gap-3 mb-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -580,7 +608,7 @@ export default function POSPage() {
               {filtered.map((product) => (
                 <button
                   key={product.id}
-                  onClick={() => { addToCart(product); toast.success(`Added: ${product.name}`); }}
+                  onClick={() => { addToCart(product); toast.success(`Added: ${product.name}`); setMobileView("cart"); }}
                   className="flex flex-col items-center justify-center rounded-xl border border-border bg-card p-4 hover:border-primary/40 hover:shadow-md transition-all text-center"
                 >
                   <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
@@ -606,7 +634,7 @@ export default function POSPage() {
         </div>
 
         {/* Cart Panel */}
-        <div className="w-full lg:w-[420px] flex flex-col rounded-xl border border-border bg-card min-h-0 shrink-0 lg:max-h-full">
+        <div className={`w-full lg:w-[420px] flex flex-col rounded-xl border border-border bg-card min-h-0 shrink-0 lg:max-h-full ${mobileView !== "cart" ? "hidden lg:flex" : "flex"}`}>
           <div className="p-4 border-b border-border flex items-center justify-between">
             <div>
               <h2 className="font-display font-semibold">Current Sale</h2>
