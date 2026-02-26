@@ -1,13 +1,15 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Barcode, Minus, Trash2, CreditCard, Banknote, Smartphone, Loader2, Package } from "lucide-react";
+import { Search, Plus, Barcode, Minus, Trash2, CreditCard, Banknote, Smartphone, Loader2, Package, Printer } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLicense, LicenseBanner } from "@/contexts/LicenseContext";
 import { useScanner, ScanMode } from "@/hooks/use-scanner";
 import ScannerIndicator from "@/components/ScannerIndicator";
+import ReceiptPreviewDialog from "@/components/ReceiptPreviewDialog";
+import type { ReceiptData } from "@/components/ThermalReceipt";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import type { BarcodeResult } from "@/lib/scan-engine";
