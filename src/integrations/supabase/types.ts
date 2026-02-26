@@ -447,6 +447,53 @@ export type Database = {
           },
         ]
       }
+      gift_cards: {
+        Row: {
+          balance: number
+          business_id: string
+          code: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          initial_balance: number
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          business_id: string
+          code: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          initial_balance?: number
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          business_id?: string
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          initial_balance?: number
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_cards_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       held_sale_items: {
         Row: {
           created_at: string
@@ -678,6 +725,9 @@ export type Database = {
           created_at: string
           id: string
           method: Database["public"]["Enums"]["payment_method_type"]
+          mpesa_checkout_request_id: string | null
+          mpesa_receipt_number: string | null
+          payment_status: string
           reference: string | null
           sale_id: string
         }
@@ -686,6 +736,9 @@ export type Database = {
           created_at?: string
           id?: string
           method: Database["public"]["Enums"]["payment_method_type"]
+          mpesa_checkout_request_id?: string | null
+          mpesa_receipt_number?: string | null
+          payment_status?: string
           reference?: string | null
           sale_id: string
         }
@@ -694,6 +747,9 @@ export type Database = {
           created_at?: string
           id?: string
           method?: Database["public"]["Enums"]["payment_method_type"]
+          mpesa_checkout_request_id?: string | null
+          mpesa_receipt_number?: string | null
+          payment_status?: string
           reference?: string | null
           sale_id?: string
         }
@@ -1033,6 +1089,51 @@ export type Database = {
             columns: ["sale_id"]
             isOneToOne: false
             referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      safe_drops: {
+        Row: {
+          amount: number
+          business_id: string
+          created_at: string
+          dropped_by: string
+          id: string
+          notes: string | null
+          shift_id: string
+        }
+        Insert: {
+          amount: number
+          business_id: string
+          created_at?: string
+          dropped_by: string
+          id?: string
+          notes?: string | null
+          shift_id: string
+        }
+        Update: {
+          amount?: number
+          business_id?: string
+          created_at?: string
+          dropped_by?: string
+          id?: string
+          notes?: string | null
+          shift_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safe_drops_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safe_drops_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "cashier_shifts"
             referencedColumns: ["id"]
           },
         ]
@@ -1426,6 +1527,8 @@ export type Database = {
         | "bank_transfer"
         | "credit"
         | "split"
+        | "store_credit"
+        | "gift_card"
       product_type: "physical" | "service" | "room" | "bundle"
       purchase_order_status:
         | "draft"
@@ -1599,6 +1702,8 @@ export const Constants = {
         "bank_transfer",
         "credit",
         "split",
+        "store_credit",
+        "gift_card",
       ],
       product_type: ["physical", "service", "room", "bundle"],
       purchase_order_status: [
