@@ -41,5 +41,10 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     }
   }
 
+  // Check feature toggles for the current route
+  if (!hasRole("super_admin" as any) && !isRouteAllowedByFeature(location.pathname)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return <>{children}</>;
 }
