@@ -277,6 +277,26 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     };
   }, [user, profile?.business_id, handleStateChange, isSuperAdmin]);
 
+  // Fast re-check so admin suspension takes effect quickly
+  useEffect(() => {
+    if (!user || !profile?.business_id || isSuperAdmin) return;
+
+    const interval = setInterval(() => {
+      void refreshLicense();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [user, profile?.business_id, isSuperAdmin, refreshLicense]);
+
+  // Force logout when license is suspended or terminated
+  useEffect(() => {
+    if (!user || isSuperAdmin) return;
+    if (licenseState === "suspended" || licenseState === "terminated") {
+      clearLicenseState();
+      void signOut();
+    }
+  }, [licenseState, user, isSuperAdmin, signOut]);
+
   const canUsePOS = licenseState === "active" || licenseState === "grace";
   const canLogin = licenseState !== "suspended" && licenseState !== "terminated";
 
