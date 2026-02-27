@@ -1,6 +1,7 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLicense } from "@/contexts/LicenseContext";
+import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 import LicenseGate from "@/components/LicenseGate";
 
 interface ProtectedRouteProps {
