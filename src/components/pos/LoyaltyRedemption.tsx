@@ -40,7 +40,7 @@ export default function LoyaltyRedemption({
   return (
     <div className="flex items-center gap-2">
       <div className="flex items-center gap-1 text-xs text-muted-foreground">
-        <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+        <Star className="h-3 w-3 text-warning fill-warning" />
         <span>{availablePoints} pts</span>
       </div>
       {redeemedPoints > 0 ? (
