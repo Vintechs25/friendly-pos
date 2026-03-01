@@ -319,7 +319,7 @@ export default function POSPage() {
 
       <div className="flex flex-col md:flex-row h-full">
         {/* ═══ LEFT: Product Catalog ═══ */}
-        <div className="flex-1 flex flex-col min-w-0 border-r border-border">
+        <div className="flex-1 flex flex-col min-w-0 border-r border-border max-w-[60%]">
           {/* Search bar */}
           <div className="p-3 pb-2 space-y-2">
             <div className="flex items-center gap-2">
@@ -399,7 +399,7 @@ export default function POSPage() {
         </div>
 
         {/* ═══ RIGHT: Cart + Payment ═══ */}
-        <div className="w-full md:w-[360px] xl:w-[400px] flex flex-col bg-card shrink-0">
+        <div className="w-full md:w-[400px] xl:w-[440px] 2xl:w-[480px] flex flex-col bg-card shrink-0">
           {/* Cart header */}
           <div className="px-3 py-2.5 border-b border-border flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
