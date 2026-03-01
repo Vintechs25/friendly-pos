@@ -208,6 +208,11 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Payment Configuration - visible to business owners */}
+        {isBusinessOwner && profile?.business_id && (
+          <PaymentConfigCard businessId={profile.business_id} />
+        )}
       </div>
     </DashboardLayout>
   );
