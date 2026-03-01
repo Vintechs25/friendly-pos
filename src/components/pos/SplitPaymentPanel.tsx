@@ -206,23 +206,11 @@ export default function SplitPaymentPanel({
         </div>
 
         {selectedMethod === "cash" && (
-          <div className="space-y-1">
-            <Label className="text-xs">Cash Tendered</Label>
-            <Input
-              type="number"
-              value={cashTendered || ""}
-              onChange={(e) => onCashTenderedChange(parseFloat(e.target.value) || 0)}
-              placeholder={total.toFixed(2)}
-              className="h-8"
-              min="0"
-              step="0.01"
-            />
-            {cashTendered >= total && cashTendered > 0 && (
-              <p className="text-sm font-semibold text-green-600">
-                Change: KSh {(cashTendered - total).toFixed(2)}
-              </p>
-            )}
-          </div>
+          <NumericKeypad
+            value={cashTendered}
+            onChange={onCashTenderedChange}
+            total={total}
+          />
         )}
 
         {selectedMethod === "mobile_money" && payments[0]?.reference && (
