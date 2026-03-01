@@ -106,10 +106,10 @@ export function canAccessRoute(roles: AppRole[], route: string): boolean {
 /**
  * Filter nav items based on user roles.
  */
-export function filterNavItemsByRole(
-  items: { path: string }[],
+export function filterNavItemsByRole<T extends { path: string }>(
+  items: T[],
   roles: AppRole[]
-): typeof items {
+): T[] {
   if (roles.some((r) => ADMIN_ROLES.includes(r))) return items;
 
   return items.filter((item) => canAccessRoute(roles, item.path));
