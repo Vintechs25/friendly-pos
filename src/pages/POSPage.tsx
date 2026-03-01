@@ -314,6 +314,7 @@ export default function POSPage() {
       soundEnabled={soundEnabled}
       onToggleSound={() => setSoundEnabled((p) => !p)}
       lastBarcode={scanner.lastScan?.sanitized}
+      deviceStatuses={{ ...deviceStatuses, internet: isOnline ? "online" : "offline" }}
     >
       <LicenseBanner />
       <ReceiptPreviewDialog open={showReceipt} onOpenChange={setShowReceipt} data={receiptData} />
