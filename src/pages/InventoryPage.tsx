@@ -60,6 +60,7 @@ export default function InventoryPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [branchId, setBranchId] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   const businessId = profile?.business_id;
 
