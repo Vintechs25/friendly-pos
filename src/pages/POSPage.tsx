@@ -458,49 +458,51 @@ export default function POSPage() {
           </div>
 
           {/* ═══ Totals & Payment ═══ */}
-          <div className="p-3 space-y-2.5 border-t-2 border-border bg-muted/30">
-            {/* Subtotal */}
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-medium tabular-nums">KSh {itemsSubtotal.toFixed(2)}</span>
-            </div>
-
-            {/* Cart discount */}
-            <div className="flex items-center gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-background transition-colors touch-manipulation">
-                    <Percent className="h-3 w-3" /> Discount
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-56 p-3 space-y-2" side="top">
-                  <Label className="text-xs font-semibold">Cart Discount</Label>
-                  <div className="flex gap-1">
-                    <Button variant={cartDiscountType === "fixed" ? "default" : "outline"} size="sm" className="h-8 text-xs flex-1" onClick={() => setCartDiscountType("fixed")}><DollarSign className="h-3 w-3 mr-1" /> Fixed</Button>
-                    <Button variant={cartDiscountType === "percent" ? "default" : "outline"} size="sm" className="h-8 text-xs flex-1" onClick={() => setCartDiscountType("percent")}><Percent className="h-3 w-3 mr-1" /> %</Button>
-                  </div>
-                  <Input type="number" value={cartDiscount || ""} onChange={(e) => setCartDiscount(parseFloat(e.target.value) || 0)} placeholder="0" className="h-9" min="0" />
-                </PopoverContent>
-              </Popover>
-              {cartDiscountAmount > 0 && <span className="text-[10px] text-destructive font-medium ml-auto tabular-nums">-KSh {cartDiscountAmount.toFixed(2)}</span>}
-            </div>
-
-            {loyaltyDiscount > 0 && (
+          <div className="p-3 space-y-2 border-t-2 border-border bg-muted/30 shrink-0">
+            {/* Summary rows */}
+            <div className="space-y-1.5">
               <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Loyalty</span>
-                <span className="text-destructive font-medium tabular-nums">-KSh {loyaltyDiscount.toFixed(2)}</span>
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-medium tabular-nums">KSh {itemsSubtotal.toFixed(2)}</span>
               </div>
-            )}
 
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Tax</span>
-              <span className="font-medium tabular-nums">KSh {taxAmount.toFixed(2)}</span>
+              {/* Cart discount */}
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-background border border-transparent hover:border-border transition-all touch-manipulation">
+                      <Percent className="h-3 w-3" /> Discount
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56 p-3 space-y-2" side="top">
+                    <Label className="text-xs font-semibold">Cart Discount</Label>
+                    <div className="flex gap-1.5">
+                      <Button variant={cartDiscountType === "fixed" ? "default" : "outline"} size="sm" className="h-8 text-xs flex-1" onClick={() => setCartDiscountType("fixed")}><DollarSign className="h-3 w-3 mr-1" /> Fixed</Button>
+                      <Button variant={cartDiscountType === "percent" ? "default" : "outline"} size="sm" className="h-8 text-xs flex-1" onClick={() => setCartDiscountType("percent")}><Percent className="h-3 w-3 mr-1" /> %</Button>
+                    </div>
+                    <Input type="number" value={cartDiscount || ""} onChange={(e) => setCartDiscount(parseFloat(e.target.value) || 0)} placeholder="0" className="h-9" min="0" />
+                  </PopoverContent>
+                </Popover>
+                {cartDiscountAmount > 0 && <span className="text-[11px] text-destructive font-semibold ml-auto tabular-nums">-KSh {cartDiscountAmount.toFixed(2)}</span>}
+              </div>
+
+              {loyaltyDiscount > 0 && (
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Loyalty</span>
+                  <span className="text-destructive font-medium tabular-nums">-KSh {loyaltyDiscount.toFixed(2)}</span>
+                </div>
+              )}
+
+              <div className="flex justify-between text-xs">
+                <span className="text-muted-foreground">Tax</span>
+                <span className="font-medium tabular-nums">KSh {taxAmount.toFixed(2)}</span>
+              </div>
             </div>
 
             {/* Total - prominent */}
-            <div className="flex justify-between items-center pt-2 border-t-2 border-primary/20">
-              <span className="font-display text-base font-bold">TOTAL</span>
-              <span className="font-display text-2xl font-black text-primary tabular-nums">
+            <div className="flex justify-between items-center pt-2.5 border-t-2 border-primary/30">
+              <span className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Total</span>
+              <span className="text-2xl font-black text-primary tabular-nums">
                 KSh {total.toLocaleString("en-KE", { minimumFractionDigits: 2 })}
               </span>
             </div>
