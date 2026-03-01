@@ -317,7 +317,7 @@ export default function POSPage() {
       <LicenseBanner />
       <ReceiptPreviewDialog open={showReceipt} onOpenChange={setShowReceipt} data={receiptData} />
 
-      <div className="flex h-full">
+      <div className="flex flex-col md:flex-row h-full">
         {/* ═══ LEFT: Product Catalog ═══ */}
         <div className="flex-1 flex flex-col min-w-0 border-r border-border">
           {/* Search bar */}
@@ -327,21 +327,21 @@ export default function POSPage() {
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search products, SKU, or scan barcode..."
-                  className="pl-10 h-12 text-base rounded-xl bg-muted/50 border-transparent focus:border-primary focus:bg-background touch-manipulation"
+                  className="pl-10 h-11 text-sm rounded-xl bg-muted/50 border-transparent focus:border-primary focus:bg-background touch-manipulation"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <div className="flex items-center rounded-lg border border-border overflow-hidden">
+              <div className="flex items-center rounded-lg border border-border overflow-hidden shrink-0">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`p-3 transition-colors touch-manipulation ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                  className={`h-11 w-11 flex items-center justify-center transition-colors touch-manipulation ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-3 transition-colors touch-manipulation ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                  className={`h-11 w-11 flex items-center justify-center transition-colors touch-manipulation ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
                 >
                   <List className="h-4 w-4" />
                 </button>
