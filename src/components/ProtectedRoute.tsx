@@ -28,15 +28,33 @@ export default function ProtectedRoute({ children, requiredRole, skipBusinessChe
     return <Navigate to="/login" replace />;
   }
 
-  // Redirect to business setup if no business_id (except for admin routes and setup page itself)
+  // Users without a business_id (except super_admins) see a "no business" message
   if (
     !skipBusinessCheck &&
     !requiredRole &&
     profile &&
     !profile.business_id &&
-    location.pathname !== "/setup-business"
+    !hasRole("super_admin" as any)
   ) {
-    return <Navigate to="/setup-business" replace />;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="text-center max-w-md space-y-4">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+          </div>
+          <h2 className="text-xl font-bold">No Business Assigned</h2>
+          <p className="text-muted-foreground text-sm">
+            Your account has not been linked to a business yet. Please contact your platform administrator to get set up.
+          </p>
+          <button
+            onClick={() => window.location.href = "/login"}
+            className="text-sm text-primary hover:underline"
+          >
+            Back to Login
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (requiredRole && !hasRole(requiredRole as any)) {

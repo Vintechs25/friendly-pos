@@ -134,7 +134,6 @@ export default function AdminBusinessesPage() {
             .from("business-logos")
             .getPublicUrl(path);
           logoUrl = urlData.publicUrl;
-          // Update business logo_url
           await supabase.from("businesses").update({ logo_url: logoUrl }).eq("id", business.id);
         }
       }
@@ -155,39 +154,36 @@ export default function AdminBusinessesPage() {
       });
 
       // 4. Create branch
-      const { data: branch } = await supabase
+      await supabase
         .from("branches")
         .insert({ business_id: business.id, name: branchName || "Main Branch" })
         .select()
         .single();
 
-      // 5. Create owner account
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: ownerEmail,
-        password: ownerPassword,
-        options: { data: { full_name: ownerName } },
-      });
-      if (signUpError) throw new Error("Owner account failed: " + signUpError.message);
-      const ownerId = signUpData.user?.id;
-      if (!ownerId) throw new Error("User creation returned no ID");
+      // 5. Create owner account via manage-team edge function (uses admin API, won't log out current session)
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/manage-team`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          },
+          body: JSON.stringify({
+            action: "add_member",
+            email: ownerEmail,
+            password: ownerPassword,
+            full_name: ownerName,
+            role: "business_owner",
+            business_id: business.id,
+          }),
+        }
+      );
+      const result = await res.json();
+      if (!result.success) throw new Error(result.error || "Owner account creation failed");
 
-      await new Promise((r) => setTimeout(r, 800));
-
-      // 6. Link profile
-      await supabase
-        .from("profiles")
-        .update({ business_id: business.id, full_name: ownerName })
-        .eq("id", ownerId);
-
-      // 7. Assign role
-      await supabase.from("user_roles").insert({
-        user_id: ownerId,
-        role: "business_owner" as any,
-        business_id: business.id,
-        hierarchy_level: 2,
-      });
-
-      // 8. Audit log
+      // 6. Audit log
       await supabase.from("audit_logs").insert({
         action: "business_provisioned",
         table_name: "businesses",
