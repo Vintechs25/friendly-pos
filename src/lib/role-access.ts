@@ -7,7 +7,7 @@ type AppRole = Database["public"]["Enums"]["app_role"];
  * Roles not listed here get NO access (except login).
  * "super_admin" and "platform_admin" bypass all checks.
  */
-const ROLE_ROUTES: Record<string, string[]> = {
+const ROLE_ROUTES: Record<string, string[] | "all"> = {
   cashier: [
     "/dashboard/pos",
     "/dashboard/shifts",
