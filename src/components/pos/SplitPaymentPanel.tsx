@@ -307,15 +307,15 @@ export default function SplitPaymentPanel({
       )}
 
       {/* M-Pesa Dialog */}
-      <MpesaDialog
-        open={showMpesaDialog}
-        onOpenChange={setShowMpesaDialog}
-        phone={mpesaPhone}
-        onPhoneChange={setMpesaPhone}
-        loading={mpesaLoading}
-        onSubmit={handleMpesaSTK}
-        amount={payments.find((p) => p.method === "mobile_money")?.amount ?? remaining}
-      />
+      {businessId && (
+        <MpesaPaymentDialog
+          open={showMpesaDialog}
+          onOpenChange={setShowMpesaDialog}
+          amount={payments.find((p) => p.method === "mobile_money")?.amount ?? remaining}
+          businessId={businessId}
+          onPaymentConfirmed={handleMpesaConfirmed}
+        />
+      )}
 
       {/* Gift Card Dialog */}
       <GiftCardDialog
