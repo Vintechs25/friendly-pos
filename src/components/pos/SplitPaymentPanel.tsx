@@ -57,8 +57,6 @@ export default function SplitPaymentPanel({
   customerCreditBalance = 0,
 }: SplitPaymentPanelProps) {
   const [showMpesaDialog, setShowMpesaDialog] = useState(false);
-  const [mpesaPhone, setMpesaPhone] = useState("");
-  const [mpesaLoading, setMpesaLoading] = useState(false);
   const [showGiftCardDialog, setShowGiftCardDialog] = useState(false);
   const [giftCardCode, setGiftCardCode] = useState("");
   const [giftCardBalance, setGiftCardBalance] = useState<number | null>(null);
