@@ -330,54 +330,6 @@ export default function SplitPaymentPanel({
   );
 }
 
-// M-Pesa STK Push Dialog
-function MpesaDialog({
-  open, onOpenChange, phone, onPhoneChange, loading, onSubmit, amount,
-}: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  phone: string;
-  onPhoneChange: (v: string) => void;
-  loading: boolean;
-  onSubmit: () => void;
-  amount: number;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Smartphone className="h-5 w-5" /> M-Pesa Payment
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3 py-2">
-          <div className="rounded-lg bg-success/10 border border-success/20 p-3 text-center">
-            <p className="text-xs text-muted-foreground">Amount</p>
-            <p className="text-2xl font-bold text-success">KSh {amount.toFixed(2)}</p>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Customer Phone Number</Label>
-            <Input
-              value={phone}
-              onChange={(e) => onPhoneChange(e.target.value)}
-              placeholder="0712345678 or 254712345678"
-              className="h-9"
-            />
-            <p className="text-[10px] text-muted-foreground">An STK Push will be sent to this number</p>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={onSubmit} disabled={loading} className="bg-success hover:bg-success/90 text-success-foreground">
-            {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Smartphone className="h-4 w-4 mr-2" />}
-            Send STK Push
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 // Gift Card Dialog
 function GiftCardDialog({
   open, onOpenChange, code, onCodeChange, balance, loading, onLookup, onApply,
