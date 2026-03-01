@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ScanMode } from "@/hooks/use-scanner";
+import DeviceStatusIndicators, { type DeviceStatuses } from "@/components/hardware/DeviceStatusIndicators";
 
 interface POSLayoutProps {
   children: React.ReactNode;
