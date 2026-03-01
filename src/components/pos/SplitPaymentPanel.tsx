@@ -397,7 +397,7 @@ function MpesaDialog({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={onSubmit} disabled={loading} className="bg-green-600 hover:bg-green-700">
+          <Button onClick={onSubmit} disabled={loading} className="bg-success hover:bg-success/90 text-success-foreground">
             {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Smartphone className="h-4 w-4 mr-2" />}
             Send STK Push
           </Button>
