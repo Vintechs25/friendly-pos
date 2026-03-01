@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Search, Barcode, Loader2, Package, PauseCircle,
-  Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag,
+  Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag, Plus,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +29,7 @@ import {
 } from "@/lib/offline-store";
 
 import POSLayout from "@/components/pos/POSLayout";
+import QuickProductDialog from "@/components/pos/QuickProductDialog";
 import CategoryFilter from "@/components/pos/CategoryFilter";
 import CartItemRow from "@/components/pos/CartItemRow";
 import SplitPaymentPanel from "@/components/pos/SplitPaymentPanel";
@@ -64,6 +65,9 @@ export default function POSPage() {
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
   const [showReceipt, setShowReceipt] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [quickProductOpen, setQuickProductOpen] = useState(false);
+  const [quickProductInitial, setQuickProductInitial] = useState("");
+  const [branchId, setBranchId] = useState<string | null>(null);
 
   // Customer
   const [selectedCustomer, setSelectedCustomer] = useState<SelectedCustomer | null>(null);
@@ -121,7 +125,9 @@ export default function POSPage() {
       if (!product) {
         const nameMatch = products.find((p) => p.name.toLowerCase() === code || p.sku?.toLowerCase() === code);
         if (nameMatch) { addToCart(nameMatch); toast.success(`Added: ${nameMatch.name}`); return; }
-        toast.error(`Product not found: ${result.sanitized}`);
+        // Offer quick product creation
+        setQuickProductInitial(result.sanitized);
+        setQuickProductOpen(true);
         return;
       }
       if (scanMode === "quantity") {
@@ -152,9 +158,13 @@ export default function POSPage() {
     const loadProducts = async () => {
       setLoadingProducts(true);
       try {
-        const { data } = await supabase.from("products").select("*").eq("business_id", profile.business_id!).eq("is_active", true).order("name");
+        const [{ data }, { data: branches }] = await Promise.all([
+          supabase.from("products").select("*").eq("business_id", profile.business_id!).eq("is_active", true).order("name"),
+          supabase.from("branches").select("id").eq("business_id", profile.business_id!).eq("is_active", true).limit(1),
+        ]);
         const prods = data ?? [];
         setProducts(prods);
+        setBranchId(branches?.[0]?.id ?? null);
         cacheProducts(prods).catch(() => {});
       } catch {
         const cached = await getCachedProducts();
@@ -321,6 +331,17 @@ export default function POSPage() {
     >
       <LicenseBanner />
       <ReceiptPreviewDialog open={showReceipt} onOpenChange={setShowReceipt} data={receiptData} />
+      <QuickProductDialog
+        open={quickProductOpen}
+        onOpenChange={setQuickProductOpen}
+        businessId={profile?.business_id ?? ""}
+        branchId={branchId}
+        initialValue={quickProductInitial}
+        onCreated={(product) => {
+          setProducts((prev) => [...prev, product]);
+          addToCart(product);
+        }}
+      />
 
       <div className="flex flex-col md:flex-row h-full">
         {/* ═══ LEFT: Product Catalog ═══ */}
@@ -367,13 +388,27 @@ export default function POSPage() {
                 <Loader2 className="h-10 w-10 animate-spin text-muted-foreground/50" />
               </div>
             ) : viewMode === "grid" ? (
-              <ProductGrid products={filtered} onAddToCart={(p) => { addToCart(p); toast.success(`${p.name} added`); }} />
+              <>
+                <ProductGrid products={filtered} onAddToCart={(p) => { addToCart(p); toast.success(`${p.name} added`); }} />
+                {filtered.length === 0 && searchTerm && (
+                  <div className="text-center mt-2">
+                    <Button variant="outline" size="sm" onClick={() => { setQuickProductInitial(searchTerm); setQuickProductOpen(true); }}>
+                      <Plus className="h-3.5 w-3.5 mr-1.5" /> Create "{searchTerm}"
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="space-y-1">
                 {filtered.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                     <Package className="h-12 w-12 mb-4 opacity-15" />
                     <p className="text-sm font-semibold">No products found</p>
+                    {searchTerm && (
+                      <Button variant="outline" size="sm" className="mt-3" onClick={() => { setQuickProductInitial(searchTerm); setQuickProductOpen(true); }}>
+                        <Plus className="h-3.5 w-3.5 mr-1.5" /> Create "{searchTerm}"
+                      </Button>
+                    )}
                   </div>
                 ) : filtered.map((product) => (
                   <button

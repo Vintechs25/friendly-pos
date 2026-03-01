@@ -6,7 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import { Search, Plus, AlertTriangle, Loader2, Package, Pencil, Trash2 } from "lucide-react";
+import { Search, Plus, AlertTriangle, Loader2, Package, Pencil, Trash2, Upload } from "lucide-react";
+import BulkImportDialog from "@/components/inventory/BulkImportDialog";
+import { autoFillProductFields } from "@/lib/product-auto-gen";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -58,6 +60,7 @@ export default function InventoryPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [branchId, setBranchId] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   const businessId = profile?.business_id;
 
@@ -147,24 +150,53 @@ export default function InventoryPage() {
     }
     setSaving(true);
     try {
-      const productData: any = {
-        business_id: businessId,
-        name: form.name.trim(),
-        sku: form.sku.trim() || null,
-        barcode: form.barcode.trim() || null,
-        price: parseFloat(form.price) || 0,
-        cost: parseFloat(form.cost) || 0,
-        tax_rate: parseFloat(form.tax_rate) || 0,
-        category_id: form.category_id || null,
-        description: form.description.trim() || null,
-        unit: form.unit || "piece",
-        min_stock_level: parseInt(form.min_stock_level) || 10,
-        track_inventory: form.track_inventory,
-        expiry_date: form.expiry_date || null,
-        batch_number: form.batch_number.trim() || null,
-        serial_number: form.serial_number.trim() || null,
-        minimum_price: parseFloat(form.minimum_price) || 0,
-      };
+      let productData: any;
+
+      if (editingProduct) {
+        productData = {
+          business_id: businessId,
+          name: form.name.trim(),
+          sku: form.sku.trim() || null,
+          barcode: form.barcode.trim() || null,
+          price: parseFloat(form.price) || 0,
+          cost: parseFloat(form.cost) || 0,
+          tax_rate: parseFloat(form.tax_rate) || 0,
+          category_id: form.category_id || null,
+          description: form.description.trim() || null,
+          unit: form.unit || "piece",
+          min_stock_level: parseInt(form.min_stock_level) || 10,
+          track_inventory: form.track_inventory,
+          expiry_date: form.expiry_date || null,
+          batch_number: form.batch_number.trim() || null,
+          serial_number: form.serial_number.trim() || null,
+          minimum_price: parseFloat(form.minimum_price) || 0,
+        };
+      } else {
+        // Auto-fill missing fields for new products
+        const autoFilled = await autoFillProductFields(
+          {
+            name: form.name.trim(),
+            price: parseFloat(form.price) || 0,
+            sku: form.sku.trim() || null,
+            barcode: form.barcode.trim() || null,
+            category_id: form.category_id || null,
+            unit: form.unit || null,
+            cost: parseFloat(form.cost) || 0,
+            tax_rate: parseFloat(form.tax_rate) || 0,
+            min_stock_level: parseInt(form.min_stock_level) || 10,
+            initial_stock: parseInt(form.initial_stock) || 0,
+          },
+          businessId
+        );
+        productData = {
+          ...autoFilled,
+          description: form.description.trim() || null,
+          expiry_date: form.expiry_date || null,
+          batch_number: form.batch_number.trim() || null,
+          serial_number: form.serial_number.trim() || null,
+          minimum_price: parseFloat(form.minimum_price) || 0,
+        };
+      }
 
       if (editingProduct) {
         const { error } = await supabase.from("products").update(productData).eq("id", editingProduct.id);
@@ -223,9 +255,14 @@ export default function InventoryPage() {
             <h1 className="font-display text-2xl font-bold">Inventory</h1>
             <p className="text-muted-foreground text-sm mt-1">Manage your products and stock levels</p>
           </div>
-          <Button onClick={openAddDialog}>
-            <Plus className="h-4 w-4 mr-2" /> Add Product
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload className="h-4 w-4 mr-2" /> Import CSV
+            </Button>
+            <Button onClick={openAddDialog}>
+              <Plus className="h-4 w-4 mr-2" /> Add Product
+            </Button>
+          </div>
         </div>
 
         {/* Alerts */}
@@ -343,11 +380,11 @@ export default function InventoryPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>SKU</Label>
-                <Input value={form.sku} onChange={e => updateField("sku", e.target.value)} placeholder="BEV-001" />
+                <Input value={form.sku} onChange={e => updateField("sku", e.target.value)} placeholder="Auto-generated if empty" />
               </div>
               <div className="space-y-2">
                 <Label>Barcode</Label>
-                <Input value={form.barcode} onChange={e => updateField("barcode", e.target.value)} placeholder="4901234567890" />
+                <Input value={form.barcode} onChange={e => updateField("barcode", e.target.value)} placeholder="Auto-generated if empty" />
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -432,6 +469,14 @@ export default function InventoryPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <BulkImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        businessId={businessId ?? ""}
+        branchId={branchId}
+        onImported={loadData}
+      />
     </DashboardLayout>
   );
 }
