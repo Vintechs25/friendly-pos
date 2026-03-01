@@ -9,7 +9,7 @@ import { BrandingProvider } from "@/contexts/BrandingContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
+
 import DashboardPage from "./pages/DashboardPage";
 import POSPage from "./pages/POSPage";
 import InventoryPage from "./pages/InventoryPage";
@@ -30,7 +30,7 @@ import AdminBusinessesPage from "./pages/admin/AdminBusinessesPage";
 import AdminPlansPage from "./pages/admin/AdminPlansPage";
 import AdminFeaturesPage from "./pages/admin/AdminFeaturesPage";
 import AdminLicensesPage from "./pages/admin/AdminLicensesPage";
-import BusinessSetupPage from "./pages/BusinessSetupPage";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,8 +47,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />
-                <Route path="/setup-business" element={<ProtectedRoute skipBusinessCheck><BusinessSetupPage /></ProtectedRoute>} />
+                
                 <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
                 <Route path="/dashboard/pos" element={<ProtectedRoute><POSPage /></ProtectedRoute>} />
                 <Route path="/dashboard/inventory" element={<ProtectedRoute><InventoryPage /></ProtectedRoute>} />
