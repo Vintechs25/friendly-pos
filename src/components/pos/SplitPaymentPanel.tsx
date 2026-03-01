@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import MpesaPaymentDialog from "./MpesaPaymentDialog";
 
 const methodIcons: Record<PaymentMethod, React.ReactNode> = {
   cash: <Banknote className="h-4 w-4" />,
