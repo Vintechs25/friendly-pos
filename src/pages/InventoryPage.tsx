@@ -380,11 +380,11 @@ export default function InventoryPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>SKU</Label>
-                <Input value={form.sku} onChange={e => updateField("sku", e.target.value)} placeholder="BEV-001" />
+                <Input value={form.sku} onChange={e => updateField("sku", e.target.value)} placeholder="Auto-generated if empty" />
               </div>
               <div className="space-y-2">
                 <Label>Barcode</Label>
-                <Input value={form.barcode} onChange={e => updateField("barcode", e.target.value)} placeholder="4901234567890" />
+                <Input value={form.barcode} onChange={e => updateField("barcode", e.target.value)} placeholder="Auto-generated if empty" />
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
