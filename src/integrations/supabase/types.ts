@@ -102,6 +102,59 @@ export type Database = {
           },
         ]
       }
+      business_payment_configs: {
+        Row: {
+          business_id: string
+          consumer_key: string | null
+          consumer_secret: string | null
+          created_at: string
+          environment: string
+          id: string
+          is_active: boolean
+          passkey: string | null
+          payment_type: string
+          shortcode: string | null
+          till_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          consumer_key?: string | null
+          consumer_secret?: string | null
+          created_at?: string
+          environment?: string
+          id?: string
+          is_active?: boolean
+          passkey?: string | null
+          payment_type: string
+          shortcode?: string | null
+          till_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          consumer_key?: string | null
+          consumer_secret?: string | null
+          created_at?: string
+          environment?: string
+          id?: string
+          is_active?: boolean
+          passkey?: string | null
+          payment_type?: string
+          shortcode?: string | null
+          till_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_payment_configs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_settings: {
         Row: {
           allow_branding_edit: boolean | null
@@ -723,6 +776,75 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mpesa_transactions: {
+        Row: {
+          amount: number
+          business_id: string
+          checkout_request_id: string | null
+          created_at: string
+          customer_name: string | null
+          id: string
+          matched_at: string | null
+          matched_by: string | null
+          matched_sale_id: string | null
+          mpesa_receipt_number: string | null
+          phone: string | null
+          raw_callback: Json | null
+          status: string
+          transaction_id: string
+          transaction_type: string
+        }
+        Insert: {
+          amount?: number
+          business_id: string
+          checkout_request_id?: string | null
+          created_at?: string
+          customer_name?: string | null
+          id?: string
+          matched_at?: string | null
+          matched_by?: string | null
+          matched_sale_id?: string | null
+          mpesa_receipt_number?: string | null
+          phone?: string | null
+          raw_callback?: Json | null
+          status?: string
+          transaction_id: string
+          transaction_type?: string
+        }
+        Update: {
+          amount?: number
+          business_id?: string
+          checkout_request_id?: string | null
+          created_at?: string
+          customer_name?: string | null
+          id?: string
+          matched_at?: string | null
+          matched_by?: string | null
+          matched_sale_id?: string | null
+          mpesa_receipt_number?: string | null
+          phone?: string | null
+          raw_callback?: Json | null
+          status?: string
+          transaction_id?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mpesa_transactions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mpesa_transactions_matched_sale_id_fkey"
+            columns: ["matched_sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
             referencedColumns: ["id"]
           },
         ]

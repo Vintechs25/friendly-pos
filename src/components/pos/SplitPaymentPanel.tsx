@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import MpesaPaymentDialog from "./MpesaPaymentDialog";
 
 const methodIcons: Record<PaymentMethod, React.ReactNode> = {
   cash: <Banknote className="h-4 w-4" />,
@@ -56,8 +57,6 @@ export default function SplitPaymentPanel({
   customerCreditBalance = 0,
 }: SplitPaymentPanelProps) {
   const [showMpesaDialog, setShowMpesaDialog] = useState(false);
-  const [mpesaPhone, setMpesaPhone] = useState("");
-  const [mpesaLoading, setMpesaLoading] = useState(false);
   const [showGiftCardDialog, setShowGiftCardDialog] = useState(false);
   const [giftCardCode, setGiftCardCode] = useState("");
   const [giftCardBalance, setGiftCardBalance] = useState<number | null>(null);
@@ -72,44 +71,16 @@ export default function SplitPaymentPanel({
     ? Math.max(0, cashTendered - (cashEntry?.amount ?? 0))
     : 0;
 
-  const handleMpesaSTK = async () => {
-    if (!mpesaPhone) { toast.error("Enter phone number"); return; }
-    setMpesaLoading(true);
-    try {
-      const mpesaAmount = splitMode
-        ? payments.find((p) => p.method === "mobile_money")?.amount ?? total
-        : total;
-
-      const { data, error } = await supabase.functions.invoke("mpesa-stk", {
-        body: {
-          action: "stk_push",
-          phone: mpesaPhone,
-          amount: mpesaAmount,
-          account_reference: "POS Sale",
-        },
-      });
-
-      if (error) throw error;
-      if (data?.success) {
-        toast.success("STK Push sent! Check your phone to complete payment.");
-        setShowMpesaDialog(false);
-        // Store checkout_request_id as reference
-        if (!splitMode) {
-          onPaymentsChange([{ method: "mobile_money", amount: total, reference: data.checkout_request_id }]);
-        } else {
-          const updated = payments.map((p) =>
-            p.method === "mobile_money" ? { ...p, reference: data.checkout_request_id } : p
-          );
-          onPaymentsChange(updated);
-        }
-      } else {
-        toast.error(data?.error || "STK Push failed");
-      }
-    } catch (err: any) {
-      toast.error(err.message || "M-Pesa error");
-    } finally {
-      setMpesaLoading(false);
+  const handleMpesaConfirmed = (reference: string, _method: "stk_push" | "till") => {
+    if (!splitMode) {
+      onPaymentsChange([{ method: "mobile_money", amount: total, reference }]);
+    } else {
+      const updated = payments.map((p) =>
+        p.method === "mobile_money" ? { ...p, reference } : p
+      );
+      onPaymentsChange(updated);
     }
+    setShowMpesaDialog(false);
   };
 
   const lookupGiftCard = async () => {
@@ -224,15 +195,15 @@ export default function SplitPaymentPanel({
         </Button>
 
         {/* M-Pesa Dialog */}
-        <MpesaDialog
-          open={showMpesaDialog}
-          onOpenChange={setShowMpesaDialog}
-          phone={mpesaPhone}
-          onPhoneChange={setMpesaPhone}
-          loading={mpesaLoading}
-          onSubmit={handleMpesaSTK}
-          amount={total}
-        />
+        {businessId && (
+          <MpesaPaymentDialog
+            open={showMpesaDialog}
+            onOpenChange={setShowMpesaDialog}
+            amount={total}
+            businessId={businessId}
+            onPaymentConfirmed={handleMpesaConfirmed}
+          />
+        )}
 
         {/* Gift Card Dialog */}
         <GiftCardDialog
@@ -334,15 +305,15 @@ export default function SplitPaymentPanel({
       )}
 
       {/* M-Pesa Dialog */}
-      <MpesaDialog
-        open={showMpesaDialog}
-        onOpenChange={setShowMpesaDialog}
-        phone={mpesaPhone}
-        onPhoneChange={setMpesaPhone}
-        loading={mpesaLoading}
-        onSubmit={handleMpesaSTK}
-        amount={payments.find((p) => p.method === "mobile_money")?.amount ?? remaining}
-      />
+      {businessId && (
+        <MpesaPaymentDialog
+          open={showMpesaDialog}
+          onOpenChange={setShowMpesaDialog}
+          amount={payments.find((p) => p.method === "mobile_money")?.amount ?? remaining}
+          businessId={businessId}
+          onPaymentConfirmed={handleMpesaConfirmed}
+        />
+      )}
 
       {/* Gift Card Dialog */}
       <GiftCardDialog
@@ -356,54 +327,6 @@ export default function SplitPaymentPanel({
         onApply={applyGiftCard}
       />
     </div>
-  );
-}
-
-// M-Pesa STK Push Dialog
-function MpesaDialog({
-  open, onOpenChange, phone, onPhoneChange, loading, onSubmit, amount,
-}: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  phone: string;
-  onPhoneChange: (v: string) => void;
-  loading: boolean;
-  onSubmit: () => void;
-  amount: number;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Smartphone className="h-5 w-5" /> M-Pesa Payment
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3 py-2">
-          <div className="rounded-lg bg-success/10 border border-success/20 p-3 text-center">
-            <p className="text-xs text-muted-foreground">Amount</p>
-            <p className="text-2xl font-bold text-success">KSh {amount.toFixed(2)}</p>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Customer Phone Number</Label>
-            <Input
-              value={phone}
-              onChange={(e) => onPhoneChange(e.target.value)}
-              placeholder="0712345678 or 254712345678"
-              className="h-9"
-            />
-            <p className="text-[10px] text-muted-foreground">An STK Push will be sent to this number</p>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={onSubmit} disabled={loading} className="bg-success hover:bg-success/90 text-success-foreground">
-            {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Smartphone className="h-4 w-4 mr-2" />}
-            Send STK Push
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }
 
