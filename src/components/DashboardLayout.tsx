@@ -81,15 +81,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { isPermissionAllowedByFeature, isRouteAllowedByFeature } = useFeatureToggles();
   const posOnly = isPosOnlyUser(roles);
 
-  const visibleNavItems = navItems.filter((item) => {
-    // Check RBAC permission
+  const permFiltered = navItems.filter((item) => {
     if (item.permission && !can(item.permission)) return false;
-    // Check feature toggle by permission
     if (item.permission && !isPermissionAllowedByFeature(item.permission)) return false;
-    // Check feature toggle by route
     if (!isRouteAllowedByFeature(item.path)) return false;
     return true;
   });
+
+  // Apply role-based filtering on top of permission filtering
+  const visibleNavItems = filterNavItemsByRole(permFiltered, roles);
 
   // Group items
   const groups = ["Main", "Sales", "Stock", "Admin"];
