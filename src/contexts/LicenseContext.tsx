@@ -4,9 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   LicenseValidation,
   LicenseState,
-  validateLicense,
-  startPeriodicValidation,
-  stopPeriodicValidation,
   clearLicenseState,
 } from "@/lib/license-manager";
 import { Shield, ShieldAlert, ShieldOff, WifiOff, Lock } from "lucide-react";
