@@ -564,6 +564,10 @@ export type Database = {
         | "branch_manager"
         | "cashier"
         | "auditor"
+        | "super_admin"
+        | "manager"
+        | "waiter"
+        | "inventory_officer"
       payment_method:
         | "cash"
         | "card"
@@ -706,6 +710,10 @@ export const Constants = {
         "branch_manager",
         "cashier",
         "auditor",
+        "super_admin",
+        "manager",
+        "waiter",
+        "inventory_officer",
       ],
       payment_method: [
         "cash",
