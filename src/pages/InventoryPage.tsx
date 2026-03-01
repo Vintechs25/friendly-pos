@@ -255,9 +255,14 @@ export default function InventoryPage() {
             <h1 className="font-display text-2xl font-bold">Inventory</h1>
             <p className="text-muted-foreground text-sm mt-1">Manage your products and stock levels</p>
           </div>
-          <Button onClick={openAddDialog}>
-            <Plus className="h-4 w-4 mr-2" /> Add Product
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload className="h-4 w-4 mr-2" /> Import CSV
+            </Button>
+            <Button onClick={openAddDialog}>
+              <Plus className="h-4 w-4 mr-2" /> Add Product
+            </Button>
+          </div>
         </div>
 
         {/* Alerts */}
