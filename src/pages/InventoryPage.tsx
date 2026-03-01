@@ -150,24 +150,53 @@ export default function InventoryPage() {
     }
     setSaving(true);
     try {
-      const productData: any = {
-        business_id: businessId,
-        name: form.name.trim(),
-        sku: form.sku.trim() || null,
-        barcode: form.barcode.trim() || null,
-        price: parseFloat(form.price) || 0,
-        cost: parseFloat(form.cost) || 0,
-        tax_rate: parseFloat(form.tax_rate) || 0,
-        category_id: form.category_id || null,
-        description: form.description.trim() || null,
-        unit: form.unit || "piece",
-        min_stock_level: parseInt(form.min_stock_level) || 10,
-        track_inventory: form.track_inventory,
-        expiry_date: form.expiry_date || null,
-        batch_number: form.batch_number.trim() || null,
-        serial_number: form.serial_number.trim() || null,
-        minimum_price: parseFloat(form.minimum_price) || 0,
-      };
+      let productData: any;
+
+      if (editingProduct) {
+        productData = {
+          business_id: businessId,
+          name: form.name.trim(),
+          sku: form.sku.trim() || null,
+          barcode: form.barcode.trim() || null,
+          price: parseFloat(form.price) || 0,
+          cost: parseFloat(form.cost) || 0,
+          tax_rate: parseFloat(form.tax_rate) || 0,
+          category_id: form.category_id || null,
+          description: form.description.trim() || null,
+          unit: form.unit || "piece",
+          min_stock_level: parseInt(form.min_stock_level) || 10,
+          track_inventory: form.track_inventory,
+          expiry_date: form.expiry_date || null,
+          batch_number: form.batch_number.trim() || null,
+          serial_number: form.serial_number.trim() || null,
+          minimum_price: parseFloat(form.minimum_price) || 0,
+        };
+      } else {
+        // Auto-fill missing fields for new products
+        const autoFilled = await autoFillProductFields(
+          {
+            name: form.name.trim(),
+            price: parseFloat(form.price) || 0,
+            sku: form.sku.trim() || null,
+            barcode: form.barcode.trim() || null,
+            category_id: form.category_id || null,
+            unit: form.unit || null,
+            cost: parseFloat(form.cost) || 0,
+            tax_rate: parseFloat(form.tax_rate) || 0,
+            min_stock_level: parseInt(form.min_stock_level) || 10,
+            initial_stock: parseInt(form.initial_stock) || 0,
+          },
+          businessId
+        );
+        productData = {
+          ...autoFilled,
+          description: form.description.trim() || null,
+          expiry_date: form.expiry_date || null,
+          batch_number: form.batch_number.trim() || null,
+          serial_number: form.serial_number.trim() || null,
+          minimum_price: parseFloat(form.minimum_price) || 0,
+        };
+      }
 
       if (editingProduct) {
         const { error } = await supabase.from("products").update(productData).eq("id", editingProduct.id);
