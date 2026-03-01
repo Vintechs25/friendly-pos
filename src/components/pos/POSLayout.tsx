@@ -121,8 +121,13 @@ export default function POSLayout({
           </button>
         </div>
 
-        {/* Right: Status + Cashier + Clock */}
+        {/* Right: Device Status + Connection + Cashier + Clock */}
         <div className="flex items-center gap-3">
+          {/* Device status indicators */}
+          {deviceStatuses && (
+            <DeviceStatusIndicators statuses={deviceStatuses} compact />
+          )}
+
           {/* Connection status */}
           <div className="flex items-center gap-1.5">
             {isOnline ? (
