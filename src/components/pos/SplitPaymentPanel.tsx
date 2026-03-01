@@ -197,15 +197,15 @@ export default function SplitPaymentPanel({
         </Button>
 
         {/* M-Pesa Dialog */}
-        <MpesaDialog
-          open={showMpesaDialog}
-          onOpenChange={setShowMpesaDialog}
-          phone={mpesaPhone}
-          onPhoneChange={setMpesaPhone}
-          loading={mpesaLoading}
-          onSubmit={handleMpesaSTK}
-          amount={total}
-        />
+        {businessId && (
+          <MpesaPaymentDialog
+            open={showMpesaDialog}
+            onOpenChange={setShowMpesaDialog}
+            amount={total}
+            businessId={businessId}
+            onPaymentConfirmed={handleMpesaConfirmed}
+          />
+        )}
 
         {/* Gift Card Dialog */}
         <GiftCardDialog
