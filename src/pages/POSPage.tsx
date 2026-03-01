@@ -331,6 +331,17 @@ export default function POSPage() {
     >
       <LicenseBanner />
       <ReceiptPreviewDialog open={showReceipt} onOpenChange={setShowReceipt} data={receiptData} />
+      <QuickProductDialog
+        open={quickProductOpen}
+        onOpenChange={setQuickProductOpen}
+        businessId={profile?.business_id ?? ""}
+        branchId={branchId}
+        initialValue={quickProductInitial}
+        onCreated={(product) => {
+          setProducts((prev) => [...prev, product]);
+          addToCart(product);
+        }}
+      />
 
       <div className="flex flex-col md:flex-row h-full">
         {/* ═══ LEFT: Product Catalog ═══ */}
