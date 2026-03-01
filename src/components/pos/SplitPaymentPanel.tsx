@@ -73,44 +73,16 @@ export default function SplitPaymentPanel({
     ? Math.max(0, cashTendered - (cashEntry?.amount ?? 0))
     : 0;
 
-  const handleMpesaSTK = async () => {
-    if (!mpesaPhone) { toast.error("Enter phone number"); return; }
-    setMpesaLoading(true);
-    try {
-      const mpesaAmount = splitMode
-        ? payments.find((p) => p.method === "mobile_money")?.amount ?? total
-        : total;
-
-      const { data, error } = await supabase.functions.invoke("mpesa-stk", {
-        body: {
-          action: "stk_push",
-          phone: mpesaPhone,
-          amount: mpesaAmount,
-          account_reference: "POS Sale",
-        },
-      });
-
-      if (error) throw error;
-      if (data?.success) {
-        toast.success("STK Push sent! Check your phone to complete payment.");
-        setShowMpesaDialog(false);
-        // Store checkout_request_id as reference
-        if (!splitMode) {
-          onPaymentsChange([{ method: "mobile_money", amount: total, reference: data.checkout_request_id }]);
-        } else {
-          const updated = payments.map((p) =>
-            p.method === "mobile_money" ? { ...p, reference: data.checkout_request_id } : p
-          );
-          onPaymentsChange(updated);
-        }
-      } else {
-        toast.error(data?.error || "STK Push failed");
-      }
-    } catch (err: any) {
-      toast.error(err.message || "M-Pesa error");
-    } finally {
-      setMpesaLoading(false);
+  const handleMpesaConfirmed = (reference: string, _method: "stk_push" | "till") => {
+    if (!splitMode) {
+      onPaymentsChange([{ method: "mobile_money", amount: total, reference }]);
+    } else {
+      const updated = payments.map((p) =>
+        p.method === "mobile_money" ? { ...p, reference } : p
+      );
+      onPaymentsChange(updated);
     }
+    setShowMpesaDialog(false);
   };
 
   const lookupGiftCard = async () => {
