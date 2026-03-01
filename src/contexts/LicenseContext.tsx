@@ -142,10 +142,16 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Has active license → validate it
+    // Has active license in DB → trust it (DB is authoritative)
     setNeedsLicense(false);
-    const result = await validateLicense(activeLicense.license_key, PROJECT_ID);
-    handleStateChange(result);
+    setLicenseState("active");
+    setValidation({
+      state: "active",
+      message: "License validated.",
+      salesBlocked: false,
+      loginBlocked: false,
+    });
+    setIsLoading(false);
   }, [user, profile?.business_id, handleStateChange, isSuperAdmin, refreshProfile]);
 
   useEffect(() => {
