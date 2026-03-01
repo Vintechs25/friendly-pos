@@ -158,9 +158,13 @@ export default function POSPage() {
     const loadProducts = async () => {
       setLoadingProducts(true);
       try {
-        const { data } = await supabase.from("products").select("*").eq("business_id", profile.business_id!).eq("is_active", true).order("name");
+        const [{ data }, { data: branches }] = await Promise.all([
+          supabase.from("products").select("*").eq("business_id", profile.business_id!).eq("is_active", true).order("name"),
+          supabase.from("branches").select("id").eq("business_id", profile.business_id!).eq("is_active", true).limit(1),
+        ]);
         const prods = data ?? [];
         setProducts(prods);
+        setBranchId(branches?.[0]?.id ?? null);
         cacheProducts(prods).catch(() => {});
       } catch {
         const cached = await getCachedProducts();
