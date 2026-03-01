@@ -129,7 +129,7 @@ export async function clearSyncedSales(): Promise<void> {
     const tx = db.transaction("pending_sales", "readwrite");
     const store = tx.objectStore("pending_sales");
     const index = store.index("synced");
-    const request = index.openCursor(true);
+    const request = index.openCursor(IDBKeyRange.only(1));
     request.onsuccess = () => {
       const cursor = request.result;
       if (cursor) {
