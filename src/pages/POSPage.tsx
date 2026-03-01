@@ -266,7 +266,10 @@ export default function POSPage() {
       const paymentEntries = splitMode ? payments.filter((p) => p.amount > 0).map((p) => ({ method: p.method === "mobile_money" ? "mpesa" : p.method, amount: p.amount, reference: p.reference || null })) : [{ method: ((payments[0]?.method === "mobile_money" ? "mpesa" : payments[0]?.method) ?? "cash"), amount: total, reference: payments[0]?.reference || null }];
 
       if (isOnline && branch) {
-        const { data: sale, error: saleError } = await supabase.from("sales").insert({ business_id: profile.business_id, branch_id: branch.id, cashier_id: user.id, receipt_number: receiptNumber, subtotal: itemsSubtotal, tax_amount: taxAmount, discount_amount: cartDiscountAmount + loyaltyDiscount, total, payment_method: primaryMethod, status: "completed", customer_id: selectedCustomer?.id ?? null, customer_name: selectedCustomer?.name ?? null }).select().single();
+        const salePayload: Record<string, any> = { business_id: profile.business_id, branch_id: branch.id, cashier_id: user.id, receipt_number: receiptNumber, subtotal: itemsSubtotal, tax_amount: taxAmount, discount_amount: cartDiscountAmount + loyaltyDiscount, total, payment_method: primaryMethod, status: "completed" };
+        if (selectedCustomer?.id) salePayload.customer_id = selectedCustomer.id;
+        if (selectedCustomer?.name) salePayload.customer_name = selectedCustomer.name;
+        const { data: sale, error: saleError } = await supabase.from("sales").insert(salePayload as any).select().single();
         if (saleError) { toast.error("Failed: " + saleError.message); return; }
         await supabase.from("sale_items").insert(saleItems.map((si) => ({ ...si, sale_id: sale.id })));
         await supabase.from("payments").insert(paymentEntries.map((p) => ({ sale_id: sale.id, business_id: profile!.business_id!, method: p.method as any, amount: p.amount, reference: p.reference, payment_status: "confirmed" as any })));
