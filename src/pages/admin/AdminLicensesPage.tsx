@@ -146,7 +146,7 @@ export default function AdminLicensesPage() {
   }
 
   async function deactivateDevice(deviceId: string) {
-    await supabase.from("device_registrations").update({ is_active: false }).eq("id", deviceId);
+    await supabase.from("device_registrations").delete().eq("id", deviceId);
     if (selectedLicense) loadDevices(selectedLicense.id);
     toast({ title: "Device deactivated" });
   }
