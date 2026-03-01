@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { toast } from "sonner";
 import { User, Lock, Building2, AlertTriangle, Shield } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import PaymentConfigCard from "@/components/settings/PaymentConfigCard";
 
 export default function SettingsPage() {
   const { user, profile, session, hasRole } = useAuth();
