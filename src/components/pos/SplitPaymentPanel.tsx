@@ -6,6 +6,7 @@ import {
   Banknote, CreditCard, Smartphone, Plus, Trash2, Calculator,
   Wallet, Gift, Search, Loader2,
 } from "lucide-react";
+import NumericKeypad from "./NumericKeypad";
 import { PaymentEntry, PaymentMethod } from "./types";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
