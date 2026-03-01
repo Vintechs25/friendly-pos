@@ -37,7 +37,6 @@ export default function BusinessSetupPage() {
           phone: form.phone || null,
           email: form.email || null,
           address: form.address || null,
-          owner_id: user.id,
         })
         .select()
         .single();
