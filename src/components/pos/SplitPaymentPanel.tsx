@@ -326,22 +326,11 @@ export default function SplitPaymentPanel({
       </Button>
 
       {hasCash && (
-        <div className="space-y-1">
-          <Label className="text-xs">Cash Tendered</Label>
-          <Input
-            type="number"
-            value={cashTendered || ""}
-            onChange={(e) => onCashTenderedChange(parseFloat(e.target.value) || 0)}
-            className="h-7"
-            min="0"
-            step="0.01"
-          />
-          {changeAmount > 0 && (
-            <p className="text-xs font-semibold text-green-600">
-              Change: KSh {changeAmount.toFixed(2)}
-            </p>
-          )}
-        </div>
+        <NumericKeypad
+          value={cashTendered}
+          onChange={onCashTenderedChange}
+          total={cashEntry?.amount ?? total}
+        />
       )}
 
       {/* M-Pesa Dialog */}
