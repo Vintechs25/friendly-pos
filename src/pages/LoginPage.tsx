@@ -13,8 +13,15 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { signIn } = useAuth();
+  const { signIn, session, roles, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+
+  // If already logged in, redirect based on role
+  useEffect(() => {
+    if (session && !authLoading && roles.length > 0) {
+      navigate(getLoginRedirect(roles), { replace: true });
+    }
+  }, [session, authLoading, roles, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
