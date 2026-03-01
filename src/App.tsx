@@ -9,7 +9,7 @@ import { BrandingProvider } from "@/contexts/BrandingContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
+
 import DashboardPage from "./pages/DashboardPage";
 import POSPage from "./pages/POSPage";
 import InventoryPage from "./pages/InventoryPage";
