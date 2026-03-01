@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -18,6 +20,12 @@ import {
   Key,
   Copy,
   Loader2,
+  MoreHorizontal,
+  Trash2,
+  CalendarPlus,
+  Ban,
+  Settings2,
+  RotateCcw,
 } from "lucide-react";
 
 interface License {
@@ -59,6 +67,17 @@ export default function AdminLicensesPage() {
     expires_days: "365",
   });
 
+  // Delete confirmation
+  const [deleteTarget, setDeleteTarget] = useState<License | null>(null);
+  // Extend dialog
+  const [extendTarget, setExtendTarget] = useState<License | null>(null);
+  const [extendDays, setExtendDays] = useState("30");
+  // Edit settings dialog
+  const [editTarget, setEditTarget] = useState<License | null>(null);
+  const [editDeviceCount, setEditDeviceCount] = useState("2");
+  const [editGracePeriod, setEditGracePeriod] = useState("72");
+  const [editPlan, setEditPlan] = useState("starter");
+
   useEffect(() => {
     loadData();
   }, []);
@@ -87,7 +106,7 @@ export default function AdminLicensesPage() {
     setGenerating(true);
     try {
       const expiresAt = new Date(Date.now() + parseInt(genForm.expires_days) * 86400000).toISOString();
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || "vzerzgmywwhvcgkezkhh";
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const res = await fetch(
         `https://${projectId}.supabase.co/functions/v1/license-server?action=generate`,
         {
@@ -122,7 +141,7 @@ export default function AdminLicensesPage() {
 
   async function toggleSuspend(license: License) {
     const action = license.status === "suspended" ? "reactivate" : "suspend";
-    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || "vzerzgmywwhvcgkezkhh";
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
     try {
       const res = await fetch(
         `https://${projectId}.supabase.co/functions/v1/license-server?action=${action}`,
@@ -145,10 +164,80 @@ export default function AdminLicensesPage() {
     }
   }
 
+  async function deleteLicense(license: License) {
+    // Delete device registrations first, then the license
+    await supabase.from("device_registrations").delete().eq("license_id", license.id);
+    const { error } = await supabase.from("licenses").delete().eq("id", license.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Deleted", description: `License for ${(license as any).businesses?.name || "business"} deleted.` });
+      loadData();
+    }
+    setDeleteTarget(null);
+  }
+
+  async function extendLicense() {
+    if (!extendTarget) return;
+    const currentExpiry = new Date(extendTarget.expires_at);
+    const newExpiry = new Date(currentExpiry.getTime() + parseInt(extendDays) * 86400000);
+    const { error } = await supabase
+      .from("licenses")
+      .update({ expires_at: newExpiry.toISOString(), updated_at: new Date().toISOString() })
+      .eq("id", extendTarget.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Extended", description: `License extended to ${newExpiry.toLocaleDateString()}` });
+      loadData();
+    }
+    setExtendTarget(null);
+  }
+
+  async function terminateLicense(license: License) {
+    const { error } = await supabase
+      .from("licenses")
+      .update({ status: "terminated", updated_at: new Date().toISOString() })
+      .eq("id", license.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Terminated", description: "License permanently terminated." });
+      loadData();
+    }
+  }
+
+  async function saveEditSettings() {
+    if (!editTarget) return;
+    const { error } = await supabase
+      .from("licenses")
+      .update({
+        allowed_device_count: parseInt(editDeviceCount),
+        grace_period_hours: parseInt(editGracePeriod),
+        subscription_plan: editPlan,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", editTarget.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Updated", description: "License settings updated." });
+      loadData();
+    }
+    setEditTarget(null);
+  }
+
   async function deactivateDevice(deviceId: string) {
     await supabase.from("device_registrations").delete().eq("id", deviceId);
     if (selectedLicense) loadDevices(selectedLicense.id);
     toast({ title: "Device deactivated" });
+  }
+
+  function openEditDialog(lic: License) {
+    setEditDeviceCount(String(lic.allowed_device_count));
+    setEditGracePeriod(String(lic.grace_period_hours));
+    setEditPlan(lic.subscription_plan);
+    setEditTarget(lic);
   }
 
   const statusColor: Record<string, string> = {
@@ -282,17 +371,54 @@ export default function AdminLicensesPage() {
                         {lic.last_validated_at ? new Date(lic.last_validated_at).toLocaleString() : "Never"}
                       </td>
                       <td className="p-4 text-right">
-                        <Button
-                          variant={lic.status === "suspended" ? "default" : "destructive"}
-                          size="sm"
-                          onClick={() => toggleSuspend(lic)}
-                        >
-                          {lic.status === "suspended" ? (
-                            <><Shield className="h-3 w-3 mr-1" /> Reactivate</>
-                          ) : (
-                            <><ShieldOff className="h-3 w-3 mr-1" /> Suspend</>
-                          )}
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={() => toggleSuspend(lic)}>
+                              {lic.status === "suspended" ? (
+                                <><Shield className="h-4 w-4 mr-2" /> Reactivate</>
+                              ) : (
+                                <><ShieldOff className="h-4 w-4 mr-2" /> Suspend</>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => { setExtendDays("30"); setExtendTarget(lic); }}>
+                              <CalendarPlus className="h-4 w-4 mr-2" /> Extend Expiry
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openEditDialog(lic)}>
+                              <Settings2 className="h-4 w-4 mr-2" /> Edit Settings
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(lic.license_key); toast({ title: "Key copied!" }); }}>
+                              <Copy className="h-4 w-4 mr-2" /> Copy Full Key
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => { setSelectedLicense(lic); loadDevices(lic.id); }}>
+                              <Monitor className="h-4 w-4 mr-2" /> View Devices
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {lic.status !== "terminated" && (
+                              <DropdownMenuItem
+                                className="text-orange-600 focus:text-orange-600"
+                                onClick={() => terminateLicense(lic)}
+                              >
+                                <Ban className="h-4 w-4 mr-2" /> Terminate
+                              </DropdownMenuItem>
+                            )}
+                            {lic.status === "terminated" && (
+                              <DropdownMenuItem onClick={() => toggleSuspend({ ...lic, status: "suspended" })}>
+                                <RotateCcw className="h-4 w-4 mr-2" /> Reactivate
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => setDeleteTarget(lic)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" /> Delete License
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </td>
                     </tr>
                   ))}
@@ -308,6 +434,87 @@ export default function AdminLicensesPage() {
             </div>
           </div>
         )}
+
+        {/* Delete Confirmation */}
+        <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete License</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete the license for <strong>{(deleteTarget as any)?.businesses?.name || "this business"}</strong> and all its device registrations. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => deleteTarget && deleteLicense(deleteTarget)}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Extend Expiry Dialog */}
+        <Dialog open={!!extendTarget} onOpenChange={(o) => !o && setExtendTarget(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Extend License Expiry</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <p className="text-sm text-muted-foreground">
+                Current expiry: <strong>{extendTarget ? new Date(extendTarget.expires_at).toLocaleDateString() : ""}</strong>
+              </p>
+              <div>
+                <Label>Add Days</Label>
+                <Input type="number" value={extendDays} onChange={(e) => setExtendDays(e.target.value)} min="1" />
+              </div>
+              {extendTarget && (
+                <p className="text-sm text-muted-foreground">
+                  New expiry: <strong>{new Date(new Date(extendTarget.expires_at).getTime() + parseInt(extendDays || "0") * 86400000).toLocaleDateString()}</strong>
+                </p>
+              )}
+              <Button className="w-full" onClick={extendLicense}>
+                <CalendarPlus className="h-4 w-4 mr-1" /> Extend License
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Settings Dialog */}
+        <Dialog open={!!editTarget} onOpenChange={(o) => !o && setEditTarget(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Edit License Settings</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <div>
+                <Label>Subscription Plan</Label>
+                <Select value={editPlan} onValueChange={setEditPlan}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="trial">Trial</SelectItem>
+                    <SelectItem value="starter">Starter</SelectItem>
+                    <SelectItem value="professional">Professional</SelectItem>
+                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Max Devices</Label>
+                <Input type="number" value={editDeviceCount} onChange={(e) => setEditDeviceCount(e.target.value)} min="1" />
+              </div>
+              <div>
+                <Label>Grace Period (hours)</Label>
+                <Input type="number" value={editGracePeriod} onChange={(e) => setEditGracePeriod(e.target.value)} min="0" />
+              </div>
+              <Button className="w-full" onClick={saveEditSettings}>
+                <Settings2 className="h-4 w-4 mr-1" /> Save Changes
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Devices Dialog */}
         <Dialog open={!!selectedLicense} onOpenChange={(o) => !o && setSelectedLicense(null)}>
