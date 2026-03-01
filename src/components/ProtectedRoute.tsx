@@ -7,10 +7,11 @@ import LicenseGate from "@/components/LicenseGate";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: string;
+  skipBusinessCheck?: boolean;
 }
 
-export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const { session, loading, hasRole } = useAuth();
+export default function ProtectedRoute({ children, requiredRole, skipBusinessCheck }: ProtectedRouteProps) {
+  const { session, profile, loading, hasRole } = useAuth();
   const { isLoading: licenseLoading, needsLicense, canLogin } = useLicense();
   const { isRouteAllowedByFeature, isLoading: featureLoading } = useFeatureToggles();
   const location = useLocation();
@@ -25,6 +26,17 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
 
   if (!session) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Redirect to business setup if no business_id (except for admin routes and setup page itself)
+  if (
+    !skipBusinessCheck &&
+    !requiredRole &&
+    profile &&
+    !profile.business_id &&
+    location.pathname !== "/setup-business"
+  ) {
+    return <Navigate to="/setup-business" replace />;
   }
 
   if (requiredRole && !hasRole(requiredRole as any)) {
