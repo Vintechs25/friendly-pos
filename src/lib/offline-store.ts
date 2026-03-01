@@ -72,9 +72,11 @@ function openDB(): Promise<IDBDatabase> {
 
 export async function savePendingSale(sale: OfflineSale): Promise<void> {
   const db = await openDB();
+  // Store synced as 0/1 integer for IDB indexing
+  const record = { ...sale, synced: sale.synced ? 1 : 0 };
   return new Promise((resolve, reject) => {
     const tx = db.transaction("pending_sales", "readwrite");
-    tx.objectStore("pending_sales").put(sale);
+    tx.objectStore("pending_sales").put(record);
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
