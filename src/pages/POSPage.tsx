@@ -65,6 +65,9 @@ export default function POSPage() {
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
   const [showReceipt, setShowReceipt] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [quickProductOpen, setQuickProductOpen] = useState(false);
+  const [quickProductInitial, setQuickProductInitial] = useState("");
+  const [branchId, setBranchId] = useState<string | null>(null);
 
   // Customer
   const [selectedCustomer, setSelectedCustomer] = useState<SelectedCustomer | null>(null);
