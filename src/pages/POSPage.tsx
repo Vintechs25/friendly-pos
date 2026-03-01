@@ -125,7 +125,9 @@ export default function POSPage() {
       if (!product) {
         const nameMatch = products.find((p) => p.name.toLowerCase() === code || p.sku?.toLowerCase() === code);
         if (nameMatch) { addToCart(nameMatch); toast.success(`Added: ${nameMatch.name}`); return; }
-        toast.error(`Product not found: ${result.sanitized}`);
+        // Offer quick product creation
+        setQuickProductInitial(result.sanitized);
+        setQuickProductOpen(true);
         return;
       }
       if (scanMode === "quantity") {
