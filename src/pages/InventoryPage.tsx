@@ -78,6 +78,7 @@ export default function InventoryPage() {
 
     const bid = branchRes.data?.[0]?.id ?? null;
     setBranchId(bid);
+    branchIdRef.current = bid;
     setCategories(catRes.data ?? []);
 
     if (!bid || !prodRes.data) {
