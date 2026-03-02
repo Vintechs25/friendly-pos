@@ -200,6 +200,8 @@ export default function InventoryPage() {
         };
       }
 
+      const currentBranchId = branchIdRef.current;
+
       if (editingProduct) {
         const { error } = await supabase.from("products").update(productData).eq("id", editingProduct.id);
         if (error) { toast.error(error.message); return; }
@@ -209,14 +211,14 @@ export default function InventoryPage() {
         await supabase.from("products").update({ stock_quantity: newQty }).eq("id", editingProduct.id);
 
         // Update inventory stock if changed
-        if (branchId) {
+        if (currentBranchId) {
           const { data: inv } = await supabase
-            .from("inventory").select("id").eq("product_id", editingProduct.id).eq("branch_id", branchId).maybeSingle();
+            .from("inventory").select("id").eq("product_id", editingProduct.id).eq("branch_id", currentBranchId).maybeSingle();
           if (inv) {
             const { error: invErr } = await supabase.from("inventory").update({ quantity: newQty, reorder_level: productData.min_stock_level }).eq("id", inv.id);
             if (invErr) console.error("Inventory update error:", invErr);
           } else {
-            const { error: invErr } = await supabase.from("inventory").insert({ product_id: editingProduct.id, branch_id: branchId, quantity: newQty, reorder_level: productData.min_stock_level });
+            const { error: invErr } = await supabase.from("inventory").insert({ product_id: editingProduct.id, branch_id: currentBranchId, quantity: newQty, reorder_level: productData.min_stock_level });
             if (invErr) console.error("Inventory insert error:", invErr);
           }
         }
@@ -226,7 +228,7 @@ export default function InventoryPage() {
         if (error) { toast.error(error.message); return; }
 
         // Create inventory record
-        if (branchId && form.track_inventory) {
+        if (currentBranchId && form.track_inventory) {
           await supabase.from("inventory").insert({
             product_id: newProduct.id, branch_id: branchId,
             quantity: parseInt(form.initial_stock) || 0,
