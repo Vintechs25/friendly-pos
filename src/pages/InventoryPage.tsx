@@ -202,28 +202,28 @@ export default function InventoryPage() {
         };
       }
 
-      const currentBranchId = branchIdRef.current;
+      // Fetch branch directly to avoid stale state
+      const { data: branchData } = await supabase.from("branches").select("id").eq("business_id", businessId).eq("is_active", true).limit(1).single();
+      const activeBranchId = branchData?.id ?? null;
 
       if (editingProduct) {
-        const { error } = await supabase.from("products").update(productData).eq("id", editingProduct.id);
-        if (error) { toast.error(error.message); return; }
-
-        // Also sync stock_quantity on the product itself
         const newQty = parseInt(form.initial_stock) || 0;
-        await supabase.from("products").update({ stock_quantity: newQty }).eq("id", editingProduct.id);
 
-        // Update inventory stock if changed
-        if (currentBranchId) {
+        // Update inventory FIRST (before product update triggers realtime)
+        if (activeBranchId) {
           const { data: inv } = await supabase
-            .from("inventory").select("id").eq("product_id", editingProduct.id).eq("branch_id", currentBranchId).maybeSingle();
+            .from("inventory").select("id").eq("product_id", editingProduct.id).eq("branch_id", activeBranchId).maybeSingle();
           if (inv) {
-            const { error: invErr } = await supabase.from("inventory").update({ quantity: newQty, reorder_level: productData.min_stock_level }).eq("id", inv.id);
-            if (invErr) console.error("Inventory update error:", invErr);
+            await supabase.from("inventory").update({ quantity: newQty, reorder_level: productData.min_stock_level }).eq("id", inv.id);
           } else {
-            const { error: invErr } = await supabase.from("inventory").insert({ product_id: editingProduct.id, branch_id: currentBranchId, quantity: newQty, reorder_level: productData.min_stock_level });
-            if (invErr) console.error("Inventory insert error:", invErr);
+            await supabase.from("inventory").insert({ product_id: editingProduct.id, branch_id: activeBranchId, quantity: newQty, reorder_level: productData.min_stock_level });
           }
         }
+
+        // Now update product (triggers realtime reload)
+        const { error } = await supabase.from("products").update({ ...productData, stock_quantity: newQty }).eq("id", editingProduct.id);
+        if (error) { toast.error(error.message); return; }
+
         toast.success("Product updated");
       } else {
         const { data: newProduct, error } = await supabase.from("products").insert(productData).select().single();
