@@ -152,6 +152,7 @@ export default function InventoryPage() {
       return;
     }
     setSaving(true);
+    savingRef.current = true;
     try {
       let productData: any;
 
