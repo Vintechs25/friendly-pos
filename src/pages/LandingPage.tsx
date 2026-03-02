@@ -95,6 +95,7 @@ const stats = [
 ];
 
 export default function LandingPage() {
+  // Landing page component
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}
