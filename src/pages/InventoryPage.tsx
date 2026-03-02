@@ -240,11 +240,13 @@ export default function InventoryPage() {
         toast.success("Product added");
       }
       setDialogOpen(false);
+      savingRef.current = false;
       loadData();
     } catch (err: any) {
       toast.error(err.message);
     } finally {
       setSaving(false);
+      savingRef.current = false;
     }
   };
 
