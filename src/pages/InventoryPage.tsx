@@ -58,6 +58,7 @@ export default function InventoryPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
   const [form, setForm] = useState(emptyForm);
   const [branchId, setBranchId] = useState<string | null>(null);
   const branchIdRef = useRef<string | null>(null);
