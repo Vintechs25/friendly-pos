@@ -230,9 +230,9 @@ export default function InventoryPage() {
         if (error) { toast.error(error.message); return; }
 
         // Create inventory record
-        if (currentBranchId && form.track_inventory) {
+        if (activeBranchId && form.track_inventory) {
           await supabase.from("inventory").insert({
-            product_id: newProduct.id, branch_id: currentBranchId!,
+            product_id: newProduct.id, branch_id: activeBranchId,
             quantity: parseInt(form.initial_stock) || 0,
             reorder_level: productData.min_stock_level,
           });
