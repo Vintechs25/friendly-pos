@@ -43,7 +43,7 @@ export default function POSLayout({
 }: POSLayoutProps) {
   const [time, setTime] = useState(new Date());
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { profile, signOut } = useAuth();
   const { branding } = useBranding();
 
   useEffect(() => {
