@@ -166,6 +166,15 @@ export default function POSLayout({
             <Clock className="h-3 w-3" />
             {time.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit", hour12: true })}
           </div>
+
+          {/* Logout */}
+          <button
+            onClick={signOut}
+            className="flex items-center justify-center h-7 w-7 rounded-md hover:bg-destructive/20 text-sidebar-foreground/60 hover:text-destructive transition-colors"
+            title="Logout"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </button>
         </div>
       </header>
 
