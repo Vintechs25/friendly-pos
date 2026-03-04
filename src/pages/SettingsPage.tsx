@@ -261,6 +261,49 @@ export default function SettingsPage() {
           </Card>
         </div>
 
+        {/* Manager PIN - visible to owners & managers */}
+        {canSetPin && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <KeyRound className="h-5 w-5" /> Manager PIN
+              </CardTitle>
+              <CardDescription>
+                {hasExistingPin
+                  ? "Update your PIN used for authorizing sensitive actions (refunds, price overrides, hardware changes)."
+                  : "Set a PIN to authorize sensitive actions like refunds, price overrides, and hardware changes."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 max-w-md">
+              <div className="space-y-2">
+                <Label>New PIN (4–8 digits)</Label>
+                <Input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={8}
+                  value={newPin}
+                  onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
+                  placeholder="Enter new PIN"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Confirm PIN</Label>
+                <Input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={8}
+                  value={confirmPin}
+                  onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
+                  placeholder="Re-enter PIN"
+                />
+              </div>
+              <Button onClick={handleSetPin} disabled={savingPin || !newPin || !confirmPin}>
+                {savingPin ? "Saving..." : hasExistingPin ? "Update PIN" : "Set PIN"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Payment Configuration - visible to business owners */}
         {isBusinessOwner && profile?.business_id && (
           <PaymentConfigCard businessId={profile.business_id} />
