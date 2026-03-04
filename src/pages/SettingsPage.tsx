@@ -93,6 +93,35 @@ export default function SettingsPage() {
     },
   });
 
+  const { data: shiftSettings } = useQuery({
+    queryKey: ["shift-settings", profile?.business_id],
+    enabled: !!profile?.business_id && isBusinessOwner,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("business_settings")
+        .select("require_shift, require_cash_counting")
+        .eq("business_id", profile!.business_id!)
+        .single();
+      return {
+        requireShift: (data as any)?.require_shift ?? false,
+        requireCashCounting: (data as any)?.require_cash_counting ?? true,
+      };
+    },
+  });
+
+  const toggleShiftSetting = async (field: "require_shift" | "require_cash_counting", value: boolean) => {
+    const { error } = await supabase
+      .from("business_settings")
+      .update({ [field]: value } as any)
+      .eq("business_id", profile!.business_id!);
+    if (error) {
+      toast.error("Failed to update setting");
+    } else {
+      toast.success("Setting updated");
+      queryClient.invalidateQueries({ queryKey: ["shift-settings"] });
+    }
+  };
+
   const trialActive = business?.subscription_plan === "trial" &&
     business?.trial_ends_at && new Date(business.trial_ends_at) > new Date();
 
