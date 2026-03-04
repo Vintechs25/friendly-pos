@@ -43,6 +43,7 @@ import {
   createCartItem, getItemTotal, getItemTax,
 } from "@/components/pos/types";
 import { useHardwareConfig } from "@/hooks/useHardwareConfig";
+import ShiftGate from "@/components/pos/ShiftGate";
 type Product = Tables<"products">;
 
 interface SelectedCustomer {
