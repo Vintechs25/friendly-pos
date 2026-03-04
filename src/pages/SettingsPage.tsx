@@ -29,7 +29,53 @@ export default function SettingsPage() {
   const [savingPin, setSavingPin] = useState(false);
   const [hasExistingPin, setHasExistingPin] = useState(false);
 
-  const isBusinessOwner = hasRole("business_owner" as any);
+  const isManager = hasRole("manager" as any) || hasRole("branch_manager" as any);
+  const canSetPin = isBusinessOwner || isManager;
+
+  // Check if user already has a PIN
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("pin_code")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => {
+        setHasExistingPin(!!data?.pin_code);
+      });
+  }, [user]);
+
+  const handleSetPin = async () => {
+    if (newPin.length < 4 || newPin.length > 8) {
+      toast.error("PIN must be 4–8 digits");
+      return;
+    }
+    if (!/^\d+$/.test(newPin)) {
+      toast.error("PIN must contain only numbers");
+      return;
+    }
+    if (newPin !== confirmPin) {
+      toast.error("PINs do not match");
+      return;
+    }
+    setSavingPin(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ pin_code: newPin })
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      toast.success(hasExistingPin ? "PIN updated successfully" : "PIN set successfully");
+      setHasExistingPin(true);
+      setCurrentPin("");
+      setNewPin("");
+      setConfirmPin("");
+    } catch {
+      toast.error("Failed to save PIN");
+    } finally {
+      setSavingPin(false);
+    }
+  };
 
   const { data: business } = useQuery({
     queryKey: ["my-business", profile?.business_id],
