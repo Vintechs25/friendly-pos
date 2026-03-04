@@ -16,6 +16,7 @@ import PaymentConfigCard from "@/components/settings/PaymentConfigCard";
 
 export default function SettingsPage() {
   const { user, profile, session, hasRole, refreshProfile } = useAuth();
+  const queryClient = useQueryClient();
   const { refreshLicense, licenseState } = useLicense();
   const [fullName, setFullName] = useState(profile?.full_name ?? "");
   const [phone, setPhone] = useState(profile?.phone ?? "");
