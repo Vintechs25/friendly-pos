@@ -45,9 +45,34 @@ export default function POSLayout({
   deviceStatuses,
 }: POSLayoutProps) {
   const [time, setTime] = useState(new Date());
+  const [showCloseShift, setShowCloseShift] = useState(false);
+  const [hasOpenShift, setHasOpenShift] = useState(false);
   const navigate = useNavigate();
-  const { profile, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { branding } = useBranding();
+  const { settings } = useShiftSettings();
+
+  // Check for open shift
+  useEffect(() => {
+    if (!user || !profile?.business_id) return;
+    supabase
+      .from("cashier_shifts")
+      .select("id")
+      .eq("business_id", profile.business_id)
+      .eq("cashier_id", user.id)
+      .eq("status", "open")
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => setHasOpenShift(!!data));
+  }, [user, profile?.business_id]);
+
+  const handleLogout = () => {
+    if (settings.requireShift && hasOpenShift) {
+      setShowCloseShift(true);
+    } else {
+      signOut();
+    }
+  };
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
