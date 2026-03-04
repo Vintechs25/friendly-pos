@@ -8,13 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { User, Lock, Building2, AlertTriangle, Shield, KeyRound } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { User, Lock, Building2, AlertTriangle, Shield, KeyRound, Clock } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PaymentConfigCard from "@/components/settings/PaymentConfigCard";
 
 export default function SettingsPage() {
   const { user, profile, session, hasRole, refreshProfile } = useAuth();
+  const queryClient = useQueryClient();
   const { refreshLicense, licenseState } = useLicense();
   const [fullName, setFullName] = useState(profile?.full_name ?? "");
   const [phone, setPhone] = useState(profile?.phone ?? "");
@@ -90,6 +92,35 @@ export default function SettingsPage() {
       return data;
     },
   });
+
+  const { data: shiftSettings } = useQuery({
+    queryKey: ["shift-settings", profile?.business_id],
+    enabled: !!profile?.business_id && isBusinessOwner,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("business_settings")
+        .select("require_shift, require_cash_counting")
+        .eq("business_id", profile!.business_id!)
+        .single();
+      return {
+        requireShift: (data as any)?.require_shift ?? false,
+        requireCashCounting: (data as any)?.require_cash_counting ?? true,
+      };
+    },
+  });
+
+  const toggleShiftSetting = async (field: "require_shift" | "require_cash_counting", value: boolean) => {
+    const { error } = await supabase
+      .from("business_settings")
+      .update({ [field]: value } as any)
+      .eq("business_id", profile!.business_id!);
+    if (error) {
+      toast.error("Failed to update setting");
+    } else {
+      toast.success("Setting updated");
+      queryClient.invalidateQueries({ queryKey: ["shift-settings"] });
+    }
+  };
 
   const trialActive = business?.subscription_plan === "trial" &&
     business?.trial_ends_at && new Date(business.trial_ends_at) > new Date();
@@ -300,6 +331,52 @@ export default function SettingsPage() {
               <Button onClick={handleSetPin} disabled={savingPin || !newPin || !confirmPin}>
                 {savingPin ? "Saving..." : hasExistingPin ? "Update PIN" : "Set PIN"}
               </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Shift Management Settings - visible to business owners */}
+        {isBusinessOwner && profile?.business_id && shiftSettings && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" /> Shift Management
+              </CardTitle>
+              <CardDescription>
+                Control whether cashiers must open/close shifts and count cash at the drawer.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Require Shifts</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Cashiers must open a shift before accessing the POS and close it on logout.
+                  </p>
+                </div>
+                <Switch
+                  checked={shiftSettings.requireShift}
+                  onCheckedChange={(checked) => toggleShiftSetting("require_shift", checked)}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Cash Counting at Drawer</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Require cashiers to count and enter cash amounts when opening and closing shifts.
+                  </p>
+                </div>
+                <Switch
+                  checked={shiftSettings.requireCashCounting}
+                  onCheckedChange={(checked) => toggleShiftSetting("require_cash_counting", checked)}
+                  disabled={!shiftSettings.requireShift}
+                />
+              </div>
+              {!shiftSettings.requireShift && (
+                <p className="text-xs text-muted-foreground italic">
+                  Enable "Require Shifts" to configure cash counting.
+                </p>
+              )}
             </CardContent>
           </Card>
         )}

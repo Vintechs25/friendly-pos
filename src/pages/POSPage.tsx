@@ -43,6 +43,7 @@ import {
   createCartItem, getItemTotal, getItemTax,
 } from "@/components/pos/types";
 import { useHardwareConfig } from "@/hooks/useHardwareConfig";
+import ShiftGate from "@/components/pos/ShiftGate";
 type Product = Tables<"products">;
 
 interface SelectedCustomer {
@@ -315,6 +316,7 @@ export default function POSPage() {
   const totalQty = cart.reduce((s, i) => s + i.qty, 0);
 
   return (
+    <ShiftGate>
     <POSLayout
       isOnline={isOnline}
       pendingCount={pendingCount}
@@ -587,5 +589,6 @@ export default function POSPage() {
         </div>
       </div>
     </POSLayout>
+    </ShiftGate>
   );
 }

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBranding } from "@/contexts/BrandingContext";
+import { useShiftSettings } from "@/hooks/useShiftSettings";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Store, ArrowLeft, Clock, Wifi, WifiOff, CloudOff, RefreshCw, Loader2,
   Scan, Volume2, VolumeX, LogOut,
@@ -9,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { ScanMode } from "@/hooks/use-scanner";
 import DeviceStatusIndicators, { type DeviceStatuses } from "@/components/hardware/DeviceStatusIndicators";
+import CloseShiftDialog from "@/components/pos/CloseShiftDialog";
 
 interface POSLayoutProps {
   children: React.ReactNode;
@@ -42,9 +45,34 @@ export default function POSLayout({
   deviceStatuses,
 }: POSLayoutProps) {
   const [time, setTime] = useState(new Date());
+  const [showCloseShift, setShowCloseShift] = useState(false);
+  const [hasOpenShift, setHasOpenShift] = useState(false);
   const navigate = useNavigate();
-  const { profile, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { branding } = useBranding();
+  const { settings } = useShiftSettings();
+
+  // Check for open shift
+  useEffect(() => {
+    if (!user || !profile?.business_id) return;
+    supabase
+      .from("cashier_shifts")
+      .select("id")
+      .eq("business_id", profile.business_id)
+      .eq("cashier_id", user.id)
+      .eq("status", "open")
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => setHasOpenShift(!!data));
+  }, [user, profile?.business_id]);
+
+  const handleLogout = () => {
+    if (settings.requireShift && hasOpenShift) {
+      setShowCloseShift(true);
+    } else {
+      signOut();
+    }
+  };
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
@@ -169,7 +197,7 @@ export default function POSLayout({
 
           {/* Logout */}
           <button
-            onClick={signOut}
+            onClick={handleLogout}
             className="flex items-center justify-center h-7 w-7 rounded-md hover:bg-destructive/20 text-sidebar-foreground/60 hover:text-destructive transition-colors"
             title="Logout"
           >
@@ -182,6 +210,12 @@ export default function POSLayout({
       <main className="flex-1 overflow-hidden">
         {children}
       </main>
+
+      <CloseShiftDialog
+        open={showCloseShift}
+        onOpenChange={setShowCloseShift}
+        onShiftClosed={() => signOut()}
+      />
     </div>
   );
 }
