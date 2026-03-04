@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLicense } from "@/contexts/LicenseContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,12 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { User, Lock, Building2, AlertTriangle, Shield } from "lucide-react";
+import { User, Lock, Building2, AlertTriangle, Shield, KeyRound } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import PaymentConfigCard from "@/components/settings/PaymentConfigCard";
 
 export default function SettingsPage() {
-  const { user, profile, session, hasRole } = useAuth();
+  const { user, profile, session, hasRole, refreshProfile } = useAuth();
   const { refreshLicense, licenseState } = useLicense();
   const [fullName, setFullName] = useState(profile?.full_name ?? "");
   const [phone, setPhone] = useState(profile?.phone ?? "");
@@ -23,8 +23,60 @@ export default function SettingsPage() {
   const [changingPassword, setChangingPassword] = useState(false);
   const [endingTrial, setEndingTrial] = useState(false);
   const [showEndTrialDialog, setShowEndTrialDialog] = useState(false);
+  const [currentPin, setCurrentPin] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [savingPin, setSavingPin] = useState(false);
+  const [hasExistingPin, setHasExistingPin] = useState(false);
 
   const isBusinessOwner = hasRole("business_owner" as any);
+  const isManager = hasRole("manager" as any) || hasRole("branch_manager" as any);
+  const canSetPin = isBusinessOwner || isManager;
+
+  // Check if user already has a PIN
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("pin_code")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => {
+        setHasExistingPin(!!data?.pin_code);
+      });
+  }, [user]);
+
+  const handleSetPin = async () => {
+    if (newPin.length < 4 || newPin.length > 8) {
+      toast.error("PIN must be 4–8 digits");
+      return;
+    }
+    if (!/^\d+$/.test(newPin)) {
+      toast.error("PIN must contain only numbers");
+      return;
+    }
+    if (newPin !== confirmPin) {
+      toast.error("PINs do not match");
+      return;
+    }
+    setSavingPin(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ pin_code: newPin })
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      toast.success(hasExistingPin ? "PIN updated successfully" : "PIN set successfully");
+      setHasExistingPin(true);
+      setCurrentPin("");
+      setNewPin("");
+      setConfirmPin("");
+    } catch {
+      toast.error("Failed to save PIN");
+    } finally {
+      setSavingPin(false);
+    }
+  };
 
   const { data: business } = useQuery({
     queryKey: ["my-business", profile?.business_id],
@@ -208,6 +260,49 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Manager PIN - visible to owners & managers */}
+        {canSetPin && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <KeyRound className="h-5 w-5" /> Manager PIN
+              </CardTitle>
+              <CardDescription>
+                {hasExistingPin
+                  ? "Update your PIN used for authorizing sensitive actions (refunds, price overrides, hardware changes)."
+                  : "Set a PIN to authorize sensitive actions like refunds, price overrides, and hardware changes."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 max-w-md">
+              <div className="space-y-2">
+                <Label>New PIN (4–8 digits)</Label>
+                <Input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={8}
+                  value={newPin}
+                  onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
+                  placeholder="Enter new PIN"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Confirm PIN</Label>
+                <Input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={8}
+                  value={confirmPin}
+                  onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
+                  placeholder="Re-enter PIN"
+                />
+              </div>
+              <Button onClick={handleSetPin} disabled={savingPin || !newPin || !confirmPin}>
+                {savingPin ? "Saving..." : hasExistingPin ? "Update PIN" : "Set PIN"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Payment Configuration - visible to business owners */}
         {isBusinessOwner && profile?.business_id && (
