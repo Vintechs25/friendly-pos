@@ -172,6 +172,8 @@ export type Database = {
           primary_color: string | null
           receipt_footer_text: string | null
           receipt_header_text: string | null
+          require_cash_counting: boolean
+          require_shift: boolean
           secondary_color: string | null
           theme_mode: string | null
           updated_at: string
@@ -192,6 +194,8 @@ export type Database = {
           primary_color?: string | null
           receipt_footer_text?: string | null
           receipt_header_text?: string | null
+          require_cash_counting?: boolean
+          require_shift?: boolean
           secondary_color?: string | null
           theme_mode?: string | null
           updated_at?: string
@@ -212,6 +216,8 @@ export type Database = {
           primary_color?: string | null
           receipt_footer_text?: string | null
           receipt_header_text?: string | null
+          require_cash_counting?: boolean
+          require_shift?: boolean
           secondary_color?: string | null
           theme_mode?: string | null
           updated_at?: string
