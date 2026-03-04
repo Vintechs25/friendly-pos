@@ -316,6 +316,7 @@ export default function POSPage() {
   const totalQty = cart.reduce((s, i) => s + i.qty, 0);
 
   return (
+    <ShiftGate>
     <POSLayout
       isOnline={isOnline}
       pendingCount={pendingCount}
@@ -588,5 +589,6 @@ export default function POSPage() {
         </div>
       </div>
     </POSLayout>
+    </ShiftGate>
   );
 }
