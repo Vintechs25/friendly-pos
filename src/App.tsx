@@ -31,6 +31,7 @@ import AdminPlansPage from "./pages/admin/AdminPlansPage";
 import AdminFeaturesPage from "./pages/admin/AdminFeaturesPage";
 import AdminLicensesPage from "./pages/admin/AdminLicensesPage";
 import HardwareSettingsPage from "./pages/HardwareSettingsPage";
+import EmailPage from "./pages/EmailPage";
 
 import NotFound from "./pages/NotFound";
 
@@ -65,6 +66,7 @@ const App = () => (
                 <Route path="/dashboard/team" element={<ProtectedRoute><TeamPage /></ProtectedRoute>} />
                 <Route path="/dashboard/audit-logs" element={<ProtectedRoute><AuditLogsPage /></ProtectedRoute>} />
                 <Route path="/dashboard/hardware" element={<ProtectedRoute><HardwareSettingsPage /></ProtectedRoute>} />
+                <Route path="/dashboard/email" element={<ProtectedRoute><EmailPage /></ProtectedRoute>} />
                 <Route path="/admin" element={<ProtectedRoute requiredRole="super_admin"><AdminDashboardPage /></ProtectedRoute>} />
                 <Route path="/admin/businesses" element={<ProtectedRoute requiredRole="super_admin"><AdminBusinessesPage /></ProtectedRoute>} />
                 <Route path="/admin/plans" element={<ProtectedRoute requiredRole="super_admin"><AdminPlansPage /></ProtectedRoute>} />
