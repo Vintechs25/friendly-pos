@@ -183,7 +183,7 @@ export default function EmailInbox() {
                   <Star
                     className={cn(
                       "h-4 w-4",
-                      email.is_starred ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"
+                      email.is_starred ? "fill-current text-yellow-500" : "text-muted-foreground"
                     )}
                   />
                 </button>
