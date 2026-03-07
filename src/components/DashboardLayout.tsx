@@ -33,6 +33,7 @@ import {
   X,
   Store,
   Monitor,
+  Mail,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -67,6 +68,7 @@ const navItems: NavItem[] = [
   { icon: FileText, label: "Audit Logs", path: "/dashboard/audit-logs", permission: "view_audit_logs", group: "Admin" },
   { icon: Settings, label: "Settings", path: "/dashboard/settings", permission: "manage_settings", group: "Admin" },
   { icon: Monitor, label: "Hardware", path: "/dashboard/hardware", permission: "manage_settings", group: "Admin" },
+  { icon: Mail, label: "Email", path: "/dashboard/email", permission: "manage_settings", group: "Admin" },
 ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {

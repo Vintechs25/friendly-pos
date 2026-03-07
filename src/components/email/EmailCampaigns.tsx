@@ -65,7 +65,7 @@ export default function EmailCampaigns() {
         body_html: `<div style="font-family:sans-serif;line-height:1.6">${bodyHtml.replace(/\n/g, "<br/>")}</div>`,
         from_email: fromEmail,
         from_name: fromName,
-        created_by: profile.user_id,
+        created_by: profile.id,
         total_recipients: customers.length,
       });
       if (error) throw error;
