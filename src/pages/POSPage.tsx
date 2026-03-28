@@ -345,17 +345,17 @@ export default function POSPage() {
         }}
       />
 
-      <div className="flex flex-col md:flex-row h-full">
+      <div className="flex h-full">
         {/* ═══ LEFT: Product Catalog ═══ */}
-        <div className="flex-1 flex flex-col min-w-0 border-r border-border max-w-[60%]">
+        <div className="flex-1 flex flex-col min-w-0 bg-muted/30">
           {/* Search bar */}
-          <div className="p-3 pb-2 space-y-2">
+          <div className="px-3 py-2 space-y-1.5 bg-background border-b border-border">
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search products, SKU, or scan barcode..."
-                  className="pl-10 h-11 text-sm rounded-xl bg-muted/50 border-transparent focus:border-primary focus:bg-background touch-manipulation"
+                  placeholder="Search or scan barcode..."
+                  className="pl-9 h-10 text-sm rounded-lg bg-muted/50 border-border focus:border-primary touch-manipulation"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -363,13 +363,13 @@ export default function POSPage() {
               <div className="flex items-center rounded-lg border border-border overflow-hidden shrink-0">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`h-11 w-11 flex items-center justify-center transition-colors touch-manipulation ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                  className={`h-10 w-10 flex items-center justify-center transition-colors touch-manipulation ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`h-11 w-11 flex items-center justify-center transition-colors touch-manipulation ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                  className={`h-10 w-10 flex items-center justify-center transition-colors touch-manipulation ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
                 >
                   <List className="h-4 w-4" />
                 </button>
@@ -384,90 +384,7 @@ export default function POSPage() {
           </div>
 
           {/* Product grid */}
-          <div className="flex-1 overflow-y-auto p-3 pt-0">
-            {loadingProducts ? (
-              <div className="flex items-center justify-center py-24">
-                <Loader2 className="h-10 w-10 animate-spin text-muted-foreground/50" />
-              </div>
-            ) : viewMode === "grid" ? (
-              <>
-                <ProductGrid products={filtered} onAddToCart={(p) => { addToCart(p); toast.success(`${p.name} added`); }} />
-                {filtered.length === 0 && searchTerm && (
-                  <div className="text-center mt-2">
-                    <Button variant="outline" size="sm" onClick={() => { setQuickProductInitial(searchTerm); setQuickProductOpen(true); }}>
-                      <Plus className="h-3.5 w-3.5 mr-1.5" /> Create "{searchTerm}"
-                    </Button>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="space-y-1">
-                {filtered.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-                    <Package className="h-12 w-12 mb-4 opacity-15" />
-                    <p className="text-sm font-semibold">No products found</p>
-                    {searchTerm && (
-                      <Button variant="outline" size="sm" className="mt-3" onClick={() => { setQuickProductInitial(searchTerm); setQuickProductOpen(true); }}>
-                        <Plus className="h-3.5 w-3.5 mr-1.5" /> Create "{searchTerm}"
-                      </Button>
-                    )}
-                  </div>
-                ) : filtered.map((product) => (
-                  <button
-                    key={product.id}
-                    onClick={() => { addToCart(product); toast.success(`${product.name} added`); }}
-                    className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-muted/60 transition-all text-left touch-manipulation active:scale-[0.98] select-none"
-                  >
-                    <div className="h-11 w-11 rounded-lg bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-black text-primary/30">
-                        {product.name.slice(0, 2).toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold truncate">{product.name}</p>
-                      <p className="text-[11px] text-muted-foreground">
-                        {product.sku && <span className="mr-2">{product.sku}</span>}
-                        {product.unit_of_measure !== "piece" && <span>({product.unit_of_measure})</span>}
-                      </p>
-                    </div>
-                    <span className="text-sm font-bold text-primary whitespace-nowrap">
-                      KSh {product.price.toLocaleString("en-KE")}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ═══ RIGHT: Cart + Payment ═══ */}
-        <div className="w-full md:w-[400px] xl:w-[440px] 2xl:w-[480px] flex flex-col bg-card shrink-0">
-          {/* Cart header */}
-          <div className="px-3 py-2.5 border-b border-border flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <ShoppingBag className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <h2 className="font-bold text-sm leading-tight">Cart</h2>
-                <p className="text-[10px] text-muted-foreground leading-tight">
-                  {cart.length} item{cart.length !== 1 ? "s" : ""} · {totalQty % 1 !== 0 ? totalQty.toFixed(3) : totalQty} units
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-1.5">
-              {cart.length > 0 && (
-                <>
-                  <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 touch-manipulation rounded-lg" onClick={holdTransaction}>
-                    <PauseCircle className="h-3.5 w-3.5" /> Hold
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10 touch-manipulation rounded-lg" onClick={voidCurrentSale}>
-                    <XCircle className="h-3.5 w-3.5" /> Void
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
+          <div className="flex-1 overflow-y-auto p-2.5">
 
           {/* Scrollable middle: customer + held sales + cart items + totals + payment */}
           <div className="flex-1 overflow-y-auto min-h-0">
