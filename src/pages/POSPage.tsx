@@ -345,17 +345,17 @@ export default function POSPage() {
         }}
       />
 
-      <div className="flex flex-col md:flex-row h-full">
+      <div className="flex h-full">
         {/* ═══ LEFT: Product Catalog ═══ */}
-        <div className="flex-1 flex flex-col min-w-0 border-r border-border max-w-[60%]">
+        <div className="flex-1 flex flex-col min-w-0 bg-muted/30">
           {/* Search bar */}
-          <div className="p-3 pb-2 space-y-2">
+          <div className="px-3 py-2 space-y-1.5 bg-background border-b border-border">
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search products, SKU, or scan barcode..."
-                  className="pl-10 h-11 text-sm rounded-xl bg-muted/50 border-transparent focus:border-primary focus:bg-background touch-manipulation"
+                  placeholder="Search or scan barcode..."
+                  className="pl-9 h-10 text-sm rounded-lg bg-muted/50 border-border focus:border-primary touch-manipulation"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -363,13 +363,13 @@ export default function POSPage() {
               <div className="flex items-center rounded-lg border border-border overflow-hidden shrink-0">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`h-11 w-11 flex items-center justify-center transition-colors touch-manipulation ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                  className={`h-10 w-10 flex items-center justify-center transition-colors touch-manipulation ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`h-11 w-11 flex items-center justify-center transition-colors touch-manipulation ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                  className={`h-10 w-10 flex items-center justify-center transition-colors touch-manipulation ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
                 >
                   <List className="h-4 w-4" />
                 </button>
@@ -384,7 +384,7 @@ export default function POSPage() {
           </div>
 
           {/* Product grid */}
-          <div className="flex-1 overflow-y-auto p-3 pt-0">
+          <div className="flex-1 overflow-y-auto p-2.5">
             {loadingProducts ? (
               <div className="flex items-center justify-center py-24">
                 <Loader2 className="h-10 w-10 animate-spin text-muted-foreground/50" />
@@ -401,7 +401,7 @@ export default function POSPage() {
                 )}
               </>
             ) : (
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {filtered.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                     <Package className="h-12 w-12 mb-4 opacity-15" />
@@ -416,18 +416,17 @@ export default function POSPage() {
                   <button
                     key={product.id}
                     onClick={() => { addToCart(product); toast.success(`${product.name} added`); }}
-                    className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-muted/60 transition-all text-left touch-manipulation active:scale-[0.98] select-none"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/60 transition-all text-left touch-manipulation active:scale-[0.98] select-none"
                   >
-                    <div className="h-11 w-11 rounded-lg bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-black text-primary/30">
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-black text-primary/40">
                         {product.name.slice(0, 2).toUpperCase()}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold truncate">{product.name}</p>
-                      <p className="text-[11px] text-muted-foreground">
+                      <p className="text-[12px] font-semibold truncate">{product.name}</p>
+                      <p className="text-[10px] text-muted-foreground">
                         {product.sku && <span className="mr-2">{product.sku}</span>}
-                        {product.unit_of_measure !== "piece" && <span>({product.unit_of_measure})</span>}
                       </p>
                     </div>
                     <span className="text-sm font-bold text-primary whitespace-nowrap">
@@ -441,38 +440,36 @@ export default function POSPage() {
         </div>
 
         {/* ═══ RIGHT: Cart + Payment ═══ */}
-        <div className="w-full md:w-[400px] xl:w-[440px] 2xl:w-[480px] flex flex-col bg-card shrink-0">
+        <div className="w-[380px] xl:w-[420px] 2xl:w-[460px] flex flex-col bg-card shrink-0 border-l border-border">
           {/* Cart header */}
-          <div className="px-3 py-2.5 border-b border-border flex items-center justify-between shrink-0">
+          <div className="px-3 py-2 border-b border-border flex items-center justify-between shrink-0 bg-card">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <ShoppingBag className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <h2 className="font-bold text-sm leading-tight">Cart</h2>
-                <p className="text-[10px] text-muted-foreground leading-tight">
-                  {cart.length} item{cart.length !== 1 ? "s" : ""} · {totalQty % 1 !== 0 ? totalQty.toFixed(3) : totalQty} units
-                </p>
-              </div>
+              <ShoppingBag className="h-4 w-4 text-primary" />
+              <span className="font-bold text-sm">
+                Cart
+                <span className="text-muted-foreground font-normal ml-1.5 text-[11px]">
+                  ({cart.length} {cart.length === 1 ? "item" : "items"})
+                </span>
+              </span>
             </div>
-            <div className="flex gap-1.5">
+            <div className="flex gap-1">
               {cart.length > 0 && (
                 <>
-                  <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 touch-manipulation rounded-lg" onClick={holdTransaction}>
-                    <PauseCircle className="h-3.5 w-3.5" /> Hold
+                  <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1 touch-manipulation rounded-md px-2" onClick={holdTransaction}>
+                    <PauseCircle className="h-3 w-3" /> Hold
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10 touch-manipulation rounded-lg" onClick={voidCurrentSale}>
-                    <XCircle className="h-3.5 w-3.5" /> Void
+                  <Button variant="ghost" size="sm" className="h-7 text-[11px] gap-1 text-destructive hover:text-destructive hover:bg-destructive/10 touch-manipulation rounded-md px-2" onClick={voidCurrentSale}>
+                    <XCircle className="h-3 w-3" /> Void
                   </Button>
                 </>
               )}
             </div>
           </div>
 
-          {/* Scrollable middle: customer + held sales + cart items + totals + payment */}
+          {/* Scrollable middle */}
           <div className="flex-1 overflow-y-auto min-h-0">
             {/* Customer */}
-            <div className="px-3 py-2 border-b border-border">
+            <div className="px-3 py-2 border-b border-border/50">
               <CustomerPicker businessId={profile?.business_id ?? null} selectedCustomer={selectedCustomer} onSelect={setSelectedCustomer} />
               {selectedCustomer && selectedCustomer.loyalty_points > 0 && cart.length > 0 && (
                 <div className="mt-1.5">
@@ -489,69 +486,70 @@ export default function POSPage() {
             )}
 
             {/* Cart items */}
-            <div className="p-3 space-y-2">
+            <div className="px-2 py-1">
               {cart.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
                   <Barcode className="h-10 w-10 mb-3 opacity-15" />
                   <p className="text-xs font-semibold">No items in cart</p>
-                  <p className="text-[11px] mt-1 text-muted-foreground/60">Tap a product or scan a barcode</p>
+                  <p className="text-[11px] mt-1 text-muted-foreground/60">Tap a product or scan barcode</p>
                 </div>
               ) : cart.map((item) => (
                 <CartItemRow key={item.id} item={item} onUpdateQty={updateQty} onRemove={removeItem} onUpdateDiscount={updateItemDiscount} onPriceOverride={overridePrice} canOverridePrice={canOverridePrice} />
               ))}
             </div>
+          </div>
 
-            {/* ═══ Totals & Payment ═══ */}
-            <div className="p-3 space-y-2 border-t-2 border-border bg-muted/30">
-              {/* Summary rows */}
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium tabular-nums">KSh {itemsSubtotal.toFixed(2)}</span>
-                </div>
-
-                {/* Cart discount */}
-                <div className="flex items-center gap-2">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-background border border-transparent hover:border-border transition-all touch-manipulation">
-                        <Percent className="h-3 w-3" /> Discount
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-56 p-3 space-y-2" side="top">
-                      <Label className="text-xs font-semibold">Cart Discount</Label>
-                      <div className="flex gap-1.5">
-                        <Button variant={cartDiscountType === "fixed" ? "default" : "outline"} size="sm" className="h-8 text-xs flex-1" onClick={() => setCartDiscountType("fixed")}><DollarSign className="h-3 w-3 mr-1" /> Fixed</Button>
-                        <Button variant={cartDiscountType === "percent" ? "default" : "outline"} size="sm" className="h-8 text-xs flex-1" onClick={() => setCartDiscountType("percent")}><Percent className="h-3 w-3 mr-1" /> %</Button>
-                      </div>
-                      <Input type="number" value={cartDiscount || ""} onChange={(e) => setCartDiscount(parseFloat(e.target.value) || 0)} placeholder="0" className="h-9" min="0" />
-                    </PopoverContent>
-                  </Popover>
-                  {cartDiscountAmount > 0 && <span className="text-[11px] text-destructive font-semibold ml-auto tabular-nums">-KSh {cartDiscountAmount.toFixed(2)}</span>}
-                </div>
-
-                {loyaltyDiscount > 0 && (
-                  <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">Loyalty</span>
-                    <span className="text-destructive font-medium tabular-nums">-KSh {loyaltyDiscount.toFixed(2)}</span>
-                  </div>
-                )}
-
-                <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">Tax</span>
-                  <span className="font-medium tabular-nums">KSh {taxAmount.toFixed(2)}</span>
-                </div>
+          {/* ═══ Totals & Payment - pinned bottom ═══ */}
+          <div className="border-t-2 border-border bg-card shrink-0">
+            <div className="px-3 py-2 space-y-1">
+              <div className="flex justify-between text-[11px]">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-medium tabular-nums">KSh {itemsSubtotal.toFixed(2)}</span>
               </div>
 
-              {/* Total - prominent */}
-              <div className="flex justify-between items-center pt-2.5 border-t-2 border-primary/30">
-                <span className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Total</span>
-                <span className="text-2xl font-black text-primary tabular-nums">
-                  KSh {total.toLocaleString("en-KE", { minimumFractionDigits: 2 })}
-                </span>
+              {/* Cart discount */}
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all touch-manipulation">
+                      <Percent className="h-2.5 w-2.5" /> Discount
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56 p-3 space-y-2" side="top">
+                    <Label className="text-xs font-semibold">Cart Discount</Label>
+                    <div className="flex gap-1.5">
+                      <Button variant={cartDiscountType === "fixed" ? "default" : "outline"} size="sm" className="h-8 text-xs flex-1" onClick={() => setCartDiscountType("fixed")}><DollarSign className="h-3 w-3 mr-1" /> Fixed</Button>
+                      <Button variant={cartDiscountType === "percent" ? "default" : "outline"} size="sm" className="h-8 text-xs flex-1" onClick={() => setCartDiscountType("percent")}><Percent className="h-3 w-3 mr-1" /> %</Button>
+                    </div>
+                    <Input type="number" value={cartDiscount || ""} onChange={(e) => setCartDiscount(parseFloat(e.target.value) || 0)} placeholder="0" className="h-9" min="0" />
+                  </PopoverContent>
+                </Popover>
+                {cartDiscountAmount > 0 && <span className="text-[10px] text-destructive font-semibold ml-auto tabular-nums">-KSh {cartDiscountAmount.toFixed(2)}</span>}
               </div>
 
-              {/* Payment methods */}
+              {loyaltyDiscount > 0 && (
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-muted-foreground">Loyalty</span>
+                  <span className="text-destructive font-medium tabular-nums">-KSh {loyaltyDiscount.toFixed(2)}</span>
+                </div>
+              )}
+
+              <div className="flex justify-between text-[11px]">
+                <span className="text-muted-foreground">Tax</span>
+                <span className="font-medium tabular-nums">KSh {taxAmount.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Total - big and prominent */}
+            <div className="flex justify-between items-center px-3 py-2.5 bg-primary/5 border-y border-primary/20">
+              <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">TOTAL</span>
+              <span className="text-2xl font-black text-primary tabular-nums">
+                KSh {total.toLocaleString("en-KE", { minimumFractionDigits: 2 })}
+              </span>
+            </div>
+
+            {/* Payment methods */}
+            <div className="px-3 py-2 space-y-2">
               <SplitPaymentPanel
                 total={total}
                 payments={payments}
@@ -568,23 +566,23 @@ export default function POSPage() {
                 <QuickCashButtons total={total} onSelect={setCashTendered} />
               )}
             </div>
-          </div>
 
-          {/* Complete button - always pinned at bottom */}
-          <div className="p-3 border-t border-border bg-card shrink-0">
-            <Button
-              className="w-full h-12 md:h-14 text-sm md:text-base font-bold rounded-xl touch-manipulation shadow-lg shadow-primary/25 active:scale-[0.98] transition-transform"
-              disabled={cart.length === 0 || processing || !canUsePOS}
-              onClick={completeSale}
-            >
-              {!canUsePOS ? "License Required" : processing ? (
-                <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Processing...</>
-              ) : !isOnline ? (
-                "Complete Sale (Offline)"
-              ) : (
-                <>Complete Sale — KSh {total.toLocaleString("en-KE", { minimumFractionDigits: 2 })}</>
-              )}
-            </Button>
+            {/* Complete button */}
+            <div className="px-3 pb-3 pt-1">
+              <Button
+                className="w-full h-12 text-sm font-bold rounded-lg touch-manipulation shadow-lg shadow-primary/25 active:scale-[0.98] transition-transform"
+                disabled={cart.length === 0 || processing || !canUsePOS}
+                onClick={completeSale}
+              >
+                {!canUsePOS ? "License Required" : processing ? (
+                  <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Processing...</>
+                ) : !isOnline ? (
+                  "Complete Sale (Offline)"
+                ) : (
+                  <>Complete Sale — KSh {total.toLocaleString("en-KE", { minimumFractionDigits: 2 })}</>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
