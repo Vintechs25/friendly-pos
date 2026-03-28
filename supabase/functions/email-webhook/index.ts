@@ -18,17 +18,23 @@ Deno.serve(async (req) => {
     );
 
     const body = await req.json();
-    const { type } = body;
+    console.log("Webhook received:", JSON.stringify(body).substring(0, 500));
+
+    const type = body.type;
 
     if (type === "email.received") {
-      // Inbound email from Resend
-      const { from, to, subject, html, text } = body.data || body;
+      // Resend inbound email payload
+      const data = body.data || body;
+      const from = data.from;
+      const to = data.to;
+      const subject = data.subject;
+      const html = data.html;
+      const text = data.text;
 
-      // Find business by to_email domain or address
       const toEmail = Array.isArray(to) ? to[0] : to;
-      
-      // Try to find a business with matching from_email in their settings or campaigns
-      // For now, store with a lookup based on the to address
+      const fromEmail = typeof from === "string" ? from : from?.email || String(from);
+
+      // Find the business: match by the "to" email address against business email
       const { data: businesses } = await supabase
         .from("businesses")
         .select("id, email")
@@ -36,24 +42,38 @@ Deno.serve(async (req) => {
 
       let businessId: string | null = null;
 
-      // Match by business email domain
       if (businesses) {
+        // Exact match on business email first
         for (const biz of businesses) {
-          if (biz.email && toEmail.includes(biz.email.split("@")[1])) {
+          if (biz.email && toEmail.toLowerCase().includes(biz.email.toLowerCase())) {
             businessId = biz.id;
             break;
           }
         }
-        // Fallback: use first business if only one exists
+        // Then try domain match
+        if (!businessId) {
+          for (const biz of businesses) {
+            if (biz.email) {
+              const bizDomain = biz.email.split("@")[1]?.toLowerCase();
+              if (bizDomain && toEmail.toLowerCase().includes(bizDomain)) {
+                businessId = biz.id;
+                break;
+              }
+            }
+          }
+        }
+        // Fallback: if only one business exists
         if (!businessId && businesses.length === 1) {
           businessId = businesses[0].id;
         }
       }
 
+      console.log("Matched business:", businessId, "for to:", toEmail);
+
       if (businessId) {
-        await supabase.from("inbound_emails").insert({
+        const { error } = await supabase.from("inbound_emails").insert({
           business_id: businessId,
-          from_email: typeof from === "string" ? from : from?.email || from,
+          from_email: fromEmail,
           from_name: typeof from === "object" ? from?.name : null,
           to_email: toEmail,
           subject: subject || "(No Subject)",
@@ -61,6 +81,9 @@ Deno.serve(async (req) => {
           body_text: text,
           raw_payload: body,
         });
+        if (error) console.error("Insert error:", error);
+      } else {
+        console.error("No matching business found for:", toEmail);
       }
 
       return new Response(JSON.stringify({ success: true }), {
@@ -69,7 +92,7 @@ Deno.serve(async (req) => {
     }
 
     // Handle delivery status webhooks
-    if (type === "email.delivered" || type === "email.bounced" || type === "email.opened" || type === "email.clicked") {
+    if (["email.delivered", "email.bounced", "email.opened", "email.clicked"].includes(type)) {
       const emailId = body.data?.email_id;
       if (emailId) {
         const updates: Record<string, unknown> = {};
