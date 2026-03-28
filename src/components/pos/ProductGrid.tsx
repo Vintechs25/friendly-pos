@@ -1,4 +1,4 @@
-import { Package, ShoppingCart } from "lucide-react";
+import { Package, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Product {
@@ -18,6 +18,25 @@ interface ProductGridProps {
   onAddToCart: (product: any) => void;
 }
 
+// Generate a consistent color from product name
+function getProductColor(name: string): string {
+  const colors = [
+    "from-blue-500/80 to-blue-600/80",
+    "from-emerald-500/80 to-emerald-600/80",
+    "from-amber-500/80 to-amber-600/80",
+    "from-rose-500/80 to-rose-600/80",
+    "from-violet-500/80 to-violet-600/80",
+    "from-cyan-500/80 to-cyan-600/80",
+    "from-orange-500/80 to-orange-600/80",
+    "from-teal-500/80 to-teal-600/80",
+    "from-indigo-500/80 to-indigo-600/80",
+    "from-pink-500/80 to-pink-600/80",
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+}
+
 export default function ProductGrid({ products, onAddToCart }: ProductGridProps) {
   if (products.length === 0) {
     return (
@@ -30,7 +49,7 @@ export default function ProductGrid({ products, onAddToCart }: ProductGridProps)
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2">
       {products.map((product) => {
         const outOfStock = product.stock_quantity <= 0;
         return (
@@ -39,49 +58,53 @@ export default function ProductGrid({ products, onAddToCart }: ProductGridProps)
             onClick={() => onAddToCart(product)}
             disabled={outOfStock}
             className={cn(
-              "group relative flex flex-col rounded-xl border-2 p-2.5 text-left transition-all touch-manipulation select-none",
+              "group relative flex flex-col rounded-xl overflow-hidden transition-all touch-manipulation select-none",
+              "h-[110px] min-h-[110px]",
               outOfStock
-                ? "border-border/50 bg-muted/30 opacity-50 cursor-not-allowed"
-                : "border-border bg-card hover:border-primary/50 hover:shadow-md active:scale-[0.96] active:shadow-none"
+                ? "opacity-40 cursor-not-allowed grayscale"
+                : "hover:scale-[1.03] active:scale-[0.97] hover:shadow-lg active:shadow-none cursor-pointer"
             )}
           >
-            {/* Image / Placeholder */}
+            {/* Colored background */}
             {product.image_url ? (
-              <div className="w-full aspect-[4/3] rounded-lg bg-muted overflow-hidden mb-2">
+              <div className="absolute inset-0">
                 <img
                   src={product.image_url}
                   alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                  className="w-full h-full object-cover"
                   loading="lazy"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               </div>
             ) : (
-              <div className="w-full aspect-[4/3] rounded-lg bg-gradient-to-br from-primary/5 to-primary/10 mb-2 flex items-center justify-center">
-                <span className="text-xl font-black text-primary/20">
-                  {product.name.slice(0, 2).toUpperCase()}
-                </span>
+              <div className={cn(
+                "absolute inset-0 bg-gradient-to-br",
+                getProductColor(product.name)
+              )} />
+            )}
+
+            {/* Stock badge */}
+            {outOfStock && (
+              <div className="absolute top-1.5 right-1.5 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                OUT
               </div>
             )}
 
-            {/* Name */}
-            <p className="text-[13px] font-semibold leading-tight line-clamp-2 min-h-[2.25rem] text-foreground">
-              {product.name}
-            </p>
+            {/* Quick add indicator */}
+            {!outOfStock && (
+              <div className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Plus className="h-3.5 w-3.5 text-white" />
+              </div>
+            )}
 
-            {/* Price row */}
-            <div className="flex items-center justify-between mt-auto pt-1.5">
-              <span className="text-sm font-bold text-primary">
+            {/* Product info - bottom aligned */}
+            <div className="relative mt-auto p-2 pt-3">
+              <p className="text-[12px] font-bold leading-tight line-clamp-2 text-white drop-shadow-sm">
+                {product.name}
+              </p>
+              <p className="text-[13px] font-black text-white/90 mt-0.5 drop-shadow-sm">
                 KSh {product.price.toLocaleString("en-KE", { minimumFractionDigits: 0 })}
-              </span>
-              {outOfStock ? (
-                <span className="text-[10px] font-semibold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">
-                  OUT
-                </span>
-              ) : (
-                <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ShoppingCart className="h-3 w-3 text-primary" />
-                </div>
-              )}
+              </p>
             </div>
           </button>
         );
