@@ -1,0 +1,1 @@
+UPDATE businesses SET email = 'info@vintechdev.store' WHERE id = 'ad328d09-f74a-489d-ae0f-892a7d49501b';
