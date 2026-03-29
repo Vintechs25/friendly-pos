@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import {
   Search, Barcode, Loader2, Package, PauseCircle,
-  Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag, Plus,
+  Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag, Plus, StickyNote,
 } from "lucide-react";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLicense, LicenseBanner } from "@/contexts/LicenseContext";
@@ -69,6 +70,10 @@ export default function POSPage() {
   const [quickProductOpen, setQuickProductOpen] = useState(false);
   const [quickProductInitial, setQuickProductInitial] = useState("");
   const [branchId, setBranchId] = useState<string | null>(null);
+  const [orderNotes, setOrderNotes] = useState("");
+  const [showNotes, setShowNotes] = useState(false);
+  const [cartPulse, setCartPulse] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   // Customer
   const [selectedCustomer, setSelectedCustomer] = useState<SelectedCustomer | null>(null);
@@ -204,6 +209,9 @@ export default function POSPage() {
       if (existing) return prev.map((i) => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
       return [...prev, createCartItem(product)];
     });
+    // Pulse animation on cart badge
+    setCartPulse(true);
+    setTimeout(() => setCartPulse(false), 600);
   };
   const updateQty = (id: string, qty: number) => setCart((prev) => prev.map((i) => i.id === id ? { ...i, qty: Math.max(0.001, qty) } : i));
   const removeItem = (id: string) => setCart((prev) => prev.filter((i) => i.id !== id));
@@ -255,8 +263,30 @@ export default function POSPage() {
 
   const deleteHeldSale = async (id: string) => { await supabase.from("held_sales").delete().eq("id", id); loadHeldSales(); };
 
-  const resetSale = () => { setCart([]); setCartDiscount(0); setCashTendered(0); setSplitMode(false); setSelectedCustomer(null); setRedeemedPoints(0); };
+  const resetSale = () => { setCart([]); setCartDiscount(0); setCashTendered(0); setSplitMode(false); setSelectedCustomer(null); setRedeemedPoints(0); setOrderNotes(""); setShowNotes(false); };
   const voidCurrentSale = () => { if (cart.length === 0) return; resetSale(); toast.info("Sale voided"); };
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).tagName === "INPUT" || (e.target as HTMLElement).tagName === "TEXTAREA") {
+        if (e.key === "Escape") { setSearchTerm(""); (e.target as HTMLElement).blur(); e.preventDefault(); }
+        return;
+      }
+      switch (e.key) {
+        case "F1": e.preventDefault(); setPayments([{ method: "cash", amount: total }]); break;
+        case "F2": e.preventDefault(); setPayments([{ method: "card", amount: total }]); break;
+        case "F3": e.preventDefault(); setPayments([{ method: "mobile_money", amount: total }]); break;
+        case "F4": e.preventDefault(); holdTransaction(); break;
+        case "F8": e.preventDefault(); voidCurrentSale(); break;
+        case "F11": e.preventDefault(); if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen().catch(() => {}); break;
+        case "Enter": e.preventDefault(); if (cart.length > 0 && !processing) completeSale(); break;
+        case "Escape": e.preventDefault(); setSearchTerm(""); break;
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [cart.length, processing, total]);
 
   // Complete sale
   const completeSale = async () => {
@@ -280,6 +310,7 @@ export default function POSPage() {
         const salePayload: Record<string, any> = { business_id: profile.business_id, branch_id: branch.id, cashier_id: user.id, receipt_number: receiptNumber, subtotal: itemsSubtotal, tax_amount: taxAmount, discount_amount: cartDiscountAmount + loyaltyDiscount, total, payment_method: primaryMethod, status: "completed" };
         if (selectedCustomer?.id) salePayload.customer_id = selectedCustomer.id;
         if (selectedCustomer?.name) salePayload.customer_name = selectedCustomer.name;
+        if (orderNotes.trim()) salePayload.notes = orderNotes.trim();
         const { data: sale, error: saleError } = await supabase.from("sales").insert(salePayload as any).select().single();
         if (saleError) { toast.error("Failed: " + saleError.message); return; }
         await supabase.from("sale_items").insert(saleItems.map((si) => ({ ...si, sale_id: sale.id })));
@@ -330,6 +361,7 @@ export default function POSPage() {
       onToggleSound={() => setSoundEnabled((p) => !p)}
       lastBarcode={scanner.lastScan?.sanitized}
       deviceStatuses={{ ...deviceStatuses, internet: isOnline ? "online" : "offline" }}
+      onLastReceipt={receiptData ? () => setShowReceipt(true) : undefined}
     >
       <LicenseBanner />
       <ReceiptPreviewDialog open={showReceipt} onOpenChange={setShowReceipt} data={receiptData} />
@@ -444,10 +476,10 @@ export default function POSPage() {
           {/* Cart header */}
           <div className="px-3 py-2 border-b border-border flex items-center justify-between shrink-0 bg-card">
             <div className="flex items-center gap-2">
-              <ShoppingBag className="h-4 w-4 text-primary" />
+              <ShoppingBag className={cn("h-4 w-4 text-primary transition-transform", cartPulse && "scale-125 text-success")} />
               <span className="font-bold text-sm">
                 Cart
-                <span className="text-muted-foreground font-normal ml-1.5 text-[11px]">
+                <span className={cn("text-muted-foreground font-normal ml-1.5 text-[11px] transition-colors", cartPulse && "text-success font-semibold")}>
                   ({cart.length} {cart.length === 1 ? "item" : "items"})
                 </span>
               </span>
@@ -455,6 +487,9 @@ export default function POSPage() {
             <div className="flex gap-1">
               {cart.length > 0 && (
                 <>
+                  <Button variant="ghost" size="sm" className="h-7 text-[11px] gap-1 touch-manipulation rounded-md px-2" onClick={() => setShowNotes(!showNotes)}>
+                    <StickyNote className={cn("h-3 w-3", orderNotes && "text-warning")} />
+                  </Button>
                   <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1 touch-manipulation rounded-md px-2" onClick={holdTransaction}>
                     <PauseCircle className="h-3 w-3" /> Hold
                   </Button>
@@ -485,13 +520,24 @@ export default function POSPage() {
               </div>
             )}
 
+            {/* Order notes */}
+            {showNotes && cart.length > 0 && (
+              <div className="px-3 py-1.5 border-b border-border/50">
+                <Input
+                  placeholder="Order notes (e.g. Gift wrap, pickup later)"
+                  value={orderNotes}
+                  onChange={(e) => setOrderNotes(e.target.value)}
+                  className="h-8 text-xs"
+                />
+              </div>
+            )}
+
             {/* Cart items */}
             <div className="px-2 py-1">
               {cart.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                  <Barcode className="h-10 w-10 mb-3 opacity-15" />
-                  <p className="text-xs font-semibold">No items in cart</p>
-                  <p className="text-[11px] mt-1 text-muted-foreground/60">Tap a product or scan barcode</p>
+                <div className="flex items-center justify-center py-8 text-muted-foreground gap-2">
+                  <Barcode className="h-5 w-5 opacity-20" />
+                  <p className="text-xs">Scan or tap to add items</p>
                 </div>
               ) : cart.map((item) => (
                 <CartItemRow key={item.id} item={item} onUpdateQty={updateQty} onRemove={removeItem} onUpdateDiscount={updateItemDiscount} onPriceOverride={overridePrice} canOverridePrice={canOverridePrice} />

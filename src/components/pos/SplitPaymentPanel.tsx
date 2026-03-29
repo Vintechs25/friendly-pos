@@ -58,6 +58,7 @@ export default function SplitPaymentPanel({
 }: SplitPaymentPanelProps) {
   const [showMpesaDialog, setShowMpesaDialog] = useState(false);
   const [showGiftCardDialog, setShowGiftCardDialog] = useState(false);
+  const [showKeypad, setShowKeypad] = useState(false);
   const [giftCardCode, setGiftCardCode] = useState("");
   const [giftCardBalance, setGiftCardBalance] = useState<number | null>(null);
   const [giftCardId, setGiftCardId] = useState<string | null>(null);
@@ -177,11 +178,22 @@ export default function SplitPaymentPanel({
         </div>
 
         {selectedMethod === "cash" && (
-          <NumericKeypad
-            value={cashTendered}
-            onChange={onCashTenderedChange}
-            total={total}
-          />
+          <div className="space-y-1">
+            <button
+              onClick={() => setShowKeypad((v) => !v)}
+              className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Calculator className="h-3 w-3" />
+              {showKeypad ? "Hide keypad" : "Show keypad"}
+            </button>
+            {showKeypad && (
+              <NumericKeypad
+                value={cashTendered}
+                onChange={onCashTenderedChange}
+                total={total}
+              />
+            )}
+          </div>
         )}
 
         {selectedMethod === "mobile_money" && payments[0]?.reference && (

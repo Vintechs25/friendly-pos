@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBranding } from "@/contexts/BrandingContext";
@@ -6,12 +6,13 @@ import { useShiftSettings } from "@/hooks/useShiftSettings";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Store, ArrowLeft, Clock, Wifi, WifiOff, CloudOff, RefreshCw, Loader2,
-  Scan, Volume2, VolumeX, LogOut,
+  Scan, Volume2, VolumeX, LogOut, Maximize, Minimize, Keyboard, Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ScanMode } from "@/hooks/use-scanner";
 import DeviceStatusIndicators, { type DeviceStatuses } from "@/components/hardware/DeviceStatusIndicators";
 import CloseShiftDialog from "@/components/pos/CloseShiftDialog";
+import KeyboardShortcutsHelp from "@/components/pos/KeyboardShortcutsHelp";
 
 interface POSLayoutProps {
   children: React.ReactNode;
@@ -27,6 +28,7 @@ interface POSLayoutProps {
   onToggleSound: () => void;
   lastBarcode?: string;
   deviceStatuses?: DeviceStatuses;
+  onLastReceipt?: () => void;
 }
 
 export default function POSLayout({
@@ -43,10 +45,13 @@ export default function POSLayout({
   onToggleSound,
   lastBarcode,
   deviceStatuses,
+  onLastReceipt,
 }: POSLayoutProps) {
   const [time, setTime] = useState(new Date());
   const [showCloseShift, setShowCloseShift] = useState(false);
   const [hasOpenShift, setHasOpenShift] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
   const { branding } = useBranding();
@@ -73,6 +78,20 @@ export default function POSLayout({
       signOut();
     }
   };
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+    }
+  }, []);
+
+  useEffect(() => {
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
@@ -149,8 +168,25 @@ export default function POSLayout({
           </button>
         </div>
 
-        {/* Right: Device Status + Connection + Cashier + Clock */}
-        <div className="flex items-center gap-3">
+        {/* Right: Tools + Connection + Cashier + Clock */}
+        <div className="flex items-center gap-2">
+          {/* Last receipt */}
+          {onLastReceipt && (
+            <button onClick={onLastReceipt} className="p-1 rounded hover:bg-sidebar-accent/50 transition-colors" title="Last Receipt">
+              <Receipt className="h-3.5 w-3.5 text-sidebar-foreground/60" />
+            </button>
+          )}
+
+          {/* Keyboard shortcuts help */}
+          <button onClick={() => setShowShortcuts(true)} className="p-1 rounded hover:bg-sidebar-accent/50 transition-colors" title="Keyboard Shortcuts">
+            <Keyboard className="h-3.5 w-3.5 text-sidebar-foreground/60" />
+          </button>
+
+          {/* Fullscreen toggle */}
+          <button onClick={toggleFullscreen} className="p-1 rounded hover:bg-sidebar-accent/50 transition-colors" title="Toggle Fullscreen">
+            {isFullscreen ? <Minimize className="h-3.5 w-3.5 text-sidebar-foreground/60" /> : <Maximize className="h-3.5 w-3.5 text-sidebar-foreground/60" />}
+          </button>
+
           {/* Device status indicators */}
           {deviceStatuses && (
             <DeviceStatusIndicators statuses={deviceStatuses} compact />
@@ -205,6 +241,8 @@ export default function POSLayout({
           </button>
         </div>
       </header>
+
+      <KeyboardShortcutsHelp open={showShortcuts} onOpenChange={setShowShortcuts} />
 
       {/* ═══ MAIN CONTENT ═══ */}
       <main className="flex-1 overflow-hidden">

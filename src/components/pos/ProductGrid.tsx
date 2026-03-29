@@ -84,9 +84,13 @@ export default function ProductGrid({ products, onAddToCart }: ProductGridProps)
             )}
 
             {/* Stock badge */}
-            {outOfStock && (
+            {outOfStock ? (
               <div className="absolute top-1.5 right-1.5 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
                 OUT
+              </div>
+            ) : product.stock_quantity <= 10 && product.stock_quantity > 0 && (
+              <div className="absolute top-1.5 left-1.5 bg-warning/90 text-warning-foreground text-[9px] font-bold px-1.5 py-0.5 rounded">
+                {product.stock_quantity} left
               </div>
             )}
 
