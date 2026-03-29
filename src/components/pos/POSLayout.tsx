@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBranding } from "@/contexts/BrandingContext";
@@ -6,12 +6,13 @@ import { useShiftSettings } from "@/hooks/useShiftSettings";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Store, ArrowLeft, Clock, Wifi, WifiOff, CloudOff, RefreshCw, Loader2,
-  Scan, Volume2, VolumeX, LogOut,
+  Scan, Volume2, VolumeX, LogOut, Maximize, Minimize, Keyboard, Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ScanMode } from "@/hooks/use-scanner";
 import DeviceStatusIndicators, { type DeviceStatuses } from "@/components/hardware/DeviceStatusIndicators";
 import CloseShiftDialog from "@/components/pos/CloseShiftDialog";
+import KeyboardShortcutsHelp from "@/components/pos/KeyboardShortcutsHelp";
 
 interface POSLayoutProps {
   children: React.ReactNode;
@@ -27,6 +28,7 @@ interface POSLayoutProps {
   onToggleSound: () => void;
   lastBarcode?: string;
   deviceStatuses?: DeviceStatuses;
+  onLastReceipt?: () => void;
 }
 
 export default function POSLayout({
@@ -43,10 +45,13 @@ export default function POSLayout({
   onToggleSound,
   lastBarcode,
   deviceStatuses,
+  onLastReceipt,
 }: POSLayoutProps) {
   const [time, setTime] = useState(new Date());
   const [showCloseShift, setShowCloseShift] = useState(false);
   const [hasOpenShift, setHasOpenShift] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
   const { branding } = useBranding();
