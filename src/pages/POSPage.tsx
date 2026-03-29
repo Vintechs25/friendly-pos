@@ -309,6 +309,7 @@ export default function POSPage() {
         const salePayload: Record<string, any> = { business_id: profile.business_id, branch_id: branch.id, cashier_id: user.id, receipt_number: receiptNumber, subtotal: itemsSubtotal, tax_amount: taxAmount, discount_amount: cartDiscountAmount + loyaltyDiscount, total, payment_method: primaryMethod, status: "completed" };
         if (selectedCustomer?.id) salePayload.customer_id = selectedCustomer.id;
         if (selectedCustomer?.name) salePayload.customer_name = selectedCustomer.name;
+        if (orderNotes.trim()) salePayload.notes = orderNotes.trim();
         const { data: sale, error: saleError } = await supabase.from("sales").insert(salePayload as any).select().single();
         if (saleError) { toast.error("Failed: " + saleError.message); return; }
         await supabase.from("sale_items").insert(saleItems.map((si) => ({ ...si, sale_id: sale.id })));
