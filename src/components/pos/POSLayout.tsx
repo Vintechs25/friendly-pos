@@ -168,8 +168,25 @@ export default function POSLayout({
           </button>
         </div>
 
-        {/* Right: Device Status + Connection + Cashier + Clock */}
-        <div className="flex items-center gap-3">
+        {/* Right: Tools + Connection + Cashier + Clock */}
+        <div className="flex items-center gap-2">
+          {/* Last receipt */}
+          {onLastReceipt && (
+            <button onClick={onLastReceipt} className="p-1 rounded hover:bg-sidebar-accent/50 transition-colors" title="Last Receipt">
+              <Receipt className="h-3.5 w-3.5 text-sidebar-foreground/60" />
+            </button>
+          )}
+
+          {/* Keyboard shortcuts help */}
+          <button onClick={() => setShowShortcuts(true)} className="p-1 rounded hover:bg-sidebar-accent/50 transition-colors" title="Keyboard Shortcuts">
+            <Keyboard className="h-3.5 w-3.5 text-sidebar-foreground/60" />
+          </button>
+
+          {/* Fullscreen toggle */}
+          <button onClick={toggleFullscreen} className="p-1 rounded hover:bg-sidebar-accent/50 transition-colors" title="Toggle Fullscreen">
+            {isFullscreen ? <Minimize className="h-3.5 w-3.5 text-sidebar-foreground/60" /> : <Maximize className="h-3.5 w-3.5 text-sidebar-foreground/60" />}
+          </button>
+
           {/* Device status indicators */}
           {deviceStatuses && (
             <DeviceStatusIndicators statuses={deviceStatuses} compact />
@@ -224,6 +241,8 @@ export default function POSLayout({
           </button>
         </div>
       </header>
+
+      <KeyboardShortcutsHelp open={showShortcuts} onOpenChange={setShowShortcuts} />
 
       {/* ═══ MAIN CONTENT ═══ */}
       <main className="flex-1 overflow-hidden">
