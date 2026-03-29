@@ -3,9 +3,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Search, Barcode, Loader2, Package, PauseCircle,
-  Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag, Plus,
+  Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag, Plus, StickyNote,
 } from "lucide-react";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLicense, LicenseBanner } from "@/contexts/LicenseContext";
@@ -69,6 +69,10 @@ export default function POSPage() {
   const [quickProductOpen, setQuickProductOpen] = useState(false);
   const [quickProductInitial, setQuickProductInitial] = useState("");
   const [branchId, setBranchId] = useState<string | null>(null);
+  const [orderNotes, setOrderNotes] = useState("");
+  const [showNotes, setShowNotes] = useState(false);
+  const [cartPulse, setCartPulse] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   // Customer
   const [selectedCustomer, setSelectedCustomer] = useState<SelectedCustomer | null>(null);
@@ -204,6 +208,9 @@ export default function POSPage() {
       if (existing) return prev.map((i) => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
       return [...prev, createCartItem(product)];
     });
+    // Pulse animation on cart badge
+    setCartPulse(true);
+    setTimeout(() => setCartPulse(false), 600);
   };
   const updateQty = (id: string, qty: number) => setCart((prev) => prev.map((i) => i.id === id ? { ...i, qty: Math.max(0.001, qty) } : i));
   const removeItem = (id: string) => setCart((prev) => prev.filter((i) => i.id !== id));
@@ -255,8 +262,30 @@ export default function POSPage() {
 
   const deleteHeldSale = async (id: string) => { await supabase.from("held_sales").delete().eq("id", id); loadHeldSales(); };
 
-  const resetSale = () => { setCart([]); setCartDiscount(0); setCashTendered(0); setSplitMode(false); setSelectedCustomer(null); setRedeemedPoints(0); };
+  const resetSale = () => { setCart([]); setCartDiscount(0); setCashTendered(0); setSplitMode(false); setSelectedCustomer(null); setRedeemedPoints(0); setOrderNotes(""); setShowNotes(false); };
   const voidCurrentSale = () => { if (cart.length === 0) return; resetSale(); toast.info("Sale voided"); };
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).tagName === "INPUT" || (e.target as HTMLElement).tagName === "TEXTAREA") {
+        if (e.key === "Escape") { setSearchTerm(""); (e.target as HTMLElement).blur(); e.preventDefault(); }
+        return;
+      }
+      switch (e.key) {
+        case "F1": e.preventDefault(); setPayments([{ method: "cash", amount: total }]); break;
+        case "F2": e.preventDefault(); setPayments([{ method: "card", amount: total }]); break;
+        case "F3": e.preventDefault(); setPayments([{ method: "mobile_money", amount: total }]); break;
+        case "F4": e.preventDefault(); holdTransaction(); break;
+        case "F8": e.preventDefault(); voidCurrentSale(); break;
+        case "F11": e.preventDefault(); if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen().catch(() => {}); break;
+        case "Enter": e.preventDefault(); if (cart.length > 0 && !processing) completeSale(); break;
+        case "Escape": e.preventDefault(); setSearchTerm(""); break;
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [cart.length, processing, total]);
 
   // Complete sale
   const completeSale = async () => {
