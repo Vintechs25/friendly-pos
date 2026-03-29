@@ -360,6 +360,7 @@ export default function POSPage() {
       onToggleSound={() => setSoundEnabled((p) => !p)}
       lastBarcode={scanner.lastScan?.sanitized}
       deviceStatuses={{ ...deviceStatuses, internet: isOnline ? "online" : "offline" }}
+      onLastReceipt={receiptData ? () => setShowReceipt(true) : undefined}
     >
       <LicenseBanner />
       <ReceiptPreviewDialog open={showReceipt} onOpenChange={setShowReceipt} data={receiptData} />
@@ -474,10 +475,10 @@ export default function POSPage() {
           {/* Cart header */}
           <div className="px-3 py-2 border-b border-border flex items-center justify-between shrink-0 bg-card">
             <div className="flex items-center gap-2">
-              <ShoppingBag className="h-4 w-4 text-primary" />
+              <ShoppingBag className={cn("h-4 w-4 text-primary transition-transform", cartPulse && "scale-125 text-success")} />
               <span className="font-bold text-sm">
                 Cart
-                <span className="text-muted-foreground font-normal ml-1.5 text-[11px]">
+                <span className={cn("text-muted-foreground font-normal ml-1.5 text-[11px] transition-colors", cartPulse && "text-success font-semibold")}>
                   ({cart.length} {cart.length === 1 ? "item" : "items"})
                 </span>
               </span>
@@ -485,6 +486,9 @@ export default function POSPage() {
             <div className="flex gap-1">
               {cart.length > 0 && (
                 <>
+                  <Button variant="ghost" size="sm" className="h-7 text-[11px] gap-1 touch-manipulation rounded-md px-2" onClick={() => setShowNotes(!showNotes)}>
+                    <StickyNote className={cn("h-3 w-3", orderNotes && "text-warning")} />
+                  </Button>
                   <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1 touch-manipulation rounded-md px-2" onClick={holdTransaction}>
                     <PauseCircle className="h-3 w-3" /> Hold
                   </Button>
@@ -515,13 +519,24 @@ export default function POSPage() {
               </div>
             )}
 
+            {/* Order notes */}
+            {showNotes && cart.length > 0 && (
+              <div className="px-3 py-1.5 border-b border-border/50">
+                <Input
+                  placeholder="Order notes (e.g. Gift wrap, pickup later)"
+                  value={orderNotes}
+                  onChange={(e) => setOrderNotes(e.target.value)}
+                  className="h-8 text-xs"
+                />
+              </div>
+            )}
+
             {/* Cart items */}
             <div className="px-2 py-1">
               {cart.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                  <Barcode className="h-10 w-10 mb-3 opacity-15" />
-                  <p className="text-xs font-semibold">No items in cart</p>
-                  <p className="text-[11px] mt-1 text-muted-foreground/60">Tap a product or scan barcode</p>
+                <div className="flex items-center justify-center py-8 text-muted-foreground gap-2">
+                  <Barcode className="h-5 w-5 opacity-20" />
+                  <p className="text-xs">Scan or tap to add items</p>
                 </div>
               ) : cart.map((item) => (
                 <CartItemRow key={item.id} item={item} onUpdateQty={updateQty} onRemove={removeItem} onUpdateDiscount={updateItemDiscount} onPriceOverride={overridePrice} canOverridePrice={canOverridePrice} />
