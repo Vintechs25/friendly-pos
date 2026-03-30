@@ -521,6 +521,33 @@ export default function POSPage() {
 
           {/* Scrollable middle */}
           <div className="flex-1 overflow-y-auto min-h-0">
+            {/* Table selector (restaurant mode) */}
+            {restaurantMode && (
+              <div className="px-3 py-2 border-b border-border/50">
+                <button
+                  onClick={() => setTableDialogOpen(true)}
+                  className={cn(
+                    "w-full flex items-center gap-2 rounded-lg border-2 border-dashed px-3 py-2 text-xs transition-colors",
+                    selectedTable
+                      ? "border-primary/40 bg-primary/5 text-primary"
+                      : "border-border text-muted-foreground hover:border-primary/30"
+                  )}
+                >
+                  <UtensilsCrossed className="h-3.5 w-3.5" />
+                  {selectedTable ? `Table ${selectedTable.number}` : "Select Table (Dine-in)"}
+                  {selectedTable && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setSelectedTable(null); }}
+                      className="ml-auto text-muted-foreground hover:text-foreground"
+                    >
+                      <XCircle className="h-3 w-3" />
+                    </button>
+                  )}
+                </button>
+              </div>
+            )}
+            <TableSelector open={tableDialogOpen} onOpenChange={setTableDialogOpen} onSelect={(id, num) => setSelectedTable({ id, number: num })} />
+
             {/* Customer */}
             <div className="px-3 py-2 border-b border-border/50">
               <CustomerPicker businessId={profile?.business_id ?? null} selectedCustomer={selectedCustomer} onSelect={setSelectedCustomer} />
