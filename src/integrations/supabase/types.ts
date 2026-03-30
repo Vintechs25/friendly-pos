@@ -944,6 +944,131 @@ export type Database = {
           },
         ]
       }
+      kitchen_order_items: {
+        Row: {
+          created_at: string
+          id: string
+          kitchen_order_id: string
+          notes: string | null
+          product_id: string | null
+          product_name: string
+          quantity: number
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kitchen_order_id: string
+          notes?: string | null
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kitchen_order_id?: string
+          notes?: string | null
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kitchen_order_items_kitchen_order_id_fkey"
+            columns: ["kitchen_order_id"]
+            isOneToOne: false
+            referencedRelation: "kitchen_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kitchen_order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kitchen_orders: {
+        Row: {
+          accepted_at: string | null
+          branch_id: string | null
+          business_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          order_number: string
+          priority: string
+          sale_id: string | null
+          status: string
+          table_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          branch_id?: string | null
+          business_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          order_number: string
+          priority?: string
+          sale_id?: string | null
+          status?: string
+          table_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          branch_id?: string | null
+          business_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          order_number?: string
+          priority?: string
+          sale_id?: string | null
+          status?: string
+          table_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kitchen_orders_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kitchen_orders_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kitchen_orders_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kitchen_orders_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       license_validations: {
         Row: {
           business_id: string
@@ -1593,6 +1718,69 @@ export type Database = {
           },
         ]
       }
+      restaurant_tables: {
+        Row: {
+          branch_id: string | null
+          business_id: string
+          capacity: number
+          created_at: string
+          floor: string | null
+          id: string
+          is_active: boolean
+          name: string | null
+          position_x: number | null
+          position_y: number | null
+          status: string
+          table_number: string
+          updated_at: string
+        }
+        Insert: {
+          branch_id?: string | null
+          business_id: string
+          capacity?: number
+          created_at?: string
+          floor?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string | null
+          position_x?: number | null
+          position_y?: number | null
+          status?: string
+          table_number: string
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string | null
+          business_id?: string
+          capacity?: number
+          created_at?: string
+          floor?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string | null
+          position_x?: number | null
+          position_y?: number | null
+          status?: string
+          table_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_tables_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_tables_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       safe_drops: {
         Row: {
           amount: number
@@ -1717,11 +1905,13 @@ export type Database = {
           held_name: string | null
           id: string
           notes: string | null
+          order_type: string | null
           payment_method: string | null
           receipt_number: string | null
           shift_id: string | null
           status: Database["public"]["Enums"]["sale_status"]
           subtotal: number
+          table_id: string | null
           tax_amount: number
           total: number
         }
@@ -1737,11 +1927,13 @@ export type Database = {
           held_name?: string | null
           id?: string
           notes?: string | null
+          order_type?: string | null
           payment_method?: string | null
           receipt_number?: string | null
           shift_id?: string | null
           status?: Database["public"]["Enums"]["sale_status"]
           subtotal?: number
+          table_id?: string | null
           tax_amount?: number
           total?: number
         }
@@ -1757,11 +1949,13 @@ export type Database = {
           held_name?: string | null
           id?: string
           notes?: string | null
+          order_type?: string | null
           payment_method?: string | null
           receipt_number?: string | null
           shift_id?: string | null
           status?: Database["public"]["Enums"]["sale_status"]
           subtotal?: number
+          table_id?: string | null
           tax_amount?: number
           total?: number
         }
@@ -1785,6 +1979,13 @@ export type Database = {
             columns: ["shift_id"]
             isOneToOne: false
             referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_tables"
             referencedColumns: ["id"]
           },
         ]
