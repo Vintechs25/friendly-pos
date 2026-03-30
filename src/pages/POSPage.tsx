@@ -7,6 +7,7 @@ import {
   Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag, Plus, StickyNote,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLicense, LicenseBanner } from "@/contexts/LicenseContext";
@@ -45,6 +46,7 @@ import {
 } from "@/components/pos/types";
 import { useHardwareConfig } from "@/hooks/useHardwareConfig";
 import ShiftGate from "@/components/pos/ShiftGate";
+import TableSelector from "@/components/pos/TableSelector";
 type Product = Tables<"products">;
 
 interface SelectedCustomer {
@@ -73,6 +75,8 @@ export default function POSPage() {
   const [orderNotes, setOrderNotes] = useState("");
   const [showNotes, setShowNotes] = useState(false);
   const [cartPulse, setCartPulse] = useState(false);
+  const [selectedTable, setSelectedTable] = useState<{ id: string; number: string } | null>(null);
+  const [tableDialogOpen, setTableDialogOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // Customer
