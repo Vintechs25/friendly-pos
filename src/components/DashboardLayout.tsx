@@ -34,6 +34,8 @@ import {
   Store,
   Monitor,
   Mail,
+  UtensilsCrossed,
+  ChefHat,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -69,6 +71,8 @@ const navItems: NavItem[] = [
   { icon: Settings, label: "Settings", path: "/dashboard/settings", permission: "manage_settings", group: "Admin" },
   { icon: Monitor, label: "Hardware", path: "/dashboard/hardware", permission: "manage_settings", group: "Admin" },
   { icon: Mail, label: "Email", path: "/dashboard/email", permission: "manage_settings", group: "Admin" },
+  { icon: UtensilsCrossed, label: "Tables", path: "/dashboard/tables", permission: "manage_pos", group: "Restaurant" },
+  { icon: ChefHat, label: "Kitchen", path: "/dashboard/kitchen", permission: "manage_pos", group: "Restaurant" },
 ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -94,7 +98,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const visibleNavItems = filterNavItemsByRole(permFiltered, roles);
 
   // Group items
-  const groups = ["Main", "Sales", "Stock", "Admin"];
+  const groups = ["Main", "Sales", "Stock", "Restaurant", "Admin"];
   const groupedItems = groups.map((g) => ({
     label: g,
     items: visibleNavItems.filter((i) => i.group === g),
