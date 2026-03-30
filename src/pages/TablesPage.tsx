@@ -75,7 +75,7 @@ export default function TablesPage() {
           .from("restaurant_tables")
           .insert({
             business_id: profile!.business_id!,
-            branch_id: profile?.branch_id ?? null,
+            branch_id: null,
             table_number: form.table_number,
             name: form.name || null,
             capacity: form.capacity,
