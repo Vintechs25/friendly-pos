@@ -313,7 +313,8 @@ export default function POSPage() {
       const paymentEntries = splitMode ? payments.filter((p) => p.amount > 0).map((p) => ({ method: p.method === "mobile_money" ? "mpesa" : p.method, amount: p.amount, reference: p.reference || null })) : [{ method: ((payments[0]?.method === "mobile_money" ? "mpesa" : payments[0]?.method) ?? "cash"), amount: total, reference: payments[0]?.reference || null }];
 
       if (isOnline && branch) {
-        const salePayload: Record<string, any> = { business_id: profile.business_id, branch_id: branch.id, cashier_id: user.id, receipt_number: receiptNumber, subtotal: itemsSubtotal, tax_amount: taxAmount, discount_amount: cartDiscountAmount + loyaltyDiscount, total, payment_method: primaryMethod, status: "completed" };
+        const salePayload: Record<string, any> = { business_id: profile.business_id, branch_id: branch.id, cashier_id: user.id, receipt_number: receiptNumber, subtotal: itemsSubtotal, tax_amount: taxAmount, discount_amount: cartDiscountAmount + loyaltyDiscount, total, payment_method: primaryMethod, status: "completed", order_type: selectedTable ? "dine_in" : "counter" };
+        if (selectedTable) salePayload.table_id = selectedTable.id;
         if (selectedCustomer?.id) salePayload.customer_id = selectedCustomer.id;
         if (selectedCustomer?.name) salePayload.customer_name = selectedCustomer.name;
         if (orderNotes.trim()) salePayload.notes = orderNotes.trim();
