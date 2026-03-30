@@ -324,6 +324,17 @@ export default function POSPage() {
         await supabase.from("payments").insert(paymentEntries.map((p) => ({ sale_id: sale.id, business_id: profile!.business_id!, method: p.method as any, amount: p.amount, reference: p.reference, payment_status: "confirmed" as any })));
         for (const p of payments) { if (p.method === "gift_card" && p.reference && p.amount > 0) { const { data: gc } = await supabase.from("gift_cards").select("id, balance").eq("business_id", profile.business_id).eq("code", p.reference).single(); if (gc) await supabase.from("gift_cards").update({ balance: Math.max(0, gc.balance - p.amount) }).eq("id", gc.id); } }
         for (const item of cart) { if (!item.track_inventory) continue; const { data: inv } = await supabase.from("inventory").select("id, quantity").eq("product_id", item.id).eq("branch_id", branch.id).single(); if (inv) await supabase.from("inventory").update({ quantity: Math.max(0, inv.quantity - item.qty) }).eq("id", inv.id); else await supabase.from("inventory").insert({ product_id: item.id, branch_id: branch.id, quantity: 0 }); }
+        // Create KOT if restaurant mode and table selected
+        if (restaurantMode && selectedTable) {
+          const kotNumber = `KOT-${Date.now().toString(36).toUpperCase()}`;
+          const { data: kot } = await supabase.from("kitchen_orders").insert({ business_id: profile.business_id, branch_id: branch.id, sale_id: sale.id, table_id: selectedTable.id, order_number: kotNumber, status: "pending", created_by: user.id, notes: orderNotes.trim() || null } as any).select().single();
+          if (kot) {
+            await supabase.from("kitchen_order_items").insert(cart.map((item) => ({ kitchen_order_id: kot.id, product_id: item.id, product_name: item.name, quantity: item.qty, notes: null } as any)));
+          }
+          // Set table to occupied
+          await supabase.from("restaurant_tables").update({ status: "available" } as any).eq("id", selectedTable.id);
+          setSelectedTable(null);
+        }
         let loyaltyPointsEarned = 0;
         if (selectedCustomer) { loyaltyPointsEarned = Math.floor(total / 100); const netPoints = selectedCustomer.loyalty_points + loyaltyPointsEarned - redeemedPoints; await supabase.from("customers").update({ loyalty_points: Math.max(0, netPoints) }).eq("id", selectedCustomer.id); }
       } else {
