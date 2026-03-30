@@ -11,10 +11,13 @@ const ROLE_ROUTES: Record<string, string[] | "all"> = {
   cashier: [
     "/dashboard/pos",
     "/dashboard/shifts",
+    "/dashboard/kitchen",
   ],
   waiter: [
     "/dashboard/pos",
     "/dashboard/shifts",
+    "/dashboard/tables",
+    "/dashboard/kitchen",
   ],
   branch_manager: [
     "/dashboard",
@@ -30,6 +33,8 @@ const ROLE_ROUTES: Record<string, string[] | "all"> = {
     "/dashboard/stock-transfers",
     "/dashboard/reports",
     "/dashboard/team",
+    "/dashboard/tables",
+    "/dashboard/kitchen",
   ],
   manager: [
     "/dashboard",
@@ -45,6 +50,8 @@ const ROLE_ROUTES: Record<string, string[] | "all"> = {
     "/dashboard/stock-transfers",
     "/dashboard/reports",
     "/dashboard/team",
+    "/dashboard/tables",
+    "/dashboard/kitchen",
   ],
   inventory_officer: [
     "/dashboard",
