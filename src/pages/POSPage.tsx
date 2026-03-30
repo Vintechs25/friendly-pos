@@ -4,9 +4,10 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import {
   Search, Barcode, Loader2, Package, PauseCircle,
-  Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag, Plus, StickyNote,
+  Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag, Plus, StickyNote, UtensilsCrossed,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLicense, LicenseBanner } from "@/contexts/LicenseContext";
@@ -45,6 +46,7 @@ import {
 } from "@/components/pos/types";
 import { useHardwareConfig } from "@/hooks/useHardwareConfig";
 import ShiftGate from "@/components/pos/ShiftGate";
+import TableSelector from "@/components/pos/TableSelector";
 type Product = Tables<"products">;
 
 interface SelectedCustomer {
@@ -73,6 +75,8 @@ export default function POSPage() {
   const [orderNotes, setOrderNotes] = useState("");
   const [showNotes, setShowNotes] = useState(false);
   const [cartPulse, setCartPulse] = useState(false);
+  const [selectedTable, setSelectedTable] = useState<{ id: string; number: string } | null>(null);
+  const [tableDialogOpen, setTableDialogOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // Customer
@@ -98,6 +102,8 @@ export default function POSPage() {
   const { canUsePOS } = useLicense();
   const { isOnline, pendingCount, syncing, syncAll, refreshCount } = useOfflineSync();
   const { deviceStatuses } = useHardwareConfig();
+  const { isFeatureEnabled } = useFeatureToggles();
+  const restaurantMode = isFeatureEnabled("restaurant_mode");
 
   const canOverridePrice = hasRole("business_owner") || hasRole("manager") || hasRole("super_admin");
 
@@ -307,7 +313,8 @@ export default function POSPage() {
       const paymentEntries = splitMode ? payments.filter((p) => p.amount > 0).map((p) => ({ method: p.method === "mobile_money" ? "mpesa" : p.method, amount: p.amount, reference: p.reference || null })) : [{ method: ((payments[0]?.method === "mobile_money" ? "mpesa" : payments[0]?.method) ?? "cash"), amount: total, reference: payments[0]?.reference || null }];
 
       if (isOnline && branch) {
-        const salePayload: Record<string, any> = { business_id: profile.business_id, branch_id: branch.id, cashier_id: user.id, receipt_number: receiptNumber, subtotal: itemsSubtotal, tax_amount: taxAmount, discount_amount: cartDiscountAmount + loyaltyDiscount, total, payment_method: primaryMethod, status: "completed" };
+        const salePayload: Record<string, any> = { business_id: profile.business_id, branch_id: branch.id, cashier_id: user.id, receipt_number: receiptNumber, subtotal: itemsSubtotal, tax_amount: taxAmount, discount_amount: cartDiscountAmount + loyaltyDiscount, total, payment_method: primaryMethod, status: "completed", order_type: selectedTable ? "dine_in" : "counter" };
+        if (selectedTable) salePayload.table_id = selectedTable.id;
         if (selectedCustomer?.id) salePayload.customer_id = selectedCustomer.id;
         if (selectedCustomer?.name) salePayload.customer_name = selectedCustomer.name;
         if (orderNotes.trim()) salePayload.notes = orderNotes.trim();
@@ -317,6 +324,17 @@ export default function POSPage() {
         await supabase.from("payments").insert(paymentEntries.map((p) => ({ sale_id: sale.id, business_id: profile!.business_id!, method: p.method as any, amount: p.amount, reference: p.reference, payment_status: "confirmed" as any })));
         for (const p of payments) { if (p.method === "gift_card" && p.reference && p.amount > 0) { const { data: gc } = await supabase.from("gift_cards").select("id, balance").eq("business_id", profile.business_id).eq("code", p.reference).single(); if (gc) await supabase.from("gift_cards").update({ balance: Math.max(0, gc.balance - p.amount) }).eq("id", gc.id); } }
         for (const item of cart) { if (!item.track_inventory) continue; const { data: inv } = await supabase.from("inventory").select("id, quantity").eq("product_id", item.id).eq("branch_id", branch.id).single(); if (inv) await supabase.from("inventory").update({ quantity: Math.max(0, inv.quantity - item.qty) }).eq("id", inv.id); else await supabase.from("inventory").insert({ product_id: item.id, branch_id: branch.id, quantity: 0 }); }
+        // Create KOT if restaurant mode and table selected
+        if (restaurantMode && selectedTable) {
+          const kotNumber = `KOT-${Date.now().toString(36).toUpperCase()}`;
+          const { data: kot } = await supabase.from("kitchen_orders").insert({ business_id: profile.business_id, branch_id: branch.id, sale_id: sale.id, table_id: selectedTable.id, order_number: kotNumber, status: "pending", created_by: user.id, notes: orderNotes.trim() || null } as any).select().single();
+          if (kot) {
+            await supabase.from("kitchen_order_items").insert(cart.map((item) => ({ kitchen_order_id: kot.id, product_id: item.id, product_name: item.name, quantity: item.qty, notes: null } as any)));
+          }
+          // Set table to occupied
+          await supabase.from("restaurant_tables").update({ status: "available" } as any).eq("id", selectedTable.id);
+          setSelectedTable(null);
+        }
         let loyaltyPointsEarned = 0;
         if (selectedCustomer) { loyaltyPointsEarned = Math.floor(total / 100); const netPoints = selectedCustomer.loyalty_points + loyaltyPointsEarned - redeemedPoints; await supabase.from("customers").update({ loyalty_points: Math.max(0, netPoints) }).eq("id", selectedCustomer.id); }
       } else {
@@ -503,6 +521,33 @@ export default function POSPage() {
 
           {/* Scrollable middle */}
           <div className="flex-1 overflow-y-auto min-h-0">
+            {/* Table selector (restaurant mode) */}
+            {restaurantMode && (
+              <div className="px-3 py-2 border-b border-border/50">
+                <button
+                  onClick={() => setTableDialogOpen(true)}
+                  className={cn(
+                    "w-full flex items-center gap-2 rounded-lg border-2 border-dashed px-3 py-2 text-xs transition-colors",
+                    selectedTable
+                      ? "border-primary/40 bg-primary/5 text-primary"
+                      : "border-border text-muted-foreground hover:border-primary/30"
+                  )}
+                >
+                  <UtensilsCrossed className="h-3.5 w-3.5" />
+                  {selectedTable ? `Table ${selectedTable.number}` : "Select Table (Dine-in)"}
+                  {selectedTable && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setSelectedTable(null); }}
+                      className="ml-auto text-muted-foreground hover:text-foreground"
+                    >
+                      <XCircle className="h-3 w-3" />
+                    </button>
+                  )}
+                </button>
+              </div>
+            )}
+            <TableSelector open={tableDialogOpen} onOpenChange={setTableDialogOpen} onSelect={(id, num) => setSelectedTable({ id, number: num })} />
+
             {/* Customer */}
             <div className="px-3 py-2 border-b border-border/50">
               <CustomerPicker businessId={profile?.business_id ?? null} selectedCustomer={selectedCustomer} onSelect={setSelectedCustomer} />

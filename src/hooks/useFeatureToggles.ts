@@ -17,6 +17,7 @@ const FEATURE_TO_PERMISSIONS: Record<string, string[]> = {
   advanced_reports: ["view_reports"],
   audit_logs: ["view_audit_logs"],
   customer_loyalty: ["manage_customers"],
+  restaurant_mode: ["manage_pos"],
 };
 
 /**
@@ -34,6 +35,7 @@ const FEATURE_TO_ROUTES: Record<string, string[]> = {
   advanced_reports: ["/dashboard/reports"],
   audit_logs: ["/dashboard/audit-logs"],
   customer_loyalty: ["/dashboard/customers"],
+  restaurant_mode: ["/dashboard/tables", "/dashboard/kitchen"],
 };
 
 export function useFeatureToggles() {
