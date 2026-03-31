@@ -30,6 +30,7 @@ import {
   ArrowRightLeft,
   Shield,
   FileText,
+  FolderOpen,
   X,
   Store,
   Monitor,
