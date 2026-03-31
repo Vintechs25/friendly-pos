@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Search, Loader2, Building2, ToggleLeft, ToggleRight, Plus, Upload, Palette } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables, Database } from "@/integrations/supabase/types";
+import { getFeatureTogglesForIndustry } from "@/lib/feature-provisioning";
 
 type Business = Tables<"businesses">;
 type IndustryType = string;
