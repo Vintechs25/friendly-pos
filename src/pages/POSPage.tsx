@@ -78,6 +78,7 @@ export default function POSPage() {
   const [cartPulse, setCartPulse] = useState(false);
   const [selectedTable, setSelectedTable] = useState<{ id: string; number: string } | null>(null);
   const [tableDialogOpen, setTableDialogOpen] = useState(false);
+  const [customItemOpen, setCustomItemOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // Customer
