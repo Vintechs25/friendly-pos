@@ -32,6 +32,7 @@ import {
 
 import POSLayout from "@/components/pos/POSLayout";
 import QuickProductDialog from "@/components/pos/QuickProductDialog";
+import CustomItemDialog from "@/components/pos/CustomItemDialog";
 import CategoryFilter from "@/components/pos/CategoryFilter";
 import CartItemRow from "@/components/pos/CartItemRow";
 import SplitPaymentPanel from "@/components/pos/SplitPaymentPanel";
