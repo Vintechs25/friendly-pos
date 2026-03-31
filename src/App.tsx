@@ -34,6 +34,7 @@ import HardwareSettingsPage from "./pages/HardwareSettingsPage";
 import EmailPage from "./pages/EmailPage";
 import TablesPage from "./pages/TablesPage";
 import KitchenDisplayPage from "./pages/KitchenDisplayPage";
+import FilesPage from "./pages/FilesPage";
 
 import NotFound from "./pages/NotFound";
 
