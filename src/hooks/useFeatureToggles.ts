@@ -18,6 +18,12 @@ const FEATURE_TO_PERMISSIONS: Record<string, string[]> = {
   audit_logs: ["view_audit_logs"],
   customer_loyalty: ["manage_customers"],
   restaurant_mode: ["manage_pos"],
+  custom_items: [],
+  batch_tracking: [],
+  expiry_tracking: [],
+  barcode_scanning: [],
+  mpesa_payments: [],
+  hardware_support: [],
 };
 
 /**
