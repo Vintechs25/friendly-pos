@@ -437,6 +437,14 @@ export default function POSPage() {
                   <List className="h-4 w-4" />
                 </button>
               </div>
+              {customItemsEnabled && (
+                <button
+                  onClick={() => setCustomItemOpen(true)}
+                  className="h-10 px-3 flex items-center gap-1.5 rounded-lg border border-dashed border-primary/40 text-xs font-medium text-primary hover:bg-primary/5 transition-colors touch-manipulation shrink-0"
+                >
+                  <Wrench className="h-3.5 w-3.5" /> Custom
+                </button>
+              )}
             </div>
             {/* Category pills */}
             <CategoryFilter
