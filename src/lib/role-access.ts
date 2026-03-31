@@ -35,6 +35,7 @@ const ROLE_ROUTES: Record<string, string[] | "all"> = {
     "/dashboard/team",
     "/dashboard/tables",
     "/dashboard/kitchen",
+    "/dashboard/files",
   ],
   manager: [
     "/dashboard",
@@ -52,6 +53,7 @@ const ROLE_ROUTES: Record<string, string[] | "all"> = {
     "/dashboard/team",
     "/dashboard/tables",
     "/dashboard/kitchen",
+    "/dashboard/files",
   ],
   inventory_officer: [
     "/dashboard",

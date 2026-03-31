@@ -34,6 +34,7 @@ import HardwareSettingsPage from "./pages/HardwareSettingsPage";
 import EmailPage from "./pages/EmailPage";
 import TablesPage from "./pages/TablesPage";
 import KitchenDisplayPage from "./pages/KitchenDisplayPage";
+import FilesPage from "./pages/FilesPage";
 
 import NotFound from "./pages/NotFound";
 
@@ -71,6 +72,7 @@ const App = () => (
                 <Route path="/dashboard/email" element={<ProtectedRoute><EmailPage /></ProtectedRoute>} />
                 <Route path="/dashboard/tables" element={<ProtectedRoute><TablesPage /></ProtectedRoute>} />
                 <Route path="/dashboard/kitchen" element={<ProtectedRoute><KitchenDisplayPage /></ProtectedRoute>} />
+                <Route path="/dashboard/files" element={<ProtectedRoute><FilesPage /></ProtectedRoute>} />
                 <Route path="/admin" element={<ProtectedRoute requiredRole="super_admin"><AdminDashboardPage /></ProtectedRoute>} />
                 <Route path="/admin/businesses" element={<ProtectedRoute requiredRole="super_admin"><AdminBusinessesPage /></ProtectedRoute>} />
                 <Route path="/admin/plans" element={<ProtectedRoute requiredRole="super_admin"><AdminPlansPage /></ProtectedRoute>} />

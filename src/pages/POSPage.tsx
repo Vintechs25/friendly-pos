@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import {
   Search, Barcode, Loader2, Package, PauseCircle,
-  Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag, Plus, StickyNote, UtensilsCrossed,
+  Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag, Plus, StickyNote, UtensilsCrossed, Wrench,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useFeatureToggles } from "@/hooks/useFeatureToggles";
@@ -32,6 +32,7 @@ import {
 
 import POSLayout from "@/components/pos/POSLayout";
 import QuickProductDialog from "@/components/pos/QuickProductDialog";
+import CustomItemDialog from "@/components/pos/CustomItemDialog";
 import CategoryFilter from "@/components/pos/CategoryFilter";
 import CartItemRow from "@/components/pos/CartItemRow";
 import SplitPaymentPanel from "@/components/pos/SplitPaymentPanel";
@@ -77,6 +78,7 @@ export default function POSPage() {
   const [cartPulse, setCartPulse] = useState(false);
   const [selectedTable, setSelectedTable] = useState<{ id: string; number: string } | null>(null);
   const [tableDialogOpen, setTableDialogOpen] = useState(false);
+  const [customItemOpen, setCustomItemOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // Customer
@@ -104,6 +106,7 @@ export default function POSPage() {
   const { deviceStatuses } = useHardwareConfig();
   const { isFeatureEnabled } = useFeatureToggles();
   const restaurantMode = isFeatureEnabled("restaurant_mode");
+  const customItemsEnabled = isFeatureEnabled("custom_items");
 
   const canOverridePrice = hasRole("business_owner") || hasRole("manager") || hasRole("super_admin");
 
@@ -394,6 +397,16 @@ export default function POSPage() {
           addToCart(product);
         }}
       />
+      <CustomItemDialog
+        open={customItemOpen}
+        onOpenChange={setCustomItemOpen}
+        onAdd={(item) => {
+          setCart((prev) => [...prev, item]);
+          setCartPulse(true);
+          setTimeout(() => setCartPulse(false), 600);
+          toast.success(`Custom: ${item.name} added`);
+        }}
+      />
 
       <div className="flex h-full">
         {/* ═══ LEFT: Product Catalog ═══ */}
@@ -424,6 +437,14 @@ export default function POSPage() {
                   <List className="h-4 w-4" />
                 </button>
               </div>
+              {customItemsEnabled && (
+                <button
+                  onClick={() => setCustomItemOpen(true)}
+                  className="h-10 px-3 flex items-center gap-1.5 rounded-lg border border-dashed border-primary/40 text-xs font-medium text-primary hover:bg-primary/5 transition-colors touch-manipulation shrink-0"
+                >
+                  <Wrench className="h-3.5 w-3.5" /> Custom
+                </button>
+              )}
             </div>
             {/* Category pills */}
             <CategoryFilter

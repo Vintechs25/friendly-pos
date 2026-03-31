@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Search, Loader2, Building2, ToggleLeft, ToggleRight, Plus, Upload, Palette } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables, Database } from "@/integrations/supabase/types";
+import { getFeatureTogglesForIndustry } from "@/lib/feature-provisioning";
 
 type Business = Tables<"businesses">;
 type IndustryType = string;
@@ -183,7 +184,13 @@ export default function AdminBusinessesPage() {
       const result = await res.json();
       if (!result.success) throw new Error(result.error || "Owner account creation failed");
 
-      // 6. Audit log
+      // 6. Auto-provision feature flags based on industry
+      const featureRows = getFeatureTogglesForIndustry(business.id, bizIndustry);
+      if (featureRows.length > 0) {
+        await supabase.from("feature_toggles").insert(featureRows);
+      }
+
+      // 7. Audit log
       await supabase.from("audit_logs").insert({
         action: "business_provisioned",
         table_name: "businesses",
@@ -193,6 +200,7 @@ export default function AdminBusinessesPage() {
           business_name: bizName,
           owner_email: ownerEmail,
           industry: bizIndustry,
+          features_provisioned: featureRows.length,
           branding: { primaryColor, secondaryColor, invoicePrefix, currencyCode, taxLabel },
         } as any,
       });
