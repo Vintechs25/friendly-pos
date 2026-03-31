@@ -397,6 +397,16 @@ export default function POSPage() {
           addToCart(product);
         }}
       />
+      <CustomItemDialog
+        open={customItemOpen}
+        onOpenChange={setCustomItemOpen}
+        onAdd={(item) => {
+          setCart((prev) => [...prev, item]);
+          setCartPulse(true);
+          setTimeout(() => setCartPulse(false), 600);
+          toast.success(`Custom: ${item.name} added`);
+        }}
+      />
 
       <div className="flex h-full">
         {/* ═══ LEFT: Product Catalog ═══ */}
