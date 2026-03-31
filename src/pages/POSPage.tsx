@@ -106,6 +106,7 @@ export default function POSPage() {
   const { deviceStatuses } = useHardwareConfig();
   const { isFeatureEnabled } = useFeatureToggles();
   const restaurantMode = isFeatureEnabled("restaurant_mode");
+  const customItemsEnabled = isFeatureEnabled("custom_items");
 
   const canOverridePrice = hasRole("business_owner") || hasRole("manager") || hasRole("super_admin");
 
