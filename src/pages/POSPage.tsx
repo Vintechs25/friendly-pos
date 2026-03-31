@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import {
   Search, Barcode, Loader2, Package, PauseCircle,
-  Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag, Plus, StickyNote, UtensilsCrossed,
+  Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag, Plus, StickyNote, UtensilsCrossed, Wrench,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useFeatureToggles } from "@/hooks/useFeatureToggles";
