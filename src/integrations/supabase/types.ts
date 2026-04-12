@@ -656,6 +656,113 @@ export type Database = {
           },
         ]
       }
+      etims_settings: {
+        Row: {
+          api_password: string | null
+          api_username: string | null
+          business_id: string
+          created_at: string
+          device_id: string
+          environment: string
+          id: string
+          is_active: boolean
+          kra_pin: string
+          updated_at: string
+        }
+        Insert: {
+          api_password?: string | null
+          api_username?: string | null
+          business_id: string
+          created_at?: string
+          device_id?: string
+          environment?: string
+          id?: string
+          is_active?: boolean
+          kra_pin?: string
+          updated_at?: string
+        }
+        Update: {
+          api_password?: string | null
+          api_username?: string | null
+          business_id?: string
+          created_at?: string
+          device_id?: string
+          environment?: string
+          id?: string
+          is_active?: boolean
+          kra_pin?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "etims_settings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      etims_transactions: {
+        Row: {
+          business_id: string
+          control_code: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          invoice_number: string | null
+          qr_code: string | null
+          response_data: Json | null
+          retry_count: number
+          sale_id: string
+          status: string
+          submitted_at: string | null
+        }
+        Insert: {
+          business_id: string
+          control_code?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          invoice_number?: string | null
+          qr_code?: string | null
+          response_data?: Json | null
+          retry_count?: number
+          sale_id: string
+          status?: string
+          submitted_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          control_code?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          invoice_number?: string | null
+          qr_code?: string | null
+          response_data?: Json | null
+          retry_count?: number
+          sale_id?: string
+          status?: string
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "etims_transactions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "etims_transactions_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: true
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feature_toggles: {
         Row: {
           business_id: string
