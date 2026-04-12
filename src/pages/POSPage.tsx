@@ -527,29 +527,34 @@ export default function POSPage() {
         </div>
 
         {/* ═══ RIGHT: Cart + Payment ═══ */}
-        <div className="w-[380px] xl:w-[420px] 2xl:w-[460px] flex flex-col bg-card shrink-0 border-l border-border">
+        <div className="w-[400px] xl:w-[440px] 2xl:w-[480px] flex flex-col bg-card shrink-0 border-l-2 border-border shadow-[-4px_0_24px_-6px_hsl(var(--foreground)/0.06)]">
           {/* Cart header */}
-          <div className="px-3 py-2 border-b border-border flex items-center justify-between shrink-0 bg-card">
-            <div className="flex items-center gap-2">
-              <ShoppingBag className={cn("h-4 w-4 text-primary transition-transform", cartPulse && "scale-125 text-success")} />
-              <span className="font-bold text-sm">
-                Cart
-                <span className={cn("text-muted-foreground font-normal ml-1.5 text-[11px] transition-colors", cartPulse && "text-success font-semibold")}>
-                  ({cart.length} {cart.length === 1 ? "item" : "items"})
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0 bg-card">
+            <div className="flex items-center gap-2.5">
+              <div className={cn(
+                "h-8 w-8 rounded-xl flex items-center justify-center transition-all",
+                cart.length > 0 ? "bg-primary/10" : "bg-muted"
+              )}>
+                <ShoppingBag className={cn("h-4 w-4 transition-all", cart.length > 0 ? "text-primary" : "text-muted-foreground", cartPulse && "scale-125 text-primary")} />
+              </div>
+              <div>
+                <span className="font-bold text-sm">Current Sale</span>
+                <span className={cn("text-muted-foreground font-normal ml-2 text-xs transition-colors", cartPulse && "text-primary font-semibold")}>
+                  {cart.length} {cart.length === 1 ? "item" : "items"} · {totalQty} units
                 </span>
-              </span>
+              </div>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1.5">
               {cart.length > 0 && (
                 <>
-                  <Button variant="ghost" size="sm" className="h-7 text-[11px] gap-1 touch-manipulation rounded-md px-2" onClick={() => setShowNotes(!showNotes)}>
-                    <StickyNote className={cn("h-3 w-3", orderNotes && "text-warning")} />
+                  <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5 touch-manipulation rounded-lg px-2.5" onClick={() => setShowNotes(!showNotes)}>
+                    <StickyNote className={cn("h-3.5 w-3.5", orderNotes && "text-accent-foreground")} />
                   </Button>
-                  <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1 touch-manipulation rounded-md px-2" onClick={holdTransaction}>
-                    <PauseCircle className="h-3 w-3" /> Hold
+                  <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 touch-manipulation rounded-lg px-3" onClick={holdTransaction}>
+                    <PauseCircle className="h-3.5 w-3.5" /> Hold
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-7 text-[11px] gap-1 text-destructive hover:text-destructive hover:bg-destructive/10 touch-manipulation rounded-md px-2" onClick={voidCurrentSale}>
-                    <XCircle className="h-3 w-3" /> Void
+                  <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10 touch-manipulation rounded-lg px-2.5" onClick={voidCurrentSale}>
+                    <XCircle className="h-3.5 w-3.5" /> Void
                   </Button>
                 </>
               )}
