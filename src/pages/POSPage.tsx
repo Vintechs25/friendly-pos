@@ -29,6 +29,7 @@ import {
   getCachedCategories,
   OfflineSale,
 } from "@/lib/offline-store";
+import { submitToEtims } from "@/lib/etims-client";
 
 import POSLayout from "@/components/pos/POSLayout";
 import QuickProductDialog from "@/components/pos/QuickProductDialog";
@@ -360,6 +361,21 @@ export default function POSPage() {
       });
       setShowReceipt(true);
       toast.success(`Sale completed! ${receiptNumber}`);
+
+      // Fire eTIMS submission in background (non-blocking)
+      if (isOnline && branch) {
+        const saleRecord = await supabase.from("sales").select("id").eq("receipt_number", receiptNumber).eq("business_id", profile.business_id).single();
+        if (saleRecord.data) {
+          submitToEtims(saleRecord.data.id, profile.business_id).then(result => {
+            if (result.success) {
+              toast.info("eTIMS invoice submitted");
+            } else if (result.status === "failed") {
+              toast.warning("eTIMS submission pending - will retry");
+            }
+          });
+        }
+      }
+
       resetSale();
       scanner.resetCount();
     } catch (err: any) { toast.error(err.message || "Error"); } finally { setProcessing(false); }
