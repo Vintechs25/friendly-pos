@@ -75,6 +75,7 @@ const navItems: NavItem[] = [
   { icon: UtensilsCrossed, label: "Tables", path: "/dashboard/tables", permission: "manage_pos", group: "Restaurant" },
   { icon: ChefHat, label: "Kitchen", path: "/dashboard/kitchen", permission: "manage_pos", group: "Restaurant" },
   { icon: FolderOpen, label: "Files", path: "/dashboard/files", permission: "manage_settings", group: "Admin" },
+  { icon: Shield, label: "eTIMS", path: "/dashboard/etims", permission: "manage_settings", group: "Admin" },
 ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
