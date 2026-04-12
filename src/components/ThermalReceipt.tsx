@@ -69,6 +69,11 @@ export interface ReceiptData {
   loyaltyPointsEarned?: number;
   // Offline
   isPendingSync?: boolean;
+  // eTIMS compliance
+  etimsInvoiceNumber?: string;
+  etimsControlCode?: string;
+  etimsQrCode?: string;
+  etimsStatus?: string;
 }
 
 interface ThermalReceiptProps {
@@ -127,7 +132,7 @@ const ThermalReceipt = forwardRef<HTMLDivElement, ThermalReceiptProps>(
     const isRefund = variant === "refund";
     const isVoid = variant === "void";
 
-    const qrValue = JSON.stringify({
+    const qrValue = data.etimsQrCode || JSON.stringify({
       r: data.receiptNumber,
       t: data.total,
       d: data.date.toISOString(),
@@ -438,6 +443,33 @@ const ThermalReceipt = forwardRef<HTMLDivElement, ThermalReceiptProps>(
         </div>
 
         <Divider />
+
+        {/* ═══ eTIMS COMPLIANCE ═══ */}
+        {data.etimsInvoiceNumber && (
+          <div style={{ position: "relative", zIndex: 2, marginBottom: "2px" }}>
+            <Pre bold size="10px" style={{ letterSpacing: "0.5px", marginBottom: "2px" }}>
+              KRA eTIMS
+            </Pre>
+            <Row left="Invoice No" right={data.etimsInvoiceNumber} />
+            {data.etimsControlCode && <Row left="Control Code" right={data.etimsControlCode} />}
+            {data.etimsStatus === "sent" && (
+              <div style={{ fontSize: "9px", color: "#555", textAlign: "center", marginTop: "2px" }}>
+                ✓ Fiscalized — KRA Compliant
+              </div>
+            )}
+            {data.etimsStatus === "pending" && (
+              <div style={{ fontSize: "9px", color: "#b45309", textAlign: "center", marginTop: "2px", fontWeight: "bold" }}>
+                ⏳ Compliance Pending — Will update on reprint
+              </div>
+            )}
+            {data.etimsStatus === "failed" && (
+              <div style={{ fontSize: "9px", color: "#dc2626", textAlign: "center", marginTop: "2px", fontWeight: "bold" }}>
+                ⚠ Submission Failed — Will retry
+              </div>
+            )}
+            <Divider />
+          </div>
+        )}
 
         {/* ═══ 5. QR CODE ═══ */}
         {(data.config?.showQR !== false) && (
