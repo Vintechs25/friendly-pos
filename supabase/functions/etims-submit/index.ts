@@ -125,7 +125,8 @@ Deno.serve(async (req) => {
         body: JSON.stringify(etimsPayload),
       });
 
-      responseData = await etimsResponse.json().catch(() => ({ raw: await etimsResponse.text() }));
+      const responseText = await etimsResponse.text();
+      try { responseData = JSON.parse(responseText); } catch { responseData = { raw: responseText }; }
 
       if (etimsResponse.ok && responseData.control_code) {
         controlCode = responseData.control_code;
