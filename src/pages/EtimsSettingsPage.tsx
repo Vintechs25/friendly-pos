@@ -132,10 +132,11 @@ export default function EtimsSettingsPage() {
 
   const statusIcon = (status: string) => {
     switch (status) {
-      case "sent": return <CheckCircle2 className="h-4 w-4 text-green-600" />;
+      case "sent": return <CheckCircle2 className="h-4 w-4 text-primary" />;
       case "failed": return <XCircle className="h-4 w-4 text-destructive" />;
-      case "pending": return <Clock className="h-4 w-4 text-amber-500" />;
+      case "pending": return <Clock className="h-4 w-4 text-accent-foreground" />;
       default: return <AlertTriangle className="h-4 w-4 text-muted-foreground" />;
+    }
     }
   };
 
@@ -165,13 +166,13 @@ export default function EtimsSettingsPage() {
         <div className="grid grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-4 text-center">
-              <p className="text-2xl font-bold text-green-600">{sentCount}</p>
+              <p className="text-2xl font-bold text-primary">{sentCount}</p>
               <p className="text-xs text-muted-foreground">Submitted</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4 text-center">
-              <p className="text-2xl font-bold text-amber-500">{pendingCount}</p>
+              <p className="text-2xl font-bold text-accent-foreground">{pendingCount}</p>
               <p className="text-xs text-muted-foreground">Pending / Failed</p>
             </CardContent>
           </Card>
