@@ -1,4 +1,4 @@
-import { Package, Plus } from "lucide-react";
+import { Package, Plus, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Product {
@@ -18,54 +18,55 @@ interface ProductGridProps {
   onAddToCart: (product: any) => void;
 }
 
-// Generate a consistent color from product name
-function getProductColor(name: string): string {
-  const colors = [
-    "from-blue-500/80 to-blue-600/80",
-    "from-emerald-500/80 to-emerald-600/80",
-    "from-amber-500/80 to-amber-600/80",
-    "from-rose-500/80 to-rose-600/80",
-    "from-violet-500/80 to-violet-600/80",
-    "from-cyan-500/80 to-cyan-600/80",
-    "from-orange-500/80 to-orange-600/80",
-    "from-teal-500/80 to-teal-600/80",
-    "from-indigo-500/80 to-indigo-600/80",
-    "from-pink-500/80 to-pink-600/80",
-  ];
+// Professional color palette using semantic hues
+const TILE_COLORS = [
+  "from-primary/70 to-primary/90",
+  "from-accent/70 to-accent/90",
+  "from-[hsl(38,92%,50%)]/70 to-[hsl(38,92%,40%)]/90",
+  "from-[hsl(340,65%,47%)]/70 to-[hsl(340,65%,37%)]/90",
+  "from-[hsl(262,60%,50%)]/70 to-[hsl(262,60%,40%)]/90",
+  "from-[hsl(190,80%,42%)]/70 to-[hsl(190,80%,32%)]/90",
+  "from-[hsl(24,80%,50%)]/70 to-[hsl(24,80%,40%)]/90",
+  "from-[hsl(170,70%,40%)]/70 to-[hsl(170,70%,30%)]/90",
+];
+
+function getTileColor(name: string): string {
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
+  return TILE_COLORS[Math.abs(hash) % TILE_COLORS.length];
 }
 
 export default function ProductGrid({ products, onAddToCart }: ProductGridProps) {
   if (products.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-        <Package className="h-12 w-12 mb-4 opacity-15" />
-        <p className="text-sm font-semibold">No products found</p>
-        <p className="text-xs mt-1 text-muted-foreground/70">Try a different category or search</p>
+      <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
+        <Package className="h-16 w-16 mb-4 opacity-10" />
+        <p className="text-base font-bold">No products found</p>
+        <p className="text-sm mt-1 text-muted-foreground/60">Try a different category or search term</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5">
       {products.map((product) => {
         const outOfStock = product.stock_quantity <= 0;
+        const lowStock = product.stock_quantity > 0 && product.stock_quantity <= 10;
+
         return (
           <button
             key={product.id}
             onClick={() => onAddToCart(product)}
             disabled={outOfStock}
             className={cn(
-              "group relative flex flex-col rounded-xl overflow-hidden transition-all touch-manipulation select-none",
-              "h-[110px] min-h-[110px]",
+              "group relative flex flex-col rounded-2xl overflow-hidden transition-all touch-manipulation select-none",
+              "h-[140px] min-h-[140px]",
               outOfStock
-                ? "opacity-40 cursor-not-allowed grayscale"
-                : "hover:scale-[1.03] active:scale-[0.97] hover:shadow-lg active:shadow-none cursor-pointer"
+                ? "opacity-35 cursor-not-allowed grayscale"
+                : "hover:scale-[1.03] active:scale-[0.96] hover:shadow-xl hover:shadow-primary/10 active:shadow-none cursor-pointer ring-1 ring-border/30 hover:ring-primary/40"
             )}
           >
-            {/* Colored background */}
+            {/* Background */}
             {product.image_url ? (
               <div className="absolute inset-0">
                 <img
@@ -74,41 +75,53 @@ export default function ProductGrid({ products, onAddToCart }: ProductGridProps)
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/5" />
               </div>
             ) : (
-              <div className={cn(
-                "absolute inset-0 bg-gradient-to-br",
-                getProductColor(product.name)
-              )} />
+              <div className={cn("absolute inset-0 bg-gradient-to-br", getTileColor(product.name))}>
+                {/* Large faded initial */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[48px] font-black text-white/[0.08] leading-none select-none pointer-events-none">
+                  {product.name.charAt(0).toUpperCase()}
+                </div>
+              </div>
             )}
 
-            {/* Stock badge */}
+            {/* Stock badges */}
             {outOfStock ? (
-              <div className="absolute top-1.5 right-1.5 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
-                OUT
+              <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                OUT OF STOCK
               </div>
-            ) : product.stock_quantity <= 10 && product.stock_quantity > 0 && (
-              <div className="absolute top-1.5 left-1.5 bg-warning/90 text-warning-foreground text-[9px] font-bold px-1.5 py-0.5 rounded">
+            ) : lowStock ? (
+              <div className="absolute top-2 left-2 bg-[hsl(38,92%,50%)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
                 {product.stock_quantity} left
               </div>
-            )}
+            ) : null}
 
-            {/* Quick add indicator */}
+            {/* Quick add hover indicator */}
             {!outOfStock && (
-              <div className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Plus className="h-3.5 w-3.5 text-white" />
+              <div className="absolute top-2 right-2 h-7 w-7 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:scale-110">
+                <Plus className="h-4 w-4 text-white drop-shadow" />
               </div>
             )}
 
-            {/* Product info - bottom aligned */}
-            <div className="relative mt-auto p-2 pt-3">
-              <p className="text-[12px] font-bold leading-tight line-clamp-2 text-white drop-shadow-sm">
-                {product.name}
-              </p>
-              <p className="text-[13px] font-black text-white/90 mt-0.5 drop-shadow-sm">
-                KSh {product.price.toLocaleString("en-KE", { minimumFractionDigits: 0 })}
-              </p>
+            {/* Product info — bottom-aligned with glass effect */}
+            <div className="relative mt-auto">
+              <div className="px-3 py-2.5 bg-gradient-to-t from-black/60 to-transparent">
+                <p className="text-[13px] font-bold leading-tight line-clamp-2 text-white drop-shadow-md">
+                  {product.name}
+                </p>
+                <div className="flex items-center justify-between mt-1">
+                  <p className="text-[15px] font-black text-white drop-shadow-md tracking-tight">
+                    KSh {product.price.toLocaleString("en-KE", { minimumFractionDigits: 0 })}
+                  </p>
+                  {!outOfStock && (
+                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ShoppingCart className="h-3 w-3 text-white/70" />
+                      <span className="text-[10px] text-white/70 font-medium">Add</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </button>
         );
