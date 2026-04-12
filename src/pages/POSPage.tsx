@@ -620,11 +620,12 @@ export default function POSPage() {
             )}
 
             {/* Cart items */}
-            <div className="px-2 py-1">
+            <div className="px-3 py-1.5">
               {cart.length === 0 ? (
-                <div className="flex items-center justify-center py-8 text-muted-foreground gap-2">
-                  <Barcode className="h-5 w-5 opacity-20" />
-                  <p className="text-xs">Scan or tap to add items</p>
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-2">
+                  <Barcode className="h-8 w-8 opacity-15" />
+                  <p className="text-sm font-medium">Scan or tap to add items</p>
+                  <p className="text-xs text-muted-foreground/60">Products will appear here</p>
                 </div>
               ) : cart.map((item) => (
                 <CartItemRow key={item.id} item={item} onUpdateQty={updateQty} onRemove={removeItem} onUpdateDiscount={updateItemDiscount} onPriceOverride={overridePrice} canOverridePrice={canOverridePrice} />
@@ -634,18 +635,18 @@ export default function POSPage() {
 
           {/* ═══ Totals & Payment - pinned bottom ═══ */}
           <div className="border-t-2 border-border bg-card shrink-0">
-            <div className="px-3 py-2 space-y-1">
-              <div className="flex justify-between text-[11px]">
+            <div className="px-4 py-3 space-y-1.5">
+              <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-medium tabular-nums">KSh {itemsSubtotal.toFixed(2)}</span>
+                <span className="font-semibold tabular-nums">KSh {itemsSubtotal.toLocaleString("en-KE", { minimumFractionDigits: 2 })}</span>
               </div>
 
               {/* Cart discount */}
               <div className="flex items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all touch-manipulation">
-                      <Percent className="h-2.5 w-2.5" /> Discount
+                    <button className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all touch-manipulation">
+                      <Percent className="h-3 w-3" /> Discount
                     </button>
                   </PopoverTrigger>
                   <PopoverContent className="w-56 p-3 space-y-2" side="top">
@@ -657,26 +658,26 @@ export default function POSPage() {
                     <Input type="number" value={cartDiscount || ""} onChange={(e) => setCartDiscount(parseFloat(e.target.value) || 0)} placeholder="0" className="h-9" min="0" />
                   </PopoverContent>
                 </Popover>
-                {cartDiscountAmount > 0 && <span className="text-[10px] text-destructive font-semibold ml-auto tabular-nums">-KSh {cartDiscountAmount.toFixed(2)}</span>}
+                {cartDiscountAmount > 0 && <span className="text-xs text-destructive font-semibold ml-auto tabular-nums">-KSh {cartDiscountAmount.toLocaleString("en-KE", { minimumFractionDigits: 2 })}</span>}
               </div>
 
               {loyaltyDiscount > 0 && (
-                <div className="flex justify-between text-[11px]">
+                <div className="flex justify-between text-xs">
                   <span className="text-muted-foreground">Loyalty</span>
-                  <span className="text-destructive font-medium tabular-nums">-KSh {loyaltyDiscount.toFixed(2)}</span>
+                  <span className="text-destructive font-semibold tabular-nums">-KSh {loyaltyDiscount.toLocaleString("en-KE", { minimumFractionDigits: 2 })}</span>
                 </div>
               )}
 
-              <div className="flex justify-between text-[11px]">
-                <span className="text-muted-foreground">Tax</span>
-                <span className="font-medium tabular-nums">KSh {taxAmount.toFixed(2)}</span>
+              <div className="flex justify-between text-xs">
+                <span className="text-muted-foreground">VAT (16%)</span>
+                <span className="font-semibold tabular-nums">KSh {taxAmount.toLocaleString("en-KE", { minimumFractionDigits: 2 })}</span>
               </div>
             </div>
 
             {/* Total - big and prominent */}
-            <div className="flex justify-between items-center px-3 py-2.5 bg-primary/5 border-y border-primary/20">
+            <div className="flex justify-between items-center px-4 py-3.5 bg-primary/5 border-y border-primary/20">
               <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">TOTAL</span>
-              <span className="text-2xl font-black text-primary tabular-nums">
+              <span className="text-3xl font-black text-primary tabular-nums tracking-tight">
                 KSh {total.toLocaleString("en-KE", { minimumFractionDigits: 2 })}
               </span>
             </div>
