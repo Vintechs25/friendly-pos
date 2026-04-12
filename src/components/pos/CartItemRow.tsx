@@ -40,18 +40,18 @@ export default function CartItemRow({
   };
 
   return (
-    <div className="group flex items-center gap-2 py-2 px-2 rounded-lg hover:bg-muted/50 transition-colors touch-manipulation border-b border-border/50 last:border-0">
-      {/* Qty controls - compact */}
-      <div className="flex items-center gap-0.5 shrink-0">
+    <div className="group flex items-center gap-2.5 py-2.5 px-2.5 rounded-xl hover:bg-muted/40 transition-all touch-manipulation border-b border-border/30 last:border-0">
+      {/* Qty controls */}
+      <div className="flex items-center gap-1 shrink-0">
         <button
           onClick={() => onUpdateQty(item.id, Math.max(0.001, item.qty - 1))}
-          className="h-7 w-7 rounded-md bg-muted/80 flex items-center justify-center hover:bg-muted active:scale-95 transition-all"
+          className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center hover:bg-muted/80 active:scale-90 transition-all text-foreground"
         >
-          <Minus className="h-3 w-3" />
+          <Minus className="h-3.5 w-3.5" />
         </button>
         {editingQty ? (
           <Input
-            className="w-10 h-7 text-center text-xs font-bold p-0 rounded-md"
+            className="w-12 h-8 text-center text-sm font-bold p-0 rounded-lg"
             value={qtyInput}
             onChange={(e) => setQtyInput(e.target.value)}
             onBlur={commitQty}
@@ -60,7 +60,7 @@ export default function CartItemRow({
           />
         ) : (
           <button
-            className="w-9 h-7 text-center text-xs font-bold bg-muted/80 rounded-md hover:bg-muted transition-colors"
+            className="w-10 h-8 text-center text-sm font-bold bg-muted rounded-lg hover:bg-muted/80 transition-colors tabular-nums"
             onClick={() => { setQtyInput(String(item.qty)); setEditingQty(true); }}
           >
             {item.qty % 1 !== 0 ? item.qty.toFixed(2) : item.qty}
@@ -68,36 +68,36 @@ export default function CartItemRow({
         )}
         <button
           onClick={() => onUpdateQty(item.id, item.qty + 1)}
-          className="h-7 w-7 rounded-md bg-muted/80 flex items-center justify-center hover:bg-muted active:scale-95 transition-all"
+          className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center hover:bg-muted/80 active:scale-90 transition-all text-foreground"
         >
-          <Plus className="h-3 w-3" />
+          <Plus className="h-3.5 w-3.5" />
         </button>
       </div>
 
       {/* Product info */}
       <div className="flex-1 min-w-0">
-        <p className="text-[12px] font-semibold truncate leading-tight">{item.name}</p>
+        <p className="text-sm font-semibold truncate leading-tight">{item.name}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
-          <span className="text-[10px] text-muted-foreground">
-            @ {effectivePrice.toFixed(0)}
+          <span className="text-xs text-muted-foreground tabular-nums">
+            @ KSh {effectivePrice.toLocaleString("en-KE", { minimumFractionDigits: 0 })}
           </span>
           {item.priceOverride !== null && (
-            <span className="text-[9px] text-warning font-medium bg-warning/10 px-1 rounded">edited</span>
+            <span className="text-[10px] text-accent-foreground font-medium bg-accent/10 px-1.5 py-0.5 rounded-full">edited</span>
           )}
           {item.itemDiscount > 0 && (
-            <span className="text-[9px] text-success font-medium bg-success/10 px-1 rounded">
-              -{item.itemDiscountType === "percent" ? `${item.itemDiscount}%` : item.itemDiscount.toFixed(0)}
+            <span className="text-[10px] text-primary font-medium bg-primary/10 px-1.5 py-0.5 rounded-full">
+              -{item.itemDiscountType === "percent" ? `${item.itemDiscount}%` : `${item.itemDiscount.toFixed(0)}`}
             </span>
           )}
         </div>
       </div>
 
       {/* Line total */}
-      <span className="text-[13px] font-bold w-[68px] text-right tabular-nums shrink-0">
-        {lineTotal.toFixed(2)}
+      <span className="text-sm font-bold w-[72px] text-right tabular-nums shrink-0">
+        {lineTotal.toLocaleString("en-KE", { minimumFractionDigits: 2 })}
       </span>
 
-      {/* Actions - show on hover */}
+      {/* Actions */}
       <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
         <ItemDiscountPopover item={item} onApply={onUpdateDiscount} />
         {canOverridePrice && (
@@ -105,9 +105,9 @@ export default function CartItemRow({
         )}
         <button
           onClick={() => onRemove(item.id)}
-          className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+          className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
         >
-          <Trash2 className="h-3.5 w-3.5" />
+          <Trash2 className="h-4 w-4" />
         </button>
       </div>
     </div>

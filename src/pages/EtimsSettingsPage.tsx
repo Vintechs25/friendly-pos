@@ -137,7 +137,6 @@ export default function EtimsSettingsPage() {
       case "pending": return <Clock className="h-4 w-4 text-accent-foreground" />;
       default: return <AlertTriangle className="h-4 w-4 text-muted-foreground" />;
     }
-    }
   };
 
   if (isLoading) {
