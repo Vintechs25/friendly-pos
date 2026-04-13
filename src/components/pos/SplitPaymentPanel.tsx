@@ -160,20 +160,49 @@ export default function SplitPaymentPanel({
 
   if (!splitMode) {
     const selectedMethod = payments[0]?.method ?? "cash";
+
+    const methodStyles: Record<PaymentMethod, string> = {
+      cash: "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20",
+      card: "bg-accent text-accent-foreground border-accent shadow-md shadow-accent/20",
+      mobile_money: "bg-[hsl(145,63%,42%)] text-white border-[hsl(145,63%,42%)] shadow-md shadow-[hsl(145,63%,42%)]/25",
+      store_credit: "bg-secondary text-secondary-foreground border-secondary",
+      gift_card: "bg-[hsl(38,92%,50%)] text-white border-[hsl(38,92%,50%)] shadow-md shadow-[hsl(38,92%,50%)]/20",
+    };
+
     return (
       <div className="space-y-2.5">
-        <div className="grid grid-cols-5 gap-1.5">
-          {allMethods.map((m) => (
-            <Button
+        <div className="grid grid-cols-3 gap-1.5">
+          {(["cash", "card", "mobile_money"] as PaymentMethod[]).map((m) => (
+            <button
               key={m}
-              variant={selectedMethod === m ? "default" : "outline"}
-              size="sm"
-              className="flex-col h-auto py-2.5 gap-1 px-1 rounded-xl touch-manipulation active:scale-95 transition-all"
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-xl border-2 touch-manipulation active:scale-95 transition-all font-semibold",
+                selectedMethod === m
+                  ? methodStyles[m]
+                  : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:bg-muted/50"
+              )}
               onClick={() => selectMethod(m)}
             >
               {methodIcons[m]}
-              <span className="text-[9px] leading-tight font-semibold">{methodLabels[m]}</span>
-            </Button>
+              <span className="text-[10px] leading-tight font-bold">{methodLabels[m]}</span>
+            </button>
+          ))}
+        </div>
+        <div className="grid grid-cols-2 gap-1.5">
+          {(["store_credit", "gift_card"] as PaymentMethod[]).map((m) => (
+            <button
+              key={m}
+              className={cn(
+                "flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl border-2 touch-manipulation active:scale-95 transition-all text-[10px] font-semibold",
+                selectedMethod === m
+                  ? methodStyles[m]
+                  : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:bg-muted/50"
+              )}
+              onClick={() => selectMethod(m)}
+            >
+              {methodIcons[m]}
+              <span>{methodLabels[m]}</span>
+            </button>
           ))}
         </div>
 
