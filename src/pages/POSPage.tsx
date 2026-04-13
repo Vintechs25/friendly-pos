@@ -532,7 +532,7 @@ export default function POSPage() {
         </div>
 
         {/* ═══ RIGHT: Cart + Payment ═══ */}
-        <div className="w-[400px] xl:w-[440px] 2xl:w-[480px] flex flex-col bg-card shrink-0 border-l-2 border-border shadow-[-4px_0_24px_-6px_hsl(var(--foreground)/0.06)]">
+        <div className="w-full lg:w-[400px] xl:w-[440px] 2xl:w-[480px] flex flex-col bg-card shrink-0 border-t-2 lg:border-t-0 lg:border-l-2 border-border shadow-[-4px_0_24px_-6px_hsl(var(--foreground)/0.06)]">
           {/* Cart header */}
           <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0 bg-card">
             <div className="flex items-center gap-2.5">
