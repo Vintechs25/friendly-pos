@@ -709,7 +709,12 @@ export default function POSPage() {
             {/* Complete button */}
             <div className="px-3 pb-3 pt-1">
               <Button
-                className="w-full h-12 text-sm font-bold rounded-lg touch-manipulation shadow-lg shadow-primary/25 active:scale-[0.98] transition-transform"
+                className={cn(
+                  "w-full h-14 text-base font-black rounded-xl touch-manipulation active:scale-[0.97] transition-all",
+                  "shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40",
+                  "bg-gradient-to-r from-primary to-primary/90",
+                  cart.length === 0 && "opacity-50"
+                )}
                 disabled={cart.length === 0 || processing || !canUsePOS}
                 onClick={completeSale}
               >
