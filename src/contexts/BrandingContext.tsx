@@ -23,7 +23,7 @@ export interface BusinessBranding {
 
 const DEFAULT_BRANDING: BusinessBranding = {
   businessId: "",
-  businessName: "SwiftPOS",
+  businessName: "Friendly POS",
   logoUrl: null,
   primaryColor: "160 84% 39%",
   secondaryColor: "220 60% 50%",
@@ -82,7 +82,7 @@ export function BrandingProvider({ children }: { children: React.ReactNode }) {
       if (settings) {
         const newBranding: BusinessBranding = {
           businessId: profile.business_id,
-          businessName: business?.name || "SwiftPOS",
+          businessName: business?.name || "Friendly POS",
           logoUrl: settings.logo_url,
           primaryColor: settings.primary_color || DEFAULT_BRANDING.primaryColor,
           secondaryColor: settings.secondary_color || DEFAULT_BRANDING.secondaryColor,
@@ -104,7 +104,7 @@ export function BrandingProvider({ children }: { children: React.ReactNode }) {
         setBranding({
           ...DEFAULT_BRANDING,
           businessId: profile.business_id,
-          businessName: business?.name || "SwiftPOS",
+          businessName: business?.name || "Friendly POS",
         });
       }
     } catch (err) {

@@ -27,7 +27,7 @@ export default function SignupPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
               <Zap className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-2xl font-bold text-primary-foreground">SwiftPOS</span>
+            <span className="font-display text-2xl font-bold text-primary-foreground">Friendly POS</span>
           </div>
           <h2 className="font-display text-3xl font-bold text-primary-foreground mb-4">
             Enterprise POS Platform
@@ -53,7 +53,7 @@ export default function SignupPage() {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
               <Zap className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-bold">SwiftPOS</span>
+            <span className="font-display text-xl font-bold">Friendly POS</span>
           </div>
 
           <div className="flex flex-col items-center text-center mb-8">
