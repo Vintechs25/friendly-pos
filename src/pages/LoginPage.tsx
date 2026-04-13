@@ -53,7 +53,7 @@ export default function LoginPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
               <Zap className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-2xl font-bold text-primary-foreground">SwiftPOS</span>
+            <span className="font-display text-2xl font-bold text-primary-foreground">Friendly POS</span>
           </div>
           <h2 className="font-display text-3xl font-bold text-primary-foreground mb-4">
             Welcome back
@@ -71,7 +71,7 @@ export default function LoginPage() {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
               <Zap className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-bold">SwiftPOS</span>
+            <span className="font-display text-xl font-bold">Friendly POS</span>
           </div>
 
           <h1 className="font-display text-2xl font-bold mb-1">Sign in</h1>
@@ -105,7 +105,7 @@ export default function LoginPage() {
 
           {/* Platform watermark */}
           <p className="mt-8 text-center text-[10px] text-muted-foreground/60">
-            Powered by SwiftPOS Platform
+            Powered by Friendly POS Platform
           </p>
           <p className="mt-2 text-center">
             <Link to="/" className="text-xs text-muted-foreground hover:text-foreground">← Back to home</Link>

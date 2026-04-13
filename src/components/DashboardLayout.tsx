@@ -233,7 +233,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="border-t border-sidebar-border p-2 space-y-0.5">
           {branding.platformWatermark && !collapsed && (
             <p className="text-[9px] text-sidebar-foreground/30 text-center pb-1">
-              Powered by SwiftPOS
+              Powered by Friendly POS
             </p>
           )}
           <button

@@ -373,7 +373,7 @@ export default function AdminBusinessesPage() {
                   <div className="flex items-center justify-between rounded-lg border border-border p-3">
                     <div>
                       <p className="text-sm font-medium">Platform Watermark</p>
-                      <p className="text-xs text-muted-foreground">Show "Powered by SwiftPOS" in sidebar</p>
+                      <p className="text-xs text-muted-foreground">Show "Powered by Friendly POS" in sidebar</p>
                     </div>
                     <Switch checked={platformWatermark} onCheckedChange={setPlatformWatermark} />
                   </div>

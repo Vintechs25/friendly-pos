@@ -105,7 +105,7 @@ export default function LandingPage() {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
               <Zap className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-bold">SwiftPOS</span>
+            <span className="font-display text-xl font-bold">Friendly POS</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition-colors">Features</a>
@@ -253,7 +253,7 @@ export default function LandingPage() {
       <section className="hero-gradient py-20">
         <div className="container text-center">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground">Ready to transform your business?</h2>
-          <p className="mt-4 text-primary-foreground/70 text-lg max-w-xl mx-auto">Join thousands of businesses already using SwiftPOS to streamline operations and boost revenue.</p>
+          <p className="mt-4 text-primary-foreground/70 text-lg max-w-xl mx-auto">Join thousands of businesses already using Friendly POS to streamline operations and boost revenue.</p>
           <div className="mt-8">
             <Link to="/signup">
               <Button variant="hero" size="lg" className="text-base px-8">
@@ -271,9 +271,9 @@ export default function LandingPage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <Zap className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-display font-bold">SwiftPOS</span>
+            <span className="font-display font-bold">Friendly POS</span>
           </div>
-          <p className="text-sm text-muted-foreground">© 2026 SwiftPOS. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© 2026 Friendly POS. All rights reserved.</p>
         </div>
       </footer>
     </div>
