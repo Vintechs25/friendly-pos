@@ -424,9 +424,14 @@ export default function POSPage() {
         }}
       />
 
-      <div className="flex h-full">
+      <div className="flex flex-col lg:flex-row h-full">
         {/* ═══ LEFT: Product Catalog ═══ */}
-        <div className="flex-1 flex flex-col min-w-0 bg-muted/30">
+        <div className={cn(
+          "flex flex-col min-w-0 bg-muted/30",
+          "flex-1",
+          // On mobile, show products only when cart is not focused
+          "lg:flex"
+        )}>
           {/* Search bar */}
           <div className="px-3 py-2 space-y-1.5 bg-background border-b border-border">
             <div className="flex items-center gap-2">
@@ -439,7 +444,7 @@ export default function POSPage() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <div className="flex items-center rounded-lg border border-border overflow-hidden shrink-0">
+              <div className="hidden sm:flex items-center rounded-lg border border-border overflow-hidden shrink-0">
                 <button
                   onClick={() => setViewMode("grid")}
                   className={`h-10 w-10 flex items-center justify-center transition-colors touch-manipulation ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
@@ -458,7 +463,7 @@ export default function POSPage() {
                   onClick={() => setCustomItemOpen(true)}
                   className="h-10 px-3 flex items-center gap-1.5 rounded-lg border border-dashed border-primary/40 text-xs font-medium text-primary hover:bg-primary/5 transition-colors touch-manipulation shrink-0"
                 >
-                  <Wrench className="h-3.5 w-3.5" /> Custom
+                  <Wrench className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Custom</span>
                 </button>
               )}
             </div>
