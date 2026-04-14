@@ -281,6 +281,58 @@ export default function POSPage() {
   const resetSale = () => { setCart([]); setCartDiscount(0); setCashTendered(0); setSplitMode(false); setSelectedCustomer(null); setRedeemedPoints(0); setOrderNotes(""); setShowNotes(false); };
   const voidCurrentSale = () => { if (cart.length === 0) return; resetSale(); toast.info("Sale voided"); };
 
+  // Repeat a previous sale — load its items into cart
+  const repeatSale = async (saleId: string) => {
+    const { data: items } = await supabase
+      .from("sale_items")
+      .select("product_id, product_name, quantity, unit_price, tax_amount, item_discount, item_discount_type")
+      .eq("sale_id", saleId);
+    if (!items || items.length === 0) { toast.error("No items found"); return; }
+    const newCart: CartItem[] = items.map((i: any) => ({
+      id: i.product_id || crypto.randomUUID(),
+      name: i.product_name,
+      price: Number(i.unit_price),
+      cost: 0,
+      tax_rate: Number(i.tax_amount) > 0 ? 16 : 0,
+      qty: Number(i.quantity),
+      track_inventory: !!i.product_id,
+      itemDiscount: Number(i.item_discount) || 0,
+      itemDiscountType: (i.item_discount_type as "fixed" | "percent") || "fixed",
+      priceOverride: null,
+      overrideBy: null,
+    }));
+    setCart(newCart);
+    toast.success(`Loaded ${newCart.length} items from previous sale`);
+  };
+
+  // Credit sale handler
+  const handleCreditSale = async (dueDate: string, notes: string) => {
+    if (!user || !profile?.business_id || cart.length === 0) return;
+    if (!selectedCustomer) { toast.error("Select a customer for credit sales"); return; }
+    setProcessing(true);
+    try {
+      const { data: branches } = await supabase.from("branches").select("id, name").eq("business_id", profile.business_id).eq("is_active", true).limit(1);
+      const branch = branches?.[0];
+      if (!branch) { toast.error("No active branch"); return; }
+      const receiptNumber = `CR-${Date.now().toString(36).toUpperCase()}`;
+      const creditNotes = `CREDIT SALE | Due: ${dueDate}${notes ? ` | ${notes}` : ""}`;
+      const saleItems = cart.map((item) => ({ product_id: item.id, product_name: item.name, quantity: item.qty, unit_price: item.priceOverride ?? item.price, discount: item.itemDiscount, tax_amount: getItemTax(item), total: getItemTotal(item) + getItemTax(item), price_override: item.priceOverride, override_by: item.overrideBy, item_discount: item.itemDiscount, item_discount_type: item.itemDiscountType }));
+      const { data: sale, error } = await supabase.from("sales").insert({
+        business_id: profile.business_id, branch_id: branch.id, cashier_id: user.id,
+        receipt_number: receiptNumber, subtotal: itemsSubtotal, tax_amount: taxAmount,
+        discount_amount: cartDiscountAmount + loyaltyDiscount, total,
+        payment_method: "credit", status: "completed" as any,
+        customer_id: selectedCustomer.id, customer_name: selectedCustomer.name,
+        notes: creditNotes, order_type: "counter",
+      } as any).select().single();
+      if (error || !sale) { toast.error("Failed: " + (error?.message || "Error")); return; }
+      await supabase.from("sale_items").insert(saleItems.map((si) => ({ ...si, sale_id: sale.id })));
+      await supabase.from("payments").insert({ sale_id: sale.id, business_id: profile.business_id, method: "cash" as any, amount: 0, payment_status: "pending", reference: `Credit due ${dueDate}` });
+      toast.success(`Credit sale created! Due: ${dueDate}`);
+      resetSale();
+    } catch (err: any) { toast.error(err.message); } finally { setProcessing(false); }
+  };
+
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
