@@ -14,7 +14,7 @@ interface Product {
 interface FavoritesBarProps {
   businessId: string | null;
   products: Product[];
-  onAddToCart: (product: Product) => void;
+  onAddToCart: (product: any) => void;
 }
 
 export default function FavoritesBar({ businessId, products, onAddToCart }: FavoritesBarProps) {
