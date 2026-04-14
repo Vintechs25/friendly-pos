@@ -84,6 +84,7 @@ export default function POSPage() {
   const [selectedTable, setSelectedTable] = useState<{ id: string; number: string } | null>(null);
   const [tableDialogOpen, setTableDialogOpen] = useState(false);
   const [customItemOpen, setCustomItemOpen] = useState(false);
+  const [creditSaleOpen, setCreditSaleOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // Customer
