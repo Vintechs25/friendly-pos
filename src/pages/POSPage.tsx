@@ -481,6 +481,14 @@ export default function POSPage() {
         }}
       />
 
+      <CreditSaleDialog
+        open={creditSaleOpen}
+        onOpenChange={setCreditSaleOpen}
+        total={total}
+        customerName={selectedCustomer?.name}
+        onConfirm={handleCreditSale}
+      />
+
       <div className="flex flex-col lg:flex-row h-full">
         {/* ═══ LEFT: Product Catalog ═══ */}
         <div className={cn(
