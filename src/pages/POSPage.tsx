@@ -540,6 +540,13 @@ export default function POSPage() {
             />
           </div>
 
+          {/* Favorites / Top Sellers */}
+          <FavoritesBar
+            businessId={profile?.business_id ?? null}
+            products={products}
+            onAddToCart={(p) => { addToCart(p); toast.success(`${p.name} added`); }}
+          />
+
           {/* Product grid */}
           <div className="flex-1 overflow-y-auto p-2.5">
             {loadingProducts ? (
