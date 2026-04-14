@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import {
   Search, Barcode, Loader2, Package, PauseCircle,
-  Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag, Plus, StickyNote, UtensilsCrossed, Wrench,
+  Percent, DollarSign, XCircle, LayoutGrid, List, ShoppingBag, Plus, StickyNote, UtensilsCrossed, Wrench, Clock, CreditCard,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useFeatureToggles } from "@/hooks/useFeatureToggles";
@@ -42,6 +42,10 @@ import ProductGrid from "@/components/pos/ProductGrid";
 import CustomerPicker from "@/components/pos/CustomerPicker";
 import QuickCashButtons from "@/components/pos/QuickCashButtons";
 import LoyaltyRedemption from "@/components/pos/LoyaltyRedemption";
+import FavoritesBar from "@/components/pos/FavoritesBar";
+import RecentSalesDrawer from "@/components/pos/RecentSalesDrawer";
+import DailySalesTarget from "@/components/pos/DailySalesTarget";
+import CreditSaleDialog from "@/components/pos/CreditSaleDialog";
 import {
   CartItem, PaymentEntry, PaymentMethod, HeldSale,
   createCartItem, getItemTotal, getItemTax,
@@ -80,6 +84,7 @@ export default function POSPage() {
   const [selectedTable, setSelectedTable] = useState<{ id: string; number: string } | null>(null);
   const [tableDialogOpen, setTableDialogOpen] = useState(false);
   const [customItemOpen, setCustomItemOpen] = useState(false);
+  const [creditSaleOpen, setCreditSaleOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // Customer
@@ -276,6 +281,58 @@ export default function POSPage() {
   const resetSale = () => { setCart([]); setCartDiscount(0); setCashTendered(0); setSplitMode(false); setSelectedCustomer(null); setRedeemedPoints(0); setOrderNotes(""); setShowNotes(false); };
   const voidCurrentSale = () => { if (cart.length === 0) return; resetSale(); toast.info("Sale voided"); };
 
+  // Repeat a previous sale — load its items into cart
+  const repeatSale = async (saleId: string) => {
+    const { data: items } = await supabase
+      .from("sale_items")
+      .select("product_id, product_name, quantity, unit_price, tax_amount, item_discount, item_discount_type")
+      .eq("sale_id", saleId);
+    if (!items || items.length === 0) { toast.error("No items found"); return; }
+    const newCart: CartItem[] = items.map((i: any) => ({
+      id: i.product_id || crypto.randomUUID(),
+      name: i.product_name,
+      price: Number(i.unit_price),
+      cost: 0,
+      tax_rate: Number(i.tax_amount) > 0 ? 16 : 0,
+      qty: Number(i.quantity),
+      track_inventory: !!i.product_id,
+      itemDiscount: Number(i.item_discount) || 0,
+      itemDiscountType: (i.item_discount_type as "fixed" | "percent") || "fixed",
+      priceOverride: null,
+      overrideBy: null,
+    }));
+    setCart(newCart);
+    toast.success(`Loaded ${newCart.length} items from previous sale`);
+  };
+
+  // Credit sale handler
+  const handleCreditSale = async (dueDate: string, notes: string) => {
+    if (!user || !profile?.business_id || cart.length === 0) return;
+    if (!selectedCustomer) { toast.error("Select a customer for credit sales"); return; }
+    setProcessing(true);
+    try {
+      const { data: branches } = await supabase.from("branches").select("id, name").eq("business_id", profile.business_id).eq("is_active", true).limit(1);
+      const branch = branches?.[0];
+      if (!branch) { toast.error("No active branch"); return; }
+      const receiptNumber = `CR-${Date.now().toString(36).toUpperCase()}`;
+      const creditNotes = `CREDIT SALE | Due: ${dueDate}${notes ? ` | ${notes}` : ""}`;
+      const saleItems = cart.map((item) => ({ product_id: item.id, product_name: item.name, quantity: item.qty, unit_price: item.priceOverride ?? item.price, discount: item.itemDiscount, tax_amount: getItemTax(item), total: getItemTotal(item) + getItemTax(item), price_override: item.priceOverride, override_by: item.overrideBy, item_discount: item.itemDiscount, item_discount_type: item.itemDiscountType }));
+      const { data: sale, error } = await supabase.from("sales").insert({
+        business_id: profile.business_id, branch_id: branch.id, cashier_id: user.id,
+        receipt_number: receiptNumber, subtotal: itemsSubtotal, tax_amount: taxAmount,
+        discount_amount: cartDiscountAmount + loyaltyDiscount, total,
+        payment_method: "credit", status: "completed" as any,
+        customer_id: selectedCustomer.id, customer_name: selectedCustomer.name,
+        notes: creditNotes, order_type: "counter",
+      } as any).select().single();
+      if (error || !sale) { toast.error("Failed: " + (error?.message || "Error")); return; }
+      await supabase.from("sale_items").insert(saleItems.map((si) => ({ ...si, sale_id: sale.id })));
+      await supabase.from("payments").insert({ sale_id: sale.id, business_id: profile.business_id, method: "cash" as any, amount: 0, payment_status: "pending", reference: `Credit due ${dueDate}` });
+      toast.success(`Credit sale created! Due: ${dueDate}`);
+      resetSale();
+    } catch (err: any) { toast.error(err.message); } finally { setProcessing(false); }
+  };
+
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -424,6 +481,14 @@ export default function POSPage() {
         }}
       />
 
+      <CreditSaleDialog
+        open={creditSaleOpen}
+        onOpenChange={setCreditSaleOpen}
+        total={total}
+        customerName={selectedCustomer?.name}
+        onConfirm={handleCreditSale}
+      />
+
       <div className="flex flex-col lg:flex-row h-full">
         {/* ═══ LEFT: Product Catalog ═══ */}
         <div className={cn(
@@ -475,6 +540,13 @@ export default function POSPage() {
             />
           </div>
 
+          {/* Favorites / Top Sellers */}
+          <FavoritesBar
+            businessId={profile?.business_id ?? null}
+            products={products}
+            onAddToCart={(p) => { addToCart(p); toast.success(`${p.name} added`); }}
+          />
+
           {/* Product grid */}
           <div className="flex-1 overflow-y-auto p-2.5">
             {loadingProducts ? (
@@ -483,7 +555,23 @@ export default function POSPage() {
               </div>
             ) : viewMode === "grid" ? (
               <>
-                <ProductGrid products={filtered} onAddToCart={(p) => { addToCart(p); toast.success(`${p.name} added`); }} />
+                <ProductGrid products={filtered} onAddToCart={(p, qty) => {
+                  if (qty && qty > 1) {
+                    setCart((prev) => {
+                      const existing = prev.find((i) => i.id === p.id);
+                      if (existing) return prev.map((i) => i.id === p.id ? { ...i, qty: i.qty + qty } : i);
+                      const item = createCartItem(p);
+                      item.qty = qty;
+                      return [...prev, item];
+                    });
+                    toast.success(`${p.name} ×${qty} added`);
+                  } else {
+                    addToCart(p);
+                    toast.success(`${p.name} added`);
+                  }
+                  setCartPulse(true);
+                  setTimeout(() => setCartPulse(false), 600);
+                }} />
                 {filtered.length === 0 && searchTerm && (
                   <div className="text-center mt-2">
                     <Button variant="outline" size="sm" onClick={() => { setQuickProductInitial(searchTerm); setQuickProductOpen(true); }}>
@@ -533,8 +621,11 @@ export default function POSPage() {
 
         {/* ═══ RIGHT: Cart + Payment ═══ */}
         <div className="w-full lg:w-[400px] xl:w-[440px] 2xl:w-[480px] flex flex-col bg-card shrink-0 border-t-2 lg:border-t-0 lg:border-l-2 border-border shadow-[-4px_0_24px_-6px_hsl(var(--foreground)/0.06)]">
+          {/* Daily sales target */}
+          <DailySalesTarget businessId={profile?.business_id ?? null} />
+
           {/* Cart header */}
-          <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0 bg-card">
+          <div className="px-4 py-2 border-b border-border flex items-center justify-between shrink-0 bg-card">
             <div className="flex items-center gap-2.5">
               <div className={cn(
                 "h-8 w-8 rounded-xl flex items-center justify-center transition-all",
@@ -549,17 +640,23 @@ export default function POSPage() {
                 </span>
               </div>
             </div>
-            <div className="flex gap-1.5">
+            <div className="flex gap-1">
+              {/* Recent sales drawer */}
+              <RecentSalesDrawer businessId={profile?.business_id ?? null} onRepeatSale={repeatSale}>
+                <Button variant="ghost" size="sm" className="h-8 text-xs gap-1 touch-manipulation rounded-lg px-2">
+                  <Clock className="h-3.5 w-3.5" />
+                </Button>
+              </RecentSalesDrawer>
               {cart.length > 0 && (
                 <>
-                  <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5 touch-manipulation rounded-lg px-2.5" onClick={() => setShowNotes(!showNotes)}>
+                  <Button variant="ghost" size="sm" className="h-8 text-xs gap-1 touch-manipulation rounded-lg px-2" onClick={() => setShowNotes(!showNotes)}>
                     <StickyNote className={cn("h-3.5 w-3.5", orderNotes && "text-accent-foreground")} />
                   </Button>
-                  <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 touch-manipulation rounded-lg px-3" onClick={holdTransaction}>
+                  <Button variant="outline" size="sm" className="h-8 text-xs gap-1 touch-manipulation rounded-lg px-2.5" onClick={holdTransaction}>
                     <PauseCircle className="h-3.5 w-3.5" /> Hold
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10 touch-manipulation rounded-lg px-2.5" onClick={voidCurrentSale}>
-                    <XCircle className="h-3.5 w-3.5" /> Void
+                  <Button variant="ghost" size="sm" className="h-8 text-xs gap-1 text-destructive hover:text-destructive hover:bg-destructive/10 touch-manipulation rounded-lg px-2" onClick={voidCurrentSale}>
+                    <XCircle className="h-3.5 w-3.5" />
                   </Button>
                 </>
               )}
@@ -706,8 +803,8 @@ export default function POSPage() {
               )}
             </div>
 
-            {/* Complete button */}
-            <div className="px-3 pb-3 pt-1">
+            {/* Complete + Credit buttons */}
+            <div className="px-3 pb-3 pt-1 space-y-1.5">
               <Button
                 className={cn(
                   "w-full h-14 text-base font-black rounded-xl touch-manipulation active:scale-[0.97] transition-all",
@@ -726,6 +823,18 @@ export default function POSPage() {
                   <>Complete Sale — KSh {total.toLocaleString("en-KE", { minimumFractionDigits: 2 })}</>
                 )}
               </Button>
+              {/* Credit sale option */}
+              {cart.length > 0 && selectedCustomer && (
+                <Button
+                  variant="outline"
+                  className="w-full h-9 text-xs font-semibold rounded-xl touch-manipulation gap-1.5 border-dashed"
+                  onClick={() => setCreditSaleOpen(true)}
+                  disabled={processing}
+                >
+                  <CreditCard className="h-3.5 w-3.5" />
+                  Credit Sale (Pay Later)
+                </Button>
+              )}
             </div>
           </div>
         </div>
