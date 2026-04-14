@@ -605,8 +605,11 @@ export default function POSPage() {
 
         {/* ═══ RIGHT: Cart + Payment ═══ */}
         <div className="w-full lg:w-[400px] xl:w-[440px] 2xl:w-[480px] flex flex-col bg-card shrink-0 border-t-2 lg:border-t-0 lg:border-l-2 border-border shadow-[-4px_0_24px_-6px_hsl(var(--foreground)/0.06)]">
+          {/* Daily sales target */}
+          <DailySalesTarget businessId={profile?.business_id ?? null} />
+
           {/* Cart header */}
-          <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0 bg-card">
+          <div className="px-4 py-2 border-b border-border flex items-center justify-between shrink-0 bg-card">
             <div className="flex items-center gap-2.5">
               <div className={cn(
                 "h-8 w-8 rounded-xl flex items-center justify-center transition-all",
@@ -621,17 +624,23 @@ export default function POSPage() {
                 </span>
               </div>
             </div>
-            <div className="flex gap-1.5">
+            <div className="flex gap-1">
+              {/* Recent sales drawer */}
+              <RecentSalesDrawer businessId={profile?.business_id ?? null} onRepeatSale={repeatSale}>
+                <Button variant="ghost" size="sm" className="h-8 text-xs gap-1 touch-manipulation rounded-lg px-2">
+                  <Clock className="h-3.5 w-3.5" />
+                </Button>
+              </RecentSalesDrawer>
               {cart.length > 0 && (
                 <>
-                  <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5 touch-manipulation rounded-lg px-2.5" onClick={() => setShowNotes(!showNotes)}>
+                  <Button variant="ghost" size="sm" className="h-8 text-xs gap-1 touch-manipulation rounded-lg px-2" onClick={() => setShowNotes(!showNotes)}>
                     <StickyNote className={cn("h-3.5 w-3.5", orderNotes && "text-accent-foreground")} />
                   </Button>
-                  <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 touch-manipulation rounded-lg px-3" onClick={holdTransaction}>
+                  <Button variant="outline" size="sm" className="h-8 text-xs gap-1 touch-manipulation rounded-lg px-2.5" onClick={holdTransaction}>
                     <PauseCircle className="h-3.5 w-3.5" /> Hold
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10 touch-manipulation rounded-lg px-2.5" onClick={voidCurrentSale}>
-                    <XCircle className="h-3.5 w-3.5" /> Void
+                  <Button variant="ghost" size="sm" className="h-8 text-xs gap-1 text-destructive hover:text-destructive hover:bg-destructive/10 touch-manipulation rounded-lg px-2" onClick={voidCurrentSale}>
+                    <XCircle className="h-3.5 w-3.5" />
                   </Button>
                 </>
               )}
