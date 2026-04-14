@@ -42,6 +42,10 @@ import ProductGrid from "@/components/pos/ProductGrid";
 import CustomerPicker from "@/components/pos/CustomerPicker";
 import QuickCashButtons from "@/components/pos/QuickCashButtons";
 import LoyaltyRedemption from "@/components/pos/LoyaltyRedemption";
+import FavoritesBar from "@/components/pos/FavoritesBar";
+import RecentSalesDrawer from "@/components/pos/RecentSalesDrawer";
+import DailySalesTarget from "@/components/pos/DailySalesTarget";
+import CreditSaleDialog from "@/components/pos/CreditSaleDialog";
 import {
   CartItem, PaymentEntry, PaymentMethod, HeldSale,
   createCartItem, getItemTotal, getItemTax,
