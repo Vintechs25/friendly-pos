@@ -787,8 +787,8 @@ export default function POSPage() {
               )}
             </div>
 
-            {/* Complete button */}
-            <div className="px-3 pb-3 pt-1">
+            {/* Complete + Credit buttons */}
+            <div className="px-3 pb-3 pt-1 space-y-1.5">
               <Button
                 className={cn(
                   "w-full h-14 text-base font-black rounded-xl touch-manipulation active:scale-[0.97] transition-all",
@@ -807,6 +807,18 @@ export default function POSPage() {
                   <>Complete Sale — KSh {total.toLocaleString("en-KE", { minimumFractionDigits: 2 })}</>
                 )}
               </Button>
+              {/* Credit sale option */}
+              {cart.length > 0 && selectedCustomer && (
+                <Button
+                  variant="outline"
+                  className="w-full h-9 text-xs font-semibold rounded-xl touch-manipulation gap-1.5 border-dashed"
+                  onClick={() => setCreditSaleOpen(true)}
+                  disabled={processing}
+                >
+                  <CreditCard className="h-3.5 w-3.5" />
+                  Credit Sale (Pay Later)
+                </Button>
+              )}
             </div>
           </div>
         </div>
