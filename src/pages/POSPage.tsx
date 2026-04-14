@@ -555,7 +555,23 @@ export default function POSPage() {
               </div>
             ) : viewMode === "grid" ? (
               <>
-                <ProductGrid products={filtered} onAddToCart={(p) => { addToCart(p); toast.success(`${p.name} added`); }} />
+                <ProductGrid products={filtered} onAddToCart={(p, qty) => {
+                  if (qty && qty > 1) {
+                    setCart((prev) => {
+                      const existing = prev.find((i) => i.id === p.id);
+                      if (existing) return prev.map((i) => i.id === p.id ? { ...i, qty: i.qty + qty } : i);
+                      const item = createCartItem(p);
+                      item.qty = qty;
+                      return [...prev, item];
+                    });
+                    toast.success(`${p.name} ×${qty} added`);
+                  } else {
+                    addToCart(p);
+                    toast.success(`${p.name} added`);
+                  }
+                  setCartPulse(true);
+                  setTimeout(() => setCartPulse(false), 600);
+                }} />
                 {filtered.length === 0 && searchTerm && (
                   <div className="text-center mt-2">
                     <Button variant="outline" size="sm" onClick={() => { setQuickProductInitial(searchTerm); setQuickProductOpen(true); }}>
