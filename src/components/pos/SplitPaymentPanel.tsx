@@ -178,8 +178,6 @@ export default function SplitPaymentPanel({
       gift_card: "bg-[hsl(38,92%,50%)] text-white border-[hsl(38,92%,50%)] shadow-md shadow-[hsl(38,92%,50%)]/20",
     };
 
-    return (
-      <div className="space-y-2.5">
     const primaryRow = (["cash", "card", "mobile_money"] as PaymentMethod[]).filter((m) => {
       if (m === "card" && !cardEnabled) return false;
       if (m === "mobile_money" && !mpesaEnabled) return false;
