@@ -113,6 +113,14 @@ export default function POSPage() {
   const { isFeatureEnabled } = useFeatureToggles();
   const restaurantMode = isFeatureEnabled("restaurant_mode");
   const customItemsEnabled = isFeatureEnabled("custom_items");
+  const barcodeScanningEnabled = isFeatureEnabled("barcode_scanning");
+  const loyaltyEnabled = isFeatureEnabled("customer_loyalty");
+  const giftCardsEnabled = isFeatureEnabled("gift_cards");
+  const storeCreditEnabled = isFeatureEnabled("store_credit");
+  const mpesaEnabled = isFeatureEnabled("mpesa_payments");
+  const cardEnabled = isFeatureEnabled("card_payments");
+  const etimsEnabled = isFeatureEnabled("etims_compliance");
+  const hardwareEnabled = isFeatureEnabled("hardware_support");
 
   const canOverridePrice = hasRole("business_owner") || hasRole("manager") || hasRole("super_admin");
 
