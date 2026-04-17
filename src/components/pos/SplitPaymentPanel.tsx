@@ -43,6 +43,10 @@ interface SplitPaymentPanelProps {
   businessId: string | null;
   customerId?: string | null;
   customerCreditBalance?: number;
+  mpesaEnabled?: boolean;
+  cardEnabled?: boolean;
+  giftCardsEnabled?: boolean;
+  storeCreditEnabled?: boolean;
 }
 
 export default function SplitPaymentPanel({
@@ -56,6 +60,10 @@ export default function SplitPaymentPanel({
   businessId,
   customerId,
   customerCreditBalance = 0,
+  mpesaEnabled = true,
+  cardEnabled = true,
+  giftCardsEnabled = true,
+  storeCreditEnabled = true,
 }: SplitPaymentPanelProps) {
   const [showMpesaDialog, setShowMpesaDialog] = useState(false);
   const [showGiftCardDialog, setShowGiftCardDialog] = useState(false);
