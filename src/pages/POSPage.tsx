@@ -700,15 +700,17 @@ export default function POSPage() {
             )}
             <TableSelector open={tableDialogOpen} onOpenChange={setTableDialogOpen} onSelect={(id, num) => setSelectedTable({ id, number: num })} />
 
-            {/* Customer */}
-            <div className="px-3 py-2 border-b border-border/50">
-              <CustomerPicker businessId={profile?.business_id ?? null} selectedCustomer={selectedCustomer} onSelect={setSelectedCustomer} />
-              {selectedCustomer && selectedCustomer.loyalty_points > 0 && cart.length > 0 && (
-                <div className="mt-1.5">
-                  <LoyaltyRedemption customerName={selectedCustomer.name} availablePoints={selectedCustomer.loyalty_points} pointValue={LOYALTY_POINT_VALUE} maxRedeemable={itemsSubtotal - cartDiscountAmount} onRedeem={setRedeemedPoints} redeemedPoints={redeemedPoints} />
-                </div>
-              )}
-            </div>
+            {/* Customer + loyalty (only when loyalty feature is enabled) */}
+            {loyaltyEnabled && (
+              <div className="px-3 py-2 border-b border-border/50">
+                <CustomerPicker businessId={profile?.business_id ?? null} selectedCustomer={selectedCustomer} onSelect={setSelectedCustomer} />
+                {selectedCustomer && selectedCustomer.loyalty_points > 0 && cart.length > 0 && (
+                  <div className="mt-1.5">
+                    <LoyaltyRedemption customerName={selectedCustomer.name} availablePoints={selectedCustomer.loyalty_points} pointValue={LOYALTY_POINT_VALUE} maxRedeemable={itemsSubtotal - cartDiscountAmount} onRedeem={setRedeemedPoints} redeemedPoints={redeemedPoints} />
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Held sales */}
             {heldSales.length > 0 && (
@@ -803,6 +805,10 @@ export default function POSPage() {
                 cashTendered={cashTendered}
                 onCashTenderedChange={setCashTendered}
                 businessId={profile?.business_id ?? null}
+                mpesaEnabled={mpesaEnabled}
+                cardEnabled={cardEnabled}
+                giftCardsEnabled={giftCardsEnabled}
+                storeCreditEnabled={storeCreditEnabled}
               />
 
               {/* Quick cash */}
