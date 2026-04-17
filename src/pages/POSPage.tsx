@@ -113,6 +113,14 @@ export default function POSPage() {
   const { isFeatureEnabled } = useFeatureToggles();
   const restaurantMode = isFeatureEnabled("restaurant_mode");
   const customItemsEnabled = isFeatureEnabled("custom_items");
+  const barcodeScanningEnabled = isFeatureEnabled("barcode_scanning");
+  const loyaltyEnabled = isFeatureEnabled("customer_loyalty");
+  const giftCardsEnabled = isFeatureEnabled("gift_cards");
+  const storeCreditEnabled = isFeatureEnabled("store_credit");
+  const mpesaEnabled = isFeatureEnabled("mpesa_payments");
+  const cardEnabled = isFeatureEnabled("card_payments");
+  const etimsEnabled = isFeatureEnabled("etims_compliance");
+  const hardwareEnabled = isFeatureEnabled("hardware_support");
 
   const canOverridePrice = hasRole("business_owner") || hasRole("manager") || hasRole("super_admin");
 
@@ -166,7 +174,7 @@ export default function POSPage() {
   );
 
   const scanner = useScanner({
-    enabled: true,
+    enabled: barcodeScanningEnabled,
     mode: scanMode,
     config: { enableSound: soundEnabled },
     onScan: handleScan,
@@ -419,8 +427,8 @@ export default function POSPage() {
       setShowReceipt(true);
       toast.success(`Sale completed! ${receiptNumber}`);
 
-      // Fire eTIMS submission in background (non-blocking)
-      if (isOnline && branch) {
+      // Fire eTIMS submission in background (non-blocking) — only if compliance is enabled
+      if (etimsEnabled && isOnline && branch) {
         const saleRecord = await supabase.from("sales").select("id").eq("receipt_number", receiptNumber).eq("business_id", profile.business_id).single();
         if (saleRecord.data) {
           submitToEtims(saleRecord.data.id, profile.business_id).then(result => {
@@ -503,7 +511,7 @@ export default function POSPage() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search or scan barcode..."
+                  placeholder={barcodeScanningEnabled ? "Search or scan barcode..." : "Search products..."}
                   className="pl-9 h-10 text-sm rounded-lg bg-muted/50 border-border focus:border-primary touch-manipulation"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -692,15 +700,17 @@ export default function POSPage() {
             )}
             <TableSelector open={tableDialogOpen} onOpenChange={setTableDialogOpen} onSelect={(id, num) => setSelectedTable({ id, number: num })} />
 
-            {/* Customer */}
-            <div className="px-3 py-2 border-b border-border/50">
-              <CustomerPicker businessId={profile?.business_id ?? null} selectedCustomer={selectedCustomer} onSelect={setSelectedCustomer} />
-              {selectedCustomer && selectedCustomer.loyalty_points > 0 && cart.length > 0 && (
-                <div className="mt-1.5">
-                  <LoyaltyRedemption customerName={selectedCustomer.name} availablePoints={selectedCustomer.loyalty_points} pointValue={LOYALTY_POINT_VALUE} maxRedeemable={itemsSubtotal - cartDiscountAmount} onRedeem={setRedeemedPoints} redeemedPoints={redeemedPoints} />
-                </div>
-              )}
-            </div>
+            {/* Customer + loyalty (only when loyalty feature is enabled) */}
+            {loyaltyEnabled && (
+              <div className="px-3 py-2 border-b border-border/50">
+                <CustomerPicker businessId={profile?.business_id ?? null} selectedCustomer={selectedCustomer} onSelect={setSelectedCustomer} />
+                {selectedCustomer && selectedCustomer.loyalty_points > 0 && cart.length > 0 && (
+                  <div className="mt-1.5">
+                    <LoyaltyRedemption customerName={selectedCustomer.name} availablePoints={selectedCustomer.loyalty_points} pointValue={LOYALTY_POINT_VALUE} maxRedeemable={itemsSubtotal - cartDiscountAmount} onRedeem={setRedeemedPoints} redeemedPoints={redeemedPoints} />
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Held sales */}
             {heldSales.length > 0 && (
@@ -795,6 +805,10 @@ export default function POSPage() {
                 cashTendered={cashTendered}
                 onCashTenderedChange={setCashTendered}
                 businessId={profile?.business_id ?? null}
+                mpesaEnabled={mpesaEnabled}
+                cardEnabled={cardEnabled}
+                giftCardsEnabled={giftCardsEnabled}
+                storeCreditEnabled={storeCreditEnabled}
               />
 
               {/* Quick cash */}

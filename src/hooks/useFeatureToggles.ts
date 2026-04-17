@@ -1,6 +1,10 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  defaultsForIndustry,
+  type FeatureKey,
+} from "@/lib/feature-catalog";
 
 interface FeatureToggle {
   feature_name: string;
@@ -8,46 +12,45 @@ interface FeatureToggle {
 }
 
 /**
- * Maps feature toggle keys to the nav permission names they control.
- * When a feature is disabled, the corresponding nav items are hidden.
+ * Map a toggle key to the legacy nav permission names it controls.
+ * Disabling the feature hides the matching nav items.
  */
-const FEATURE_TO_PERMISSIONS: Record<string, string[]> = {
+const FEATURE_TO_PERMISSIONS: Partial<Record<FeatureKey, string[]>> = {
   pos: ["manage_pos"],
-  inventory: ["manage_inventory", "manage_stock", "manage_suppliers", "manage_purchase_orders"],
+  inventory: ["manage_inventory"],
+  purchase_orders: ["manage_purchase_orders"],
+  stock_transfers: ["manage_stock"],
   advanced_reports: ["view_reports"],
   audit_logs: ["view_audit_logs"],
   customer_loyalty: ["manage_customers"],
-  restaurant_mode: ["manage_pos"],
-  custom_items: [],
-  batch_tracking: [],
-  expiry_tracking: [],
-  barcode_scanning: [],
-  mpesa_payments: [],
-  hardware_support: [],
 };
 
-/**
- * Maps feature toggle keys to route paths they control.
- */
-const FEATURE_TO_ROUTES: Record<string, string[]> = {
+/** Map a toggle key to specific dashboard route paths it controls. */
+const FEATURE_TO_ROUTES: Partial<Record<FeatureKey, string[]>> = {
   pos: ["/dashboard/pos", "/dashboard/shifts"],
-  inventory: [
-    "/dashboard/inventory",
-    "/dashboard/suppliers",
-    "/dashboard/purchase-orders",
-    "/dashboard/stock-adjustments",
-    "/dashboard/stock-transfers",
-  ],
+  inventory: ["/dashboard/inventory"],
+  purchase_orders: ["/dashboard/purchase-orders"],
+  stock_transfers: ["/dashboard/stock-transfers", "/dashboard/stock-adjustments"],
   advanced_reports: ["/dashboard/reports"],
   audit_logs: ["/dashboard/audit-logs"],
   customer_loyalty: ["/dashboard/customers"],
-  restaurant_mode: ["/dashboard/tables", "/dashboard/kitchen"],
+  table_management: ["/dashboard/tables"],
+  kitchen_display: ["/dashboard/kitchen"],
+  hardware_support: ["/dashboard/hardware"],
+  email_marketing: ["/dashboard/email"],
+  etims_compliance: ["/dashboard/etims"],
 };
 
-export function useFeatureToggles() {
+interface UseFeatureTogglesArgs {
+  /** Optional industry override – falls back to the user's business industry. */
+  industry?: string;
+}
+
+export function useFeatureToggles(_args: UseFeatureTogglesArgs = {}) {
   const { profile, roles } = useAuth();
 
-  const { data: toggles = [], isLoading } = useQuery<FeatureToggle[]>({
+  // Pull the toggles for this business
+  const { data: toggles = [], isLoading: togglesLoading } = useQuery<FeatureToggle[]>({
     queryKey: ["feature-toggles", profile?.business_id],
     enabled: !!profile?.business_id,
     staleTime: 30_000,
@@ -64,41 +67,59 @@ export function useFeatureToggles() {
     },
   });
 
-  // Build a set of disabled features
-  const disabledFeatures = new Set<string>(
-    toggles.filter((t) => !t.is_enabled).map((t) => t.feature_name)
-  );
+  // Pull the business industry so we know the default set when a row is missing
+  const { data: businessRow, isLoading: businessLoading } = useQuery<{ industry: string } | null>({
+    queryKey: ["business-industry", profile?.business_id],
+    enabled: !!profile?.business_id,
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("businesses")
+        .select("industry")
+        .eq("id", profile!.business_id!)
+        .maybeSingle();
+      if (error) {
+        console.error("Business industry lookup error:", error);
+        return null;
+      }
+      return data;
+    },
+  });
 
-  // Super admins bypass feature toggles
-  const isSuperAdmin = roles.includes("super_admin" as any);
+  const isLoading = togglesLoading || businessLoading;
+  const isSuperAdmin =
+    roles.includes("super_admin" as any) ||
+    roles.includes("platform_admin" as any);
 
-  /** Check if a feature key is enabled (or has no toggle row = enabled by default) */
+  const explicit = new Map<string, boolean>();
+  for (const t of toggles) explicit.set(t.feature_name, t.is_enabled);
+
+  const industryDefaults = defaultsForIndustry(businessRow?.industry);
+
+  /**
+   * Resolution order:
+   *   1. Super admins / platform admins → always enabled.
+   *   2. Explicit row in feature_toggles → use that value.
+   *   3. No row → fall back to the industry default for this business.
+   */
   const isFeatureEnabled = (featureKey: string): boolean => {
     if (isSuperAdmin) return true;
-    // If no toggle exists for this feature, it's enabled by default
-    const toggle = toggles.find((t) => t.feature_name === featureKey);
-    if (!toggle) return true;
-    return toggle.is_enabled;
+    if (explicit.has(featureKey)) return explicit.get(featureKey)!;
+    return industryDefaults.has(featureKey as FeatureKey);
   };
 
-  /** Check if a nav permission is allowed by feature toggles */
   const isPermissionAllowedByFeature = (permission: string): boolean => {
     if (isSuperAdmin) return true;
     for (const [feature, perms] of Object.entries(FEATURE_TO_PERMISSIONS)) {
-      if (perms.includes(permission) && !isFeatureEnabled(feature)) {
-        return false;
-      }
+      if (perms?.includes(permission) && !isFeatureEnabled(feature)) return false;
     }
     return true;
   };
 
-  /** Check if a route path is allowed by feature toggles */
   const isRouteAllowedByFeature = (path: string): boolean => {
     if (isSuperAdmin) return true;
     for (const [feature, routes] of Object.entries(FEATURE_TO_ROUTES)) {
-      if (routes.includes(path) && !isFeatureEnabled(feature)) {
-        return false;
-      }
+      if (routes?.includes(path) && !isFeatureEnabled(feature)) return false;
     }
     return true;
   };
@@ -109,5 +130,6 @@ export function useFeatureToggles() {
     isRouteAllowedByFeature,
     isLoading,
     toggles,
+    industry: businessRow?.industry ?? null,
   };
 }
