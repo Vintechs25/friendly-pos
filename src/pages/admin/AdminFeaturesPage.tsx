@@ -1,81 +1,123 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, ToggleLeft, Building2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, Building2, RotateCcw, ToggleLeft } from "lucide-react";
 import { toast } from "sonner";
+import {
+  FEATURE_CATALOG,
+  ALL_FEATURE_KEYS,
+  defaultsForIndustry,
+  type FeatureKey,
+} from "@/lib/feature-catalog";
+import { getFeatureTogglesForIndustry } from "@/lib/feature-provisioning";
 
-const AVAILABLE_FEATURES = [
-  { key: "pos", label: "Point of Sale", description: "Core POS terminal for sales" },
-  { key: "inventory", label: "Inventory Management", description: "Stock tracking and procurement" },
-  { key: "restaurant_mode", label: "Restaurant Mode", description: "Table management, kitchen orders" },
-  { key: "hotel_mode", label: "Hotel Mode", description: "Room management, bookings" },
-  { key: "pharmacy_mode", label: "Pharmacy Mode", description: "Batch/expiry tracking, prescriptions" },
-  { key: "hardware_mode", label: "Hardware Mode", description: "Unit conversions, bulk pricing" },
-  { key: "customer_loyalty", label: "Customer Loyalty", description: "Points system and credit tracking" },
-  { key: "multi_branch", label: "Multi-Branch", description: "Manage multiple locations" },
-  { key: "advanced_reports", label: "Advanced Reports", description: "Profit analytics and exports" },
-  { key: "audit_logs", label: "Audit Logs", description: "Activity and change tracking" },
+interface Business { id: string; name: string; industry: string }
+interface Toggle { id: string; feature_name: string; is_enabled: boolean; business_id: string }
+
+const CATEGORY_ORDER: ReadonlyArray<typeof FEATURE_CATALOG[number]["category"]> = [
+  "Core", "Sales", "Inventory", "Payments", "Compliance", "Operations",
 ];
-
-interface Business { id: string; name: string; industry: string; }
-interface Toggle { id: string; feature_name: string; is_enabled: boolean; business_id: string; }
 
 export default function AdminFeaturesPage() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [selectedBiz, setSelectedBiz] = useState<string>("");
   const [toggles, setToggles] = useState<Toggle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [toggling, setToggling] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
-    const load = async () => {
-      const { data } = await supabase.from("businesses").select("id, name, industry").order("name");
+    (async () => {
+      const { data } = await supabase
+        .from("businesses")
+        .select("id, name, industry")
+        .order("name");
       setBusinesses(data ?? []);
       if (data?.length) setSelectedBiz(data[0].id);
       setLoading(false);
-    };
-    load();
+    })();
   }, []);
+
+  const refreshToggles = async (bizId: string) => {
+    const { data } = await supabase
+      .from("feature_toggles")
+      .select("*")
+      .eq("business_id", bizId);
+    setToggles(data ?? []);
+  };
 
   useEffect(() => {
     if (!selectedBiz) return;
-    const loadToggles = async () => {
-      const { data } = await supabase
-        .from("feature_toggles")
-        .select("*")
-        .eq("business_id", selectedBiz);
-      setToggles(data ?? []);
-    };
-    loadToggles();
+    refreshToggles(selectedBiz);
   }, [selectedBiz]);
 
-  const handleToggle = async (featureKey: string, enabled: boolean) => {
-    setToggling(featureKey);
-    const existing = toggles.find(t => t.feature_name === featureKey);
+  const currentBiz = businesses.find((b) => b.id === selectedBiz);
+  const industryDefaults = useMemo(
+    () => defaultsForIndustry(currentBiz?.industry),
+    [currentBiz?.industry],
+  );
 
-    if (existing) {
-      const { error } = await supabase
-        .from("feature_toggles")
-        .update({ is_enabled: enabled })
-        .eq("id", existing.id);
-      if (error) { toast.error(error.message); setToggling(null); return; }
-    } else {
-      const { error } = await supabase
-        .from("feature_toggles")
-        .insert({ business_id: selectedBiz, feature_name: featureKey, is_enabled: enabled });
-      if (error) { toast.error(error.message); setToggling(null); return; }
-    }
-
-    // Refresh toggles
-    const { data } = await supabase.from("feature_toggles").select("*").eq("business_id", selectedBiz);
-    setToggles(data ?? []);
-    toast.success(`${featureKey} ${enabled ? "enabled" : "disabled"}`);
-    setToggling(null);
+  /** Resolves the displayed value: explicit row wins, else industry default. */
+  const isOn = (key: FeatureKey) => {
+    const row = toggles.find((t) => t.feature_name === key);
+    if (row) return row.is_enabled;
+    return industryDefaults.has(key);
   };
 
-  const isEnabled = (key: string) => toggles.find(t => t.feature_name === key)?.is_enabled ?? false;
+  const handleToggle = async (key: FeatureKey, enabled: boolean) => {
+    setBusy(key);
+    try {
+      const existing = toggles.find((t) => t.feature_name === key);
+      if (existing) {
+        const { error } = await supabase
+          .from("feature_toggles")
+          .update({ is_enabled: enabled })
+          .eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("feature_toggles")
+          .insert({ business_id: selectedBiz, feature_name: key, is_enabled: enabled });
+        if (error) throw error;
+      }
+      await refreshToggles(selectedBiz);
+      toast.success(`${key} ${enabled ? "enabled" : "disabled"}`);
+    } catch (err: any) {
+      toast.error(err.message ?? "Failed to update");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const resetToIndustryDefaults = async () => {
+    if (!currentBiz) return;
+    setResetting(true);
+    try {
+      // Delete then re-insert the full catalog with industry defaults
+      await supabase.from("feature_toggles").delete().eq("business_id", selectedBiz);
+      const rows = getFeatureTogglesForIndustry(selectedBiz, currentBiz.industry);
+      if (rows.length) {
+        const { error } = await supabase.from("feature_toggles").insert(rows);
+        if (error) throw error;
+      }
+      await refreshToggles(selectedBiz);
+      toast.success("Reset to industry defaults");
+    } catch (err: any) {
+      toast.error(err.message ?? "Reset failed");
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  const grouped = CATEGORY_ORDER.map((cat) => ({
+    category: cat,
+    items: FEATURE_CATALOG.filter((f) => f.category === cat),
+  })).filter((g) => g.items.length > 0);
 
   if (loading) {
     return (
@@ -90,9 +132,25 @@ export default function AdminFeaturesPage() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="font-display text-2xl font-bold">Feature Toggles</h1>
-          <p className="text-muted-foreground text-sm mt-1">Enable or disable modules per business</p>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="font-display text-2xl font-bold">Feature Toggles</h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              Enable or disable modules per business. Defaults follow each industry.
+            </p>
+          </div>
+          {currentBiz && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={resetToIndustryDefaults}
+              disabled={resetting}
+              className="gap-2"
+            >
+              <RotateCcw className={`h-3.5 w-3.5 ${resetting ? "animate-spin" : ""}`} />
+              Reset to {currentBiz.industry} defaults
+            </Button>
+          )}
         </div>
 
         {businesses.length === 0 ? (
@@ -105,39 +163,64 @@ export default function AdminFeaturesPage() {
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium">Business:</span>
               <Select value={selectedBiz} onValueChange={setSelectedBiz}>
-                <SelectTrigger className="w-[280px]">
+                <SelectTrigger className="w-[320px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {businesses.map(b => (
+                  {businesses.map((b) => (
                     <SelectItem key={b.id} value={b.id}>
-                      {b.name} <span className="text-muted-foreground ml-1 capitalize">({b.industry})</span>
+                      {b.name}{" "}
+                      <span className="text-muted-foreground ml-1 capitalize">
+                        ({b.industry})
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {AVAILABLE_FEATURES.map((feature) => (
-                <div
-                  key={feature.key}
-                  className="flex items-center justify-between rounded-xl border border-border bg-card p-4"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <ToggleLeft className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{feature.label}</p>
-                      <p className="text-xs text-muted-foreground">{feature.description}</p>
-                    </div>
+            <div className="space-y-6">
+              {grouped.map((group) => (
+                <div key={group.category}>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                    {group.category}
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {group.items.map((feat) => {
+                      const checked = isOn(feat.key);
+                      const isDefault = industryDefaults.has(feat.key);
+                      return (
+                        <div
+                          key={feat.key}
+                          className="flex items-center justify-between rounded-xl border border-border bg-card p-4"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                              <ToggleLeft className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium flex items-center gap-2">
+                                {feat.label}
+                                {isDefault && (
+                                  <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/70">
+                                    default
+                                  </span>
+                                )}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {feat.description}
+                              </p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={checked}
+                            onCheckedChange={(v) => handleToggle(feat.key, v)}
+                            disabled={busy === feat.key}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
-                  <Switch
-                    checked={isEnabled(feature.key)}
-                    onCheckedChange={(v) => handleToggle(feature.key, v)}
-                    disabled={toggling === feature.key}
-                  />
                 </div>
               ))}
             </div>
