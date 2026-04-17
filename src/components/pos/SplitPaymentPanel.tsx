@@ -180,8 +180,24 @@ export default function SplitPaymentPanel({
 
     return (
       <div className="space-y-2.5">
-        <div className="grid grid-cols-3 gap-1.5">
-          {(["cash", "card", "mobile_money"] as PaymentMethod[]).map((m) => (
+    const primaryRow = (["cash", "card", "mobile_money"] as PaymentMethod[]).filter((m) => {
+      if (m === "card" && !cardEnabled) return false;
+      if (m === "mobile_money" && !mpesaEnabled) return false;
+      return true;
+    });
+    const secondaryRow = (["store_credit", "gift_card"] as PaymentMethod[]).filter((m) => {
+      if (m === "store_credit" && !storeCreditEnabled) return false;
+      if (m === "gift_card" && !giftCardsEnabled) return false;
+      return true;
+    });
+
+    return (
+      <div className="space-y-2.5">
+        <div
+          className="grid gap-1.5"
+          style={{ gridTemplateColumns: `repeat(${Math.max(1, primaryRow.length)}, minmax(0, 1fr))` }}
+        >
+          {primaryRow.map((m) => (
             <button
               key={m}
               className={cn(
@@ -197,23 +213,28 @@ export default function SplitPaymentPanel({
             </button>
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-1.5">
-          {(["store_credit", "gift_card"] as PaymentMethod[]).map((m) => (
-            <button
-              key={m}
-              className={cn(
-                "flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl border-2 touch-manipulation active:scale-95 transition-all text-[10px] font-semibold",
-                selectedMethod === m
-                  ? methodStyles[m]
-                  : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:bg-muted/50"
-              )}
-              onClick={() => selectMethod(m)}
-            >
-              {methodIcons[m]}
-              <span>{methodLabels[m]}</span>
-            </button>
-          ))}
-        </div>
+        {secondaryRow.length > 0 && (
+          <div
+            className="grid gap-1.5"
+            style={{ gridTemplateColumns: `repeat(${secondaryRow.length}, minmax(0, 1fr))` }}
+          >
+            {secondaryRow.map((m) => (
+              <button
+                key={m}
+                className={cn(
+                  "flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl border-2 touch-manipulation active:scale-95 transition-all text-[10px] font-semibold",
+                  selectedMethod === m
+                    ? methodStyles[m]
+                    : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:bg-muted/50"
+                )}
+                onClick={() => selectMethod(m)}
+              >
+                {methodIcons[m]}
+                <span>{methodLabels[m]}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {selectedMethod === "cash" && (
           <div className="space-y-1">
