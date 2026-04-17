@@ -77,47 +77,60 @@ export const ALL_FEATURE_KEYS: FeatureKey[] = FEATURE_CATALOG.map((f) => f.key);
 
 /** Industry → set of features enabled by default when a business is provisioned. */
 export const INDUSTRY_DEFAULTS: Record<string, FeatureKey[]> = {
+  // Retail shop / boutique – needs loyalty, gift cards, M-Pesa Till, eTIMS, email receipts
   retail: [
     "pos", "inventory", "barcode_scanning", "customer_loyalty", "gift_cards", "store_credit",
     "mpesa_payments", "card_payments", "etims_compliance", "hardware_support",
-    "advanced_reports", "audit_logs", "purchase_orders",
+    "advanced_reports", "audit_logs", "purchase_orders", "email_marketing",
   ],
+  // Supermarket – full multi-branch, batch/expiry, transfers, all payments
   supermarket: [
     "pos", "inventory", "barcode_scanning", "batch_tracking", "expiry_tracking",
     "customer_loyalty", "gift_cards", "store_credit", "mpesa_payments", "card_payments",
     "etims_compliance", "hardware_support", "advanced_reports", "audit_logs",
-    "purchase_orders", "stock_transfers", "multi_branch",
+    "purchase_orders", "stock_transfers", "multi_branch", "email_marketing",
   ],
+  // Hardware store – serial/batch tracking, custom items (cut-to-size), credit common
   hardware: [
-    "pos", "inventory", "barcode_scanning", "custom_items", "customer_loyalty",
-    "store_credit", "mpesa_payments", "card_payments", "etims_compliance",
-    "hardware_support", "advanced_reports", "audit_logs", "purchase_orders",
+    "pos", "inventory", "barcode_scanning", "custom_items", "batch_tracking",
+    "customer_loyalty", "store_credit", "mpesa_payments", "card_payments",
+    "etims_compliance", "hardware_support", "advanced_reports", "audit_logs",
+    "purchase_orders", "stock_transfers",
   ],
+  // Restaurant – KDS, tables, custom orders, gift cards for vouchers, email campaigns
   restaurant: [
     "pos", "inventory", "custom_items", "restaurant_mode", "table_management", "kitchen_display",
-    "expiry_tracking", "customer_loyalty", "mpesa_payments", "card_payments",
-    "etims_compliance", "hardware_support", "advanced_reports", "audit_logs",
+    "expiry_tracking", "customer_loyalty", "gift_cards", "mpesa_payments", "card_payments",
+    "etims_compliance", "hardware_support", "advanced_reports", "audit_logs", "email_marketing",
   ],
+  // Hotel – room billing on account, multi-branch, full restaurant suite, email
   hotel: [
     "pos", "inventory", "custom_items", "restaurant_mode", "table_management", "kitchen_display",
-    "customer_loyalty", "store_credit", "mpesa_payments", "card_payments",
-    "etims_compliance", "hardware_support", "advanced_reports", "audit_logs", "multi_branch",
+    "customer_loyalty", "gift_cards", "store_credit", "mpesa_payments", "card_payments",
+    "etims_compliance", "hardware_support", "advanced_reports", "audit_logs",
+    "multi_branch", "email_marketing",
   ],
+  // Pharmacy – batch/expiry critical, loyalty for chronic patients, NHIF-style credit
   pharmacy: [
     "pos", "inventory", "barcode_scanning", "batch_tracking", "expiry_tracking",
-    "customer_loyalty", "mpesa_payments", "card_payments", "etims_compliance",
-    "hardware_support", "advanced_reports", "audit_logs", "purchase_orders",
+    "customer_loyalty", "store_credit", "mpesa_payments", "card_payments",
+    "etims_compliance", "hardware_support", "advanced_reports", "audit_logs",
+    "purchase_orders", "email_marketing",
   ],
+  // Wholesale / distributor – credit terms, multi-branch, transfers
   wholesale: [
     "pos", "inventory", "barcode_scanning", "custom_items", "batch_tracking", "expiry_tracking",
-    "store_credit", "mpesa_payments", "card_payments", "etims_compliance",
-    "hardware_support", "advanced_reports", "audit_logs", "purchase_orders",
-    "stock_transfers", "multi_branch",
+    "customer_loyalty", "store_credit", "mpesa_payments", "card_payments",
+    "etims_compliance", "hardware_support", "advanced_reports", "audit_logs",
+    "purchase_orders", "stock_transfers", "multi_branch",
   ],
+  // Service (salon, garage, consultancy) – custom items, loyalty, gift cards, email
   service: [
-    "pos", "custom_items", "customer_loyalty", "store_credit", "mpesa_payments",
-    "card_payments", "etims_compliance", "advanced_reports", "audit_logs", "email_marketing",
+    "pos", "custom_items", "customer_loyalty", "gift_cards", "store_credit",
+    "mpesa_payments", "card_payments", "etims_compliance", "hardware_support",
+    "advanced_reports", "audit_logs", "email_marketing",
   ],
+  // Generic fallback – sensible safe defaults
   other: [
     "pos", "inventory", "barcode_scanning", "custom_items", "customer_loyalty",
     "mpesa_payments", "card_payments", "etims_compliance", "hardware_support",
