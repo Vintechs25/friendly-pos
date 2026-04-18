@@ -22,9 +22,12 @@ export type PermissionKey = `${string}.${string}`;
 
 /** Role hierarchy levels — lower = more powerful */
 export const ROLE_HIERARCHY: Record<string, number> = {
+  platform_admin: 0,
   super_admin: 1,
   business_owner: 2,
+  branch_manager: 3,
   manager: 3,
+  auditor: 4,
   cashier: 5,
   waiter: 5,
   inventory_officer: 5,
