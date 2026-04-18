@@ -78,15 +78,20 @@ export default function TeamPage() {
         .select("*")
         .eq("business_id", businessId!);
 
-      return profiles.map((p) => ({
-        ...p,
-        roles: (allRoles ?? []).filter((r) => r.user_id === p.id).map((r) => r.role),
-        hierarchyLevel: Math.min(
-          ...(allRoles ?? [])
-            .filter((r) => r.user_id === p.id)
-            .map((r) => ROLE_HIERARCHY[r.role] ?? 99)
-        ),
-      }));
+      return profiles.map((p) => {
+        const memberRoles = (allRoles ?? [])
+          .filter((r) => r.user_id === p.user_id)
+          .map((r) => r.role);
+        return {
+          ...p,
+          // expose auth user id explicitly for downstream mutations
+          auth_user_id: p.user_id,
+          roles: memberRoles,
+          hierarchyLevel: memberRoles.length === 0
+            ? 99
+            : Math.min(...memberRoles.map((r) => ROLE_HIERARCHY[r] ?? 99)),
+        };
+      });
     },
   });
 
