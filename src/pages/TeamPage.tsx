@@ -226,7 +226,7 @@ export default function TeamPage() {
     }
   };
 
-  const selectedMember = teamMembers.find((m) => m.id === selectedUserId);
+  const selectedMember = teamMembers.find((m) => m.auth_user_id === selectedUserId);
   const overridePermIds = new Set(userOverrides.map((o: any) => o.permission_id));
 
   // Group permissions by module
@@ -334,7 +334,7 @@ export default function TeamPage() {
                               </div>
                               <div>
                                 <p className="font-medium">{member.full_name || "Unnamed"}</p>
-                                {member.id === user?.id && <p className="text-xs text-muted-foreground">You</p>}
+                                {member.user_id === user?.id && <p className="text-xs text-muted-foreground">You</p>}
                               </div>
                             </div>
                           </TableCell>
