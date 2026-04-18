@@ -353,11 +353,11 @@ export default function TeamPage() {
                             {new Date(member.created_at).toLocaleDateString("en-KE")}
                           </TableCell>
                           <TableCell className="text-right space-x-2">
-                            {member.id !== user?.id && member.hierarchyLevel > userHierarchyLevel && (
+                            {member.user_id !== user?.id && member.hierarchyLevel > userHierarchyLevel && (
                               <>
                                 <Select
                                   value={member.roles[0] ?? ""}
-                                  onValueChange={(v) => changeRoleMutation.mutate({ userId: member.id, newRole: v as AppRole })}
+                                  onValueChange={(v) => changeRoleMutation.mutate({ userId: member.auth_user_id, newRole: v as AppRole })}
                                 >
                                   <SelectTrigger className="w-36 h-8 text-xs inline-flex">
                                     <SelectValue placeholder="Change role" />
@@ -372,7 +372,7 @@ export default function TeamPage() {
                                   variant="outline"
                                   size="sm"
                                   className="text-xs"
-                                  onClick={() => setSelectedUserId(member.id)}
+                                  onClick={() => setSelectedUserId(member.auth_user_id)}
                                 >
                                   <Lock className="h-3 w-3 mr-1" /> Permissions
                                 </Button>
