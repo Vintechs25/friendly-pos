@@ -78,15 +78,20 @@ export default function TeamPage() {
         .select("*")
         .eq("business_id", businessId!);
 
-      return profiles.map((p) => ({
-        ...p,
-        roles: (allRoles ?? []).filter((r) => r.user_id === p.id).map((r) => r.role),
-        hierarchyLevel: Math.min(
-          ...(allRoles ?? [])
-            .filter((r) => r.user_id === p.id)
-            .map((r) => ROLE_HIERARCHY[r.role] ?? 99)
-        ),
-      }));
+      return profiles.map((p) => {
+        const memberRoles = (allRoles ?? [])
+          .filter((r) => r.user_id === p.user_id)
+          .map((r) => r.role);
+        return {
+          ...p,
+          // expose auth user id explicitly for downstream mutations
+          auth_user_id: p.user_id,
+          roles: memberRoles,
+          hierarchyLevel: memberRoles.length === 0
+            ? 99
+            : Math.min(...memberRoles.map((r) => ROLE_HIERARCHY[r] ?? 99)),
+        };
+      });
     },
   });
 
@@ -221,7 +226,7 @@ export default function TeamPage() {
     }
   };
 
-  const selectedMember = teamMembers.find((m) => m.id === selectedUserId);
+  const selectedMember = teamMembers.find((m) => m.auth_user_id === selectedUserId);
   const overridePermIds = new Set(userOverrides.map((o: any) => o.permission_id));
 
   // Group permissions by module
@@ -329,7 +334,7 @@ export default function TeamPage() {
                               </div>
                               <div>
                                 <p className="font-medium">{member.full_name || "Unnamed"}</p>
-                                {member.id === user?.id && <p className="text-xs text-muted-foreground">You</p>}
+                                {member.user_id === user?.id && <p className="text-xs text-muted-foreground">You</p>}
                               </div>
                             </div>
                           </TableCell>
@@ -348,11 +353,11 @@ export default function TeamPage() {
                             {new Date(member.created_at).toLocaleDateString("en-KE")}
                           </TableCell>
                           <TableCell className="text-right space-x-2">
-                            {member.id !== user?.id && member.hierarchyLevel > userHierarchyLevel && (
+                            {member.user_id !== user?.id && member.hierarchyLevel > userHierarchyLevel && (
                               <>
                                 <Select
                                   value={member.roles[0] ?? ""}
-                                  onValueChange={(v) => changeRoleMutation.mutate({ userId: member.id, newRole: v as AppRole })}
+                                  onValueChange={(v) => changeRoleMutation.mutate({ userId: member.auth_user_id, newRole: v as AppRole })}
                                 >
                                   <SelectTrigger className="w-36 h-8 text-xs inline-flex">
                                     <SelectValue placeholder="Change role" />
@@ -367,7 +372,7 @@ export default function TeamPage() {
                                   variant="outline"
                                   size="sm"
                                   className="text-xs"
-                                  onClick={() => setSelectedUserId(member.id)}
+                                  onClick={() => setSelectedUserId(member.auth_user_id)}
                                 >
                                   <Lock className="h-3 w-3 mr-1" /> Permissions
                                 </Button>
