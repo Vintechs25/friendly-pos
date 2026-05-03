@@ -834,7 +834,7 @@ export default function POSPage() {
             </div>
 
             {/* Complete + Credit buttons */}
-            <div className="px-3 pb-3 pt-1 space-y-1.5">
+            <div id="pos-checkout-anchor" className="px-3 pb-3 pt-1 space-y-1.5">
               <Button
                 className={cn(
                   "w-full h-14 text-base font-black rounded-xl touch-manipulation active:scale-[0.97] transition-all",
