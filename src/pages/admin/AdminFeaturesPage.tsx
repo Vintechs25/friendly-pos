@@ -190,21 +190,27 @@ export default function AdminFeaturesPage() {
                     {group.items.map((feat) => {
                       const checked = isOn(feat.key);
                       const isDefault = industryDefaults.has(feat.key);
+                      const allowed = isFeatureAllowedForIndustry(feat.key, currentBiz?.industry);
                       return (
                         <div
                           key={feat.key}
-                          className="flex items-center justify-between rounded-xl border border-border bg-card p-4"
+                          className={`flex items-center justify-between rounded-xl border border-border bg-card p-4 ${!allowed ? "opacity-50" : ""}`}
                         >
                           <div className="flex items-center gap-3">
                             <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
                               <ToggleLeft className="h-4 w-4 text-primary" />
                             </div>
                             <div>
-                              <p className="text-sm font-medium flex items-center gap-2">
+                              <p className="text-sm font-medium flex items-center gap-2 flex-wrap">
                                 {feat.label}
-                                {isDefault && (
+                                {isDefault && allowed && (
                                   <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/70">
                                     default
+                                  </span>
+                                )}
+                                {!allowed && (
+                                  <span className="text-[10px] font-semibold uppercase tracking-wider text-destructive/70">
+                                    not for {currentBiz?.industry}
                                   </span>
                                 )}
                               </p>
@@ -214,9 +220,9 @@ export default function AdminFeaturesPage() {
                             </div>
                           </div>
                           <Switch
-                            checked={checked}
+                            checked={allowed && checked}
                             onCheckedChange={(v) => handleToggle(feat.key, v)}
-                            disabled={busy === feat.key}
+                            disabled={busy === feat.key || !allowed}
                           />
                         </div>
                       );
