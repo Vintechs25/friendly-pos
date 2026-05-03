@@ -875,13 +875,15 @@ export default function POSPage() {
             </div>
 
             {/* Complete + Credit buttons */}
-            <div id="pos-checkout-anchor" className="px-3 pb-3 pt-1 space-y-1.5">
+            <div id="pos-checkout-anchor" className="px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-1 space-y-1.5">
               <Button
                 className={cn(
-                  "w-full h-14 text-base font-black rounded-xl touch-manipulation active:scale-[0.97] transition-all",
-                  "shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40",
-                  "bg-gradient-to-r from-primary to-primary/90",
-                  cart.length === 0 && "opacity-50"
+                  "w-full h-14 text-[15px] font-black rounded-2xl touch-manipulation transition-all",
+                  "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground",
+                  "shadow-[0_8px_24px_-6px_hsl(var(--primary)/0.45)] hover:shadow-[0_12px_28px_-6px_hsl(var(--primary)/0.55)]",
+                  "active:scale-[0.98] active:shadow-none",
+                  "disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed",
+                  "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card"
                 )}
                 disabled={cart.length === 0 || processing || !canUsePOS}
                 onClick={completeSale}
@@ -891,7 +893,10 @@ export default function POSPage() {
                 ) : !isOnline ? (
                   "Complete Sale (Offline)"
                 ) : (
-                  <>Complete Sale — KSh {total.toLocaleString("en-KE", { minimumFractionDigits: 2 })}</>
+                  <span className="flex items-center justify-between w-full px-1">
+                    <span>Complete Sale</span>
+                    <span className="tabular-nums">KSh {total.toLocaleString("en-KE", { minimumFractionDigits: 2 })}</span>
+                  </span>
                 )}
               </Button>
               {/* Credit sale option */}
