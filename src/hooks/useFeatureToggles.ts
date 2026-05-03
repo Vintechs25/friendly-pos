@@ -105,6 +105,13 @@ export function useFeatureToggles(_args: UseFeatureTogglesArgs = {}) {
    */
   const isFeatureEnabled = (featureKey: string): boolean => {
     if (isSuperAdmin) return true;
+    // Industry hard-lock: cross-industry features (KDS, tables, batch, expiry,
+    // restaurant_mode) are silently hidden from industries that don't use them
+    // even if their toggle row says enabled. This keeps Pharmacy free of
+    // restaurant UI and Service free of batch/expiry, etc.
+    if (!isFeatureAllowedForIndustry(featureKey as FeatureKey, businessRow?.industry)) {
+      return false;
+    }
     if (explicit.has(featureKey)) return explicit.get(featureKey)!;
     return industryDefaults.has(featureKey as FeatureKey);
   };
