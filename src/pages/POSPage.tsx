@@ -679,6 +679,13 @@ export default function POSPage() {
           "fixed inset-x-0 bottom-0 z-50 max-h-[92vh] rounded-t-3xl border-t-2 transition-transform duration-300 ease-out",
           mobileCartOpen ? "translate-y-0" : "translate-y-full lg:translate-y-0"
         )}>
+          {/* Mobile drag-handle */}
+          <button
+            onClick={() => setMobileCartOpen(false)}
+            className="lg:hidden mx-auto mt-2 mb-1 h-1.5 w-12 rounded-full bg-border hover:bg-muted-foreground/40 transition-colors"
+            aria-label="Close cart"
+          />
+
           {/* Daily sales target */}
           <DailySalesTarget businessId={profile?.business_id ?? null} />
 
