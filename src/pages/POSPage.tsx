@@ -85,6 +85,7 @@ export default function POSPage() {
   const [tableDialogOpen, setTableDialogOpen] = useState(false);
   const [customItemOpen, setCustomItemOpen] = useState(false);
   const [creditSaleOpen, setCreditSaleOpen] = useState(false);
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // Customer
