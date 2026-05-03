@@ -126,18 +126,18 @@ export default function ProductGrid({ products, onAddToCart }: ProductGridProps)
 
               {/* Product info */}
               <div className="relative mt-auto">
-                <div className="px-3 py-2.5 bg-gradient-to-t from-black/60 to-transparent">
-                  <p className="text-[13px] font-bold leading-tight line-clamp-2 text-white drop-shadow-md">
+                <div className="px-2.5 sm:px-3 py-2 sm:py-2.5 bg-gradient-to-t from-black/75 via-black/40 to-transparent">
+                  <p className="text-[12px] sm:text-[13px] font-bold leading-tight line-clamp-2 text-white drop-shadow-md">
                     {product.name}
                   </p>
                   <div className="flex items-center justify-between mt-1">
-                    <p className="text-[15px] font-black text-white drop-shadow-md tracking-tight">
+                    <p className="text-[14px] sm:text-[15px] font-black text-white drop-shadow-md tracking-tight tabular-nums">
                       KSh {product.price.toLocaleString("en-KE", { minimumFractionDigits: 0 })}
                     </p>
                     {!outOfStock && (
                       <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <ShoppingCart className="h-3 w-3 text-white/70" />
-                        <span className="text-[10px] text-white/70 font-medium">Add</span>
+                        <ShoppingCart className="h-3 w-3 text-white/80" />
+                        <span className="text-[10px] text-white/80 font-semibold">Add</span>
                       </div>
                     )}
                   </div>
