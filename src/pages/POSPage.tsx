@@ -85,6 +85,7 @@ export default function POSPage() {
   const [tableDialogOpen, setTableDialogOpen] = useState(false);
   const [customItemOpen, setCustomItemOpen] = useState(false);
   const [creditSaleOpen, setCreditSaleOpen] = useState(false);
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // Customer
@@ -286,7 +287,7 @@ export default function POSPage() {
 
   const deleteHeldSale = async (id: string) => { await supabase.from("held_sales").delete().eq("id", id); loadHeldSales(); };
 
-  const resetSale = () => { setCart([]); setCartDiscount(0); setCashTendered(0); setSplitMode(false); setSelectedCustomer(null); setRedeemedPoints(0); setOrderNotes(""); setShowNotes(false); };
+  const resetSale = () => { setCart([]); setCartDiscount(0); setCashTendered(0); setSplitMode(false); setSelectedCustomer(null); setRedeemedPoints(0); setOrderNotes(""); setShowNotes(false); setMobileCartOpen(false); };
   const voidCurrentSale = () => { if (cart.length === 0) return; resetSale(); toast.info("Sale voided"); };
 
   // Repeat a previous sale — load its items into cart
@@ -498,27 +499,45 @@ export default function POSPage() {
       />
 
       <div className="flex flex-col lg:flex-row h-full relative">
-        {/* Mobile floating cart-summary FAB — jumps to checkout */}
-        {cart.length > 0 && (
+        {/* Mobile floating checkout pill — opens slide-up cart sheet */}
+        {cart.length > 0 && !mobileCartOpen && (
           <button
-            onClick={() => {
-              const el = document.getElementById("pos-checkout-anchor");
-              el?.scrollIntoView({ behavior: "smooth", block: "end" });
-            }}
-            className="lg:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 h-12 rounded-full bg-primary text-primary-foreground shadow-2xl shadow-primary/40 active:scale-95 transition-all touch-manipulation"
+            onClick={() => setMobileCartOpen(true)}
+            className={cn(
+              "lg:hidden fixed bottom-4 left-3 right-3 z-30",
+              "flex items-center justify-between gap-3 h-14 px-4 rounded-2xl",
+              "bg-primary text-primary-foreground",
+              "shadow-2xl shadow-primary/40 ring-1 ring-primary-foreground/10",
+              "active:scale-[0.98] transition-all touch-manipulation",
+              cartPulse && "animate-pulse"
+            )}
           >
-            <ShoppingBag className={cn("h-4 w-4", cartPulse && "scale-125")} />
-            <span className="text-xs font-bold">{cart.length} items</span>
-            <span className="text-sm font-black tabular-nums">KSh {total.toLocaleString("en-KE", { maximumFractionDigits: 0 })}</span>
-            <span className="text-[10px] opacity-80">Checkout →</span>
+            <span className="flex items-center gap-2.5">
+              <span className="relative flex items-center justify-center h-9 w-9 rounded-xl bg-primary-foreground/15">
+                <ShoppingBag className="h-4 w-4" />
+                <span className="absolute -top-1 -right-1 h-5 min-w-5 px-1 rounded-full bg-background text-primary text-[10px] font-black flex items-center justify-center ring-2 ring-primary">
+                  {cart.length}
+                </span>
+              </span>
+              <span className="flex flex-col items-start leading-tight">
+                <span className="text-[10px] font-semibold uppercase tracking-wider opacity-80">
+                  {totalQty} {totalQty === 1 ? "unit" : "units"}
+                </span>
+                <span className="text-base font-black tabular-nums">
+                  KSh {total.toLocaleString("en-KE", { maximumFractionDigits: 0 })}
+                </span>
+              </span>
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-primary-foreground/15">
+              Pay →
+            </span>
           </button>
         )}
 
         {/* ═══ LEFT: Product Catalog ═══ */}
         <div className={cn(
           "flex flex-col min-w-0 bg-muted/30",
-          "flex-1",
-          // On mobile, show products only when cart is not focused
+          "flex-1 pb-20 lg:pb-0", // bottom padding so the floating pill never covers products
           "lg:flex"
         )}>
           {/* Search bar */}
@@ -643,8 +662,30 @@ export default function POSPage() {
           </div>
         </div>
 
+        {/* Mobile backdrop when cart sheet is open */}
+        {mobileCartOpen && (
+          <div
+            className="lg:hidden fixed inset-0 z-40 bg-foreground/40 backdrop-blur-sm animate-in fade-in"
+            onClick={() => setMobileCartOpen(false)}
+          />
+        )}
+
         {/* ═══ RIGHT: Cart + Payment ═══ */}
-        <div className="w-full lg:w-[400px] xl:w-[440px] 2xl:w-[480px] flex flex-col bg-card shrink-0 border-t-2 lg:border-t-0 lg:border-l-2 border-border shadow-[-4px_0_24px_-6px_hsl(var(--foreground)/0.06)]">
+        <div className={cn(
+          "flex flex-col bg-card border-border shadow-[-4px_0_24px_-6px_hsl(var(--foreground)/0.06)]",
+          // Desktop: side panel
+          "lg:static lg:w-[400px] xl:w-[440px] 2xl:w-[480px] lg:translate-y-0 lg:shrink-0 lg:border-l-2 lg:max-h-none",
+          // Mobile: slide-up sheet
+          "fixed inset-x-0 bottom-0 z-50 max-h-[92vh] rounded-t-3xl border-t-2 transition-transform duration-300 ease-out",
+          mobileCartOpen ? "translate-y-0" : "translate-y-full lg:translate-y-0"
+        )}>
+          {/* Mobile drag-handle */}
+          <button
+            onClick={() => setMobileCartOpen(false)}
+            className="lg:hidden mx-auto mt-2 mb-1 h-1.5 w-12 rounded-full bg-border hover:bg-muted-foreground/40 transition-colors"
+            aria-label="Close cart"
+          />
+
           {/* Daily sales target */}
           <DailySalesTarget businessId={profile?.business_id ?? null} />
 
@@ -803,9 +844,9 @@ export default function POSPage() {
             </div>
 
             {/* Total - big and prominent */}
-            <div className="flex justify-between items-center px-4 py-3.5 bg-primary/5 border-y border-primary/20">
-              <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">TOTAL</span>
-              <span className="text-3xl font-black text-primary tabular-nums tracking-tight">
+            <div className="relative overflow-hidden flex justify-between items-center px-4 py-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-y border-primary/25">
+              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-primary/70">Total</span>
+              <span className="text-[28px] sm:text-[30px] font-black text-primary tabular-nums tracking-tight leading-none">
                 KSh {total.toLocaleString("en-KE", { minimumFractionDigits: 2 })}
               </span>
             </div>
@@ -834,13 +875,15 @@ export default function POSPage() {
             </div>
 
             {/* Complete + Credit buttons */}
-            <div id="pos-checkout-anchor" className="px-3 pb-3 pt-1 space-y-1.5">
+            <div id="pos-checkout-anchor" className="px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-1 space-y-1.5">
               <Button
                 className={cn(
-                  "w-full h-14 text-base font-black rounded-xl touch-manipulation active:scale-[0.97] transition-all",
-                  "shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40",
-                  "bg-gradient-to-r from-primary to-primary/90",
-                  cart.length === 0 && "opacity-50"
+                  "w-full h-14 text-[15px] font-black rounded-2xl touch-manipulation transition-all",
+                  "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground",
+                  "shadow-[0_8px_24px_-6px_hsl(var(--primary)/0.45)] hover:shadow-[0_12px_28px_-6px_hsl(var(--primary)/0.55)]",
+                  "active:scale-[0.98] active:shadow-none",
+                  "disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed",
+                  "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card"
                 )}
                 disabled={cart.length === 0 || processing || !canUsePOS}
                 onClick={completeSale}
@@ -850,7 +893,10 @@ export default function POSPage() {
                 ) : !isOnline ? (
                   "Complete Sale (Offline)"
                 ) : (
-                  <>Complete Sale — KSh {total.toLocaleString("en-KE", { minimumFractionDigits: 2 })}</>
+                  <span className="flex items-center justify-between w-full px-1">
+                    <span>Complete Sale</span>
+                    <span className="tabular-nums">KSh {total.toLocaleString("en-KE", { minimumFractionDigits: 2 })}</span>
+                  </span>
                 )}
               </Button>
               {/* Credit sale option */}
