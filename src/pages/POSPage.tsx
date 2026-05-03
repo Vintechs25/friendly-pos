@@ -662,8 +662,23 @@ export default function POSPage() {
           </div>
         </div>
 
+        {/* Mobile backdrop when cart sheet is open */}
+        {mobileCartOpen && (
+          <div
+            className="lg:hidden fixed inset-0 z-40 bg-foreground/40 backdrop-blur-sm animate-in fade-in"
+            onClick={() => setMobileCartOpen(false)}
+          />
+        )}
+
         {/* ═══ RIGHT: Cart + Payment ═══ */}
-        <div className="w-full lg:w-[400px] xl:w-[440px] 2xl:w-[480px] flex flex-col bg-card shrink-0 border-t-2 lg:border-t-0 lg:border-l-2 border-border shadow-[-4px_0_24px_-6px_hsl(var(--foreground)/0.06)]">
+        <div className={cn(
+          "flex flex-col bg-card border-border shadow-[-4px_0_24px_-6px_hsl(var(--foreground)/0.06)]",
+          // Desktop: side panel
+          "lg:static lg:w-[400px] xl:w-[440px] 2xl:w-[480px] lg:translate-y-0 lg:shrink-0 lg:border-l-2 lg:max-h-none",
+          // Mobile: slide-up sheet
+          "fixed inset-x-0 bottom-0 z-50 max-h-[92vh] rounded-t-3xl border-t-2 transition-transform duration-300 ease-out",
+          mobileCartOpen ? "translate-y-0" : "translate-y-full lg:translate-y-0"
+        )}>
           {/* Daily sales target */}
           <DailySalesTarget businessId={profile?.business_id ?? null} />
 
