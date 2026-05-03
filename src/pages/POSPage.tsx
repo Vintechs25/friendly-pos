@@ -499,27 +499,45 @@ export default function POSPage() {
       />
 
       <div className="flex flex-col lg:flex-row h-full relative">
-        {/* Mobile floating cart-summary FAB — jumps to checkout */}
-        {cart.length > 0 && (
+        {/* Mobile floating checkout pill — opens slide-up cart sheet */}
+        {cart.length > 0 && !mobileCartOpen && (
           <button
-            onClick={() => {
-              const el = document.getElementById("pos-checkout-anchor");
-              el?.scrollIntoView({ behavior: "smooth", block: "end" });
-            }}
-            className="lg:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 h-12 rounded-full bg-primary text-primary-foreground shadow-2xl shadow-primary/40 active:scale-95 transition-all touch-manipulation"
+            onClick={() => setMobileCartOpen(true)}
+            className={cn(
+              "lg:hidden fixed bottom-4 left-3 right-3 z-30",
+              "flex items-center justify-between gap-3 h-14 px-4 rounded-2xl",
+              "bg-primary text-primary-foreground",
+              "shadow-2xl shadow-primary/40 ring-1 ring-primary-foreground/10",
+              "active:scale-[0.98] transition-all touch-manipulation",
+              cartPulse && "animate-pulse"
+            )}
           >
-            <ShoppingBag className={cn("h-4 w-4", cartPulse && "scale-125")} />
-            <span className="text-xs font-bold">{cart.length} items</span>
-            <span className="text-sm font-black tabular-nums">KSh {total.toLocaleString("en-KE", { maximumFractionDigits: 0 })}</span>
-            <span className="text-[10px] opacity-80">Checkout →</span>
+            <span className="flex items-center gap-2.5">
+              <span className="relative flex items-center justify-center h-9 w-9 rounded-xl bg-primary-foreground/15">
+                <ShoppingBag className="h-4 w-4" />
+                <span className="absolute -top-1 -right-1 h-5 min-w-5 px-1 rounded-full bg-background text-primary text-[10px] font-black flex items-center justify-center ring-2 ring-primary">
+                  {cart.length}
+                </span>
+              </span>
+              <span className="flex flex-col items-start leading-tight">
+                <span className="text-[10px] font-semibold uppercase tracking-wider opacity-80">
+                  {totalQty} {totalQty === 1 ? "unit" : "units"}
+                </span>
+                <span className="text-base font-black tabular-nums">
+                  KSh {total.toLocaleString("en-KE", { maximumFractionDigits: 0 })}
+                </span>
+              </span>
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-primary-foreground/15">
+              Pay →
+            </span>
           </button>
         )}
 
         {/* ═══ LEFT: Product Catalog ═══ */}
         <div className={cn(
           "flex flex-col min-w-0 bg-muted/30",
-          "flex-1",
-          // On mobile, show products only when cart is not focused
+          "flex-1 pb-20 lg:pb-0", // bottom padding so the floating pill never covers products
           "lg:flex"
         )}>
           {/* Search bar */}
