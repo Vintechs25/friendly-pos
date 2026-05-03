@@ -287,7 +287,7 @@ export default function POSPage() {
 
   const deleteHeldSale = async (id: string) => { await supabase.from("held_sales").delete().eq("id", id); loadHeldSales(); };
 
-  const resetSale = () => { setCart([]); setCartDiscount(0); setCashTendered(0); setSplitMode(false); setSelectedCustomer(null); setRedeemedPoints(0); setOrderNotes(""); setShowNotes(false); };
+  const resetSale = () => { setCart([]); setCartDiscount(0); setCashTendered(0); setSplitMode(false); setSelectedCustomer(null); setRedeemedPoints(0); setOrderNotes(""); setShowNotes(false); setMobileCartOpen(false); };
   const voidCurrentSale = () => { if (cart.length === 0) return; resetSale(); toast.info("Sale voided"); };
 
   // Repeat a previous sale — load its items into cart
