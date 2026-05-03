@@ -12,6 +12,7 @@ import {
   FEATURE_CATALOG,
   ALL_FEATURE_KEYS,
   defaultsForIndustry,
+  isFeatureAllowedForIndustry,
   type FeatureKey,
 } from "@/lib/feature-catalog";
 import { getFeatureTogglesForIndustry } from "@/lib/feature-provisioning";
