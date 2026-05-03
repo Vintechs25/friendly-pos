@@ -844,9 +844,9 @@ export default function POSPage() {
             </div>
 
             {/* Total - big and prominent */}
-            <div className="flex justify-between items-center px-4 py-3.5 bg-primary/5 border-y border-primary/20">
-              <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">TOTAL</span>
-              <span className="text-3xl font-black text-primary tabular-nums tracking-tight">
+            <div className="relative overflow-hidden flex justify-between items-center px-4 py-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-y border-primary/25">
+              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-primary/70">Total</span>
+              <span className="text-[28px] sm:text-[30px] font-black text-primary tabular-nums tracking-tight leading-none">
                 KSh {total.toLocaleString("en-KE", { minimumFractionDigits: 2 })}
               </span>
             </div>
