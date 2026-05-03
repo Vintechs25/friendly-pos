@@ -143,3 +143,28 @@ export function defaultsForIndustry(industry: string | null | undefined): Set<Fe
   const list = INDUSTRY_DEFAULTS[industry ?? ""] ?? INDUSTRY_DEFAULTS.other;
   return new Set(list);
 }
+
+/**
+ * Cross-industry features that should NEVER appear in unrelated industries,
+ * even if a toggle is forced on. e.g. a Pharmacy must never see KDS / Tables;
+ * a Service business must never see Batch Tracking.
+ *
+ * A feature listed here is allowed only for industries whose INDUSTRY_DEFAULTS
+ * include it. Everything else is freely toggleable.
+ */
+export const CROSS_INDUSTRY_LOCKED: FeatureKey[] = [
+  "restaurant_mode",
+  "table_management",
+  "kitchen_display",
+  "batch_tracking",
+  "expiry_tracking",
+];
+
+export function isFeatureAllowedForIndustry(
+  feature: FeatureKey,
+  industry: string | null | undefined,
+): boolean {
+  if (!CROSS_INDUSTRY_LOCKED.includes(feature)) return true;
+  const list = INDUSTRY_DEFAULTS[industry ?? ""] ?? INDUSTRY_DEFAULTS.other;
+  return list.includes(feature);
+}

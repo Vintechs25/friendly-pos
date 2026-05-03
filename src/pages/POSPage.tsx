@@ -497,7 +497,23 @@ export default function POSPage() {
         onConfirm={handleCreditSale}
       />
 
-      <div className="flex flex-col lg:flex-row h-full">
+      <div className="flex flex-col lg:flex-row h-full relative">
+        {/* Mobile floating cart-summary FAB — jumps to checkout */}
+        {cart.length > 0 && (
+          <button
+            onClick={() => {
+              const el = document.getElementById("pos-checkout-anchor");
+              el?.scrollIntoView({ behavior: "smooth", block: "end" });
+            }}
+            className="lg:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 h-12 rounded-full bg-primary text-primary-foreground shadow-2xl shadow-primary/40 active:scale-95 transition-all touch-manipulation"
+          >
+            <ShoppingBag className={cn("h-4 w-4", cartPulse && "scale-125")} />
+            <span className="text-xs font-bold">{cart.length} items</span>
+            <span className="text-sm font-black tabular-nums">KSh {total.toLocaleString("en-KE", { maximumFractionDigits: 0 })}</span>
+            <span className="text-[10px] opacity-80">Checkout →</span>
+          </button>
+        )}
+
         {/* ═══ LEFT: Product Catalog ═══ */}
         <div className={cn(
           "flex flex-col min-w-0 bg-muted/30",
@@ -818,7 +834,7 @@ export default function POSPage() {
             </div>
 
             {/* Complete + Credit buttons */}
-            <div className="px-3 pb-3 pt-1 space-y-1.5">
+            <div id="pos-checkout-anchor" className="px-3 pb-3 pt-1 space-y-1.5">
               <Button
                 className={cn(
                   "w-full h-14 text-base font-black rounded-xl touch-manipulation active:scale-[0.97] transition-all",
